@@ -1,0 +1,21 @@
+/* src/App.css */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+/* On wider screens, give a bit more side padding */
+@media (min-width: 1024px) {
+  .app-container {
+    padding: 0 2rem;
+  }
+}
+
+.page-content {
+  padding: 1.5rem 0; /* uniform vertical spacing on every page */
+}

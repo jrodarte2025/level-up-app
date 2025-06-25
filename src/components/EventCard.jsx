@@ -1,0 +1,269 @@
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import AvatarList from "./AvatarList";
+import { useTheme } from "@mui/material/styles";
+
+export default function EventCard({
+  event,
+  isRSVPed = false,
+  isMatchGoing = false,
+  onRSVP,
+  onClick,
+  expanded = false,
+  showDetails = false,
+  attendingUsers = [],
+  toggleDetails
+}) {
+  const theme = useTheme();
+
+  const {
+    id,
+    name,
+    description,
+    location,
+    timeRange,
+    date,
+    headerImage,
+    required
+  } = event;
+
+  const formattedDate = date?.seconds
+    ? new Date(date.seconds * 1000).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+      })
+    : "";
+
+  const imageUrl = headerImage || "https://via.placeholder.com/400x225?text=Event";
+
+  const generateCalendarLinks = () => {
+    const title = encodeURIComponent(name);
+    const locationStr = encodeURIComponent(location || "");
+    const descriptionStr = encodeURIComponent(description || "");
+    const start = new Date(date?.seconds * 1000);
+    const [startHour, endHour] = timeRange?.split("–") || ["", ""];
+    const startDateTime = new Date(`${start.toDateString()} ${startHour.trim()}`);
+    const endDateTime = new Date(`${start.toDateString()} ${endHour.trim()}`);
+
+    const format = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    const dates = `${format(startDateTime)}/${format(endDateTime)}`;
+
+    const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${descriptionStr}&location=${locationStr}&sf=true&output=xml`;
+    const ics = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:${title}%0ADESCRIPTION:${descriptionStr}%0ALOCATION:${locationStr}%0ADTSTART:${format(startDateTime)}%0ADTEND:${format(endDateTime)}%0AEND:VEVENT%0AEND:VCALENDAR`;
+
+    return { google, ics, outlook: ics };
+  };
+
+  return (
+    <div
+      key={id}
+      style={{
+        borderRadius: "12px",
+        overflow: "hidden",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        backgroundColor: theme.palette.background.paper,
+        display: "flex",
+        flexDirection: "column",
+        cursor: "pointer",
+        position: "relative",
+        marginBottom: "1.5rem"
+      }}
+      onClick={onClick}
+    >
+      {/* Header image */}
+      <div style={{ position: "relative", width: "100%", height: "200px" }}>
+        {isMatchGoing && (
+          <span style={{
+            position: "absolute",
+            top: "0.75rem",
+            left: "0.75rem",
+            backgroundColor: "#1e2d5f",
+            color: "#fff",
+            padding: "0.25rem 0.5rem",
+            borderRadius: "4px",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            zIndex: 1
+          }}>
+            Your Match is Going
+          </span>
+        )}
+        <img
+          src={imageUrl}
+          alt={name}
+          style={{ width: "100%", height: "200px", objectFit: "cover", display: "block" }}
+        />
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(to top, rgba(0,0,0,0.7) 40%, transparent)",
+          pointerEvents: "none"
+        }} />
+        {required && (
+          <span style={{
+            position: "absolute",
+            top: "0.75rem",
+            right: "0.75rem",
+            backgroundColor: "#F15F5E",
+            color: "#fff",
+            padding: "0.25rem 0.5rem",
+            borderRadius: "4px",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            zIndex: 1
+          }}>
+            Required
+          </span>
+        )}
+        <div style={{
+          position: "absolute",
+          bottom: "0.75rem",
+          left: "0.75rem",
+          color: "#fff",
+          textShadow: "0 0 4px rgba(0,0,0,0.7)"
+        }}>
+          <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>{name}</h4>
+          <p style={{ margin: 0, fontSize: "0.875rem" }}>{formattedDate}</p>
+        </div>
+      </div>
+
+      {/* RSVP or status toggle button */}
+      {!isRSVPed ? (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRSVP?.(id);
+          }}
+          style={{
+            backgroundColor: "#F15F5E",
+            color: "#fff",
+            padding: "0.5rem 1rem",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            borderRadius: "12px",
+            border: "none",
+            cursor: "pointer",
+            transition: "background-color 0.2s",
+            margin: "0.75rem"
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#d14b4a"}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#F15F5E"}
+        >
+          RSVP
+        </button>
+      ) : (
+        <div style={{ padding: "0.5rem 1.2rem", textAlign: "center" }}>
+          <span style={{
+            color: theme.palette.text.primary,
+            fontWeight: 600,
+            fontSize: "0.95rem"
+          }}>
+            You’re In!
+          </span>
+        </div>
+      )}
+
+      {/* Expanded details */}
+      {expanded && showDetails && (
+        <div style={{ padding: "1.5rem 1rem", borderTop: `1px solid ${theme.palette.divider}`, background: theme.palette.background.default }}>
+          <p style={{ margin: "0 0 0.5rem", fontWeight: 500 }}>
+            <strong>Date:</strong> {formattedDate}
+          </p>
+          <p style={{ margin: "0 0 0.5rem", fontWeight: 500 }}>
+            <strong>Time:</strong> {timeRange}
+          </p>
+          <p style={{ margin: "0 0 1rem", fontWeight: 500 }}>
+            <strong>Location:</strong>{" "}
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "#1e2d5f", textDecoration: "underline" }}
+            >
+              {location}
+            </a>
+          </p>
+          <p style={{ marginBottom: "0.5rem", fontWeight: 500 }}>
+            <strong>Details:</strong>
+          </p>
+          <ReactMarkdown
+            components={{
+              p: ({ node, ...props }) => (
+                <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: 1.6 }} {...props} />
+              ),
+              a: ({ node, ...props }) => (
+                <a
+                  {...props}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#1e40af",
+                    textDecoration: "underline"
+                  }}
+                />
+              )
+            }}
+          >
+            {description}
+          </ReactMarkdown>
+          {attendingUsers.length > 0 && (
+            <>
+              <p style={{ marginTop: "1.5rem", marginBottom: "0.5rem", fontWeight: 500 }}>
+                Who’s Attending:
+              </p>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDetails?.();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "1.25rem",
+                  cursor: "pointer",
+                  transition: "transform 0.2s",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
+                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+              >
+                <AvatarList size={40} users={attendingUsers} />
+              </div>
+            </>
+          )}
+          {isRSVPed && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem", gap: "1rem", flexWrap: "wrap" }}>
+              <p style={{ fontSize: "0.85rem", margin: 0, color: "#6b7280" }}>
+                Add to calendar:{" "}
+                <a href={generateCalendarLinks().google} target="_blank" rel="noreferrer" style={{ color: "#1e2d5f", textDecoration: "underline" }}>Google</a>,{" "}
+                <a href={generateCalendarLinks().ics} download={`${name}.ics`} style={{ color: "#1e2d5f", textDecoration: "underline" }}>iCal</a>,{" "}
+                <a href={generateCalendarLinks().outlook} download={`${name}.ics`} style={{ color: "#1e2d5f", textDecoration: "underline" }}>Outlook</a>
+              </p>
+              <p
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRSVP?.(id, true); // force cancel
+                }}
+                style={{
+                  margin: 0,
+                  color: "#F15F5E",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  textDecorationColor: "transparent",
+                  transition: "text-decoration-color 0.2s"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.textDecorationColor = "#F15F5E"}
+                onMouseLeave={(e) => e.currentTarget.style.textDecorationColor = "transparent"}
+              >
+                Can’t make it anymore? Cancel RSVP
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
