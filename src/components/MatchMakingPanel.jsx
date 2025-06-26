@@ -52,15 +52,15 @@ const MatchMakingPanel = () => {
       setError("");
       setSuccess("");
       try {
-        // Fetch all approved students
+        // Fetch all students
         const allStudentsSnap = await getDocs(
-          query(collection(db, "users"), where("role", "==", "student"), where("approved", "==", true))
+          query(collection(db, "users"), where("role", "==", "student"))
         );
         const allStudents = allStudentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Fetch all approved coaches
+        // Fetch all coaches
         const allCoachesSnap = await getDocs(
-          query(collection(db, "users"), where("role", "==", "coach"), where("approved", "==", true))
+          query(collection(db, "users"), where("role", "==", "coach"))
         );
         const allCoaches = allCoachesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
