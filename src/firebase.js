@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 // Your Firebase config
 const firebaseConfig = {
@@ -17,8 +18,16 @@ const firebaseConfig = {
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 
+export const messaging = getMessaging(app);
+
+onMessage(messaging, (payload) => {
+  console.log("Message received. ", payload);
+});
+
 // Export Firebase utilities in alphabetical order
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 export const storage = getStorage(app);
+
+export { getToken };

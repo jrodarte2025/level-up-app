@@ -2,12 +2,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  apiKey: "AIzaSyB3iCL2C6654eo6mrLboG45f0H_aifVWsw",
+  authDomain: "level-up-app-c9f47.firebaseapp.com",
+  projectId: "level-up-app-c9f47",
+  storageBucket: "level-up-app-c9f47.appspot.com",
   messagingSenderId: "256858356257",
-  appId: "YOUR_APP_ID"
+  appId: "Y1:256858356257:web:e849c127252e552b58c160"
 });
 
 const messaging = firebase.messaging();
