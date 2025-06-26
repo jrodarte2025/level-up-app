@@ -556,9 +556,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
-                    {selectedUser.role === "board" && selectedUser.boardRole
-                      ? `${selectedUser.boardRole}${selectedUser.title || selectedUser.company ? `, ${selectedUser.title || ""}${selectedUser.company ? ` at ${selectedUser.company}` : ""}` : ""}`
-                      : selectedUser.role === "coach" && selectedUser.title && selectedUser.company
+                    {(["coach", "board"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
                       ? `${selectedUser.title} at ${selectedUser.company}`
                       : selectedUser.role === "student"
                       ? `${selectedUser.major || ""}${selectedUser.graduationYear ? ", Class of " + selectedUser.graduationYear : ""}`
@@ -1024,9 +1022,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
-                    {selectedUser.role === "board" && selectedUser.boardRole
-                      ? `${selectedUser.boardRole}${selectedUser.title || selectedUser.company ? `, ${selectedUser.title || ""}${selectedUser.company ? ` at ${selectedUser.company}` : ""}` : ""}`
-                      : selectedUser.role === "coach" && selectedUser.title && selectedUser.company
+                    {(["coach", "board"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
                       ? `${selectedUser.title} at ${selectedUser.company}`
                       : selectedUser.role === "student"
                       ? `${selectedUser.major || ""}${selectedUser.graduationYear ? ", Class of " + selectedUser.graduationYear : ""}`
