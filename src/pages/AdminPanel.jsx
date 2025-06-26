@@ -525,7 +525,7 @@ export default function AdminPanel({ tab }) {
             fontWeight: 600,
             marginBottom: "0.25rem",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-            color: editingId ? "#92400e" : "var(--color-text)"
+            color: editingId ? "#92400e" : theme.palette.text.primary
           }}>
             {editingId ? "Edit Event" : "Create New Event"}
           </h2>
