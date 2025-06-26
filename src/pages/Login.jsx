@@ -3,6 +3,7 @@ import { auth, googleProvider } from "../firebase";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
+import { registerForNotifications } from "../utils/notifications";
 
 export default function Login({ onLogin = () => {} }) {
   const [email, setEmail] = useState("");
@@ -16,6 +17,8 @@ export default function Login({ onLogin = () => {} }) {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      console.log("Attempting to register for notifications...");
+      await registerForNotifications();
       onLogin();
     } catch (error) {
       console.error("Login failed:", error);
