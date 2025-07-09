@@ -20,6 +20,7 @@
     "@uiw/react-md-editor": "^4.0.7",
     "date-fns": "^2.29.3",
     "firebase": "^11.7.3",
+    "firebase-admin": "^13.4.0",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -38,7 +39,6 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "vite": "^6.3.5",
-    "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-svgr": "^4.3.0"
   }
 }
