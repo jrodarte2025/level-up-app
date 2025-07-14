@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Chip } from "@mui/material";
+import { Chip, Switch } from "@mui/material";
 import CropModal from "./CropModal";
 import { resizeImage } from "../utils/resizeImage";
 import { useTheme } from "@mui/material/styles";
@@ -31,7 +31,16 @@ export default function ProfileModal({
   const theme = useTheme();
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-  const isSelf = auth.currentUser?.uid === user?.uid;
+  const [authLoaded, setAuthLoaded] = useState(false);
+
+  React.useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) setAuthLoaded(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isSelf = auth.currentUser?.uid && user?.uid && auth.currentUser.uid === user.uid;
 
   return (
     <div
@@ -214,6 +223,42 @@ export default function ProfileModal({
             </>
           )}
           <input type="url" placeholder="LinkedIn Profile URL" value={linkedinUrl} onChange={(e) => { onSave("linkedinUrl", e.target.value); setHasChanges(true); }} style={inputStyle(theme)} />
+        {console.log("authLoaded:", authLoaded, "isSelf:", isSelf, "Notification supported:", typeof Notification !== "undefined")}
+{authLoaded && isSelf ? (
+  <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
+    <Switch
+      checked={typeof Notification !== "undefined" && Notification.permission === "granted"}
+      onChange={async () => {
+        if (typeof Notification === "undefined") return;
+
+        if (Notification.permission === "granted") {
+          alert("To disable notifications, please change your browser settings.");
+        } else {
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            const registration = await navigator.serviceWorker.ready;
+            const { getMessaging, getToken } = await import("firebase/messaging");
+            const messaging = getMessaging();
+            await getToken(messaging, {
+              vapidKey: "BGIu5yYG52Ry8kOt1wfY7KkJ-ZilDdT95o1zrGlsUdF907-URK4qvBnZ3sf2xua1JTxOAxIaNopmQw8apLSaEEQ",
+              serviceWorkerRegistration: registration
+            });
+          }
+        }
+      }}
+      color="primary"
+    />
+    <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>
+      {typeof Notification !== "undefined" && Notification.permission === "granted"
+        ? "Notifications enabled"
+        : "Enable notifications"}
+    </span>
+  </label>
+) : (
+  <span style={{ fontSize: "0.85rem", color: theme.palette.text.secondary }}>
+    {authLoaded ? "Not viewing your own profile" : "Loading profile..."}
+  </span>
+)}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1.5rem" }}>
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.5rem" }}>
