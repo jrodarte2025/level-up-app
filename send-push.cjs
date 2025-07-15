@@ -26,9 +26,8 @@ async function sendTestPush() {
         await messaging.send({
           token,
           notification: {
-            title: "🚀 Push Test",
+            title: "Push Test",
             body: "This is a test notification from your local script!",
-            icon: "/icons/icon-192.png"
           },
           data: {
             click_action: "FLUTTER_NOTIFICATION_CLICK",
@@ -37,9 +36,8 @@ async function sendTestPush() {
           },
           webpush: {
             notification: {
-              title: "🚀 Push Test",
+              title: "Push Test",
               body: "This is a test notification from your local script!",
-              icon: "/icons/icon-192.png",
               requireInteraction: true
             },
             fcmOptions: {

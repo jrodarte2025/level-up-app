@@ -47,6 +47,32 @@ export default function App() {
   const [profileImage, setProfileImage] = useState(() => localStorage.getItem("profileImage") || "/default-avatar.png");
   const [imageChecked, setImageChecked] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
+  // Register for push notifications when authenticated and authLoaded is true
+  useEffect(() => {
+    if (!authLoaded || !user) return;
+    const registerForNotifications = async () => {
+      if (typeof Notification === "undefined" || Notification.permission === "denied") return;
+
+      const { getMessaging, getToken } = await import("firebase/messaging");
+      const messaging = getMessaging();
+
+      if (Notification.permission === "default") {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+      }
+
+      const token = await getToken(messaging, {
+        vapidKey: "BGIu5yYG52Ry8kOt1wfY7KkJ-ZilDdT95o1zrGlsUdF907-URK4qvBnZ3sf2xua1JTxOAxIaNopmQw8apLSaEEQ"
+      });
+
+      if (auth.currentUser && token) {
+        const { doc, setDoc } = await import("firebase/firestore");
+        const tokenRef = doc(db, "notification_tokens", auth.currentUser.uid);
+        await setDoc(tokenRef, { token }, { merge: true });
+      }
+    };
+    registerForNotifications();
+  }, [authLoaded, user]);
 
   // Allow initial selected tab to be set from navigation state
   const location = useLocation();
@@ -220,25 +246,27 @@ export default function App() {
   }, [firstName, lastName, major, graduationYear, company, jobTitle, userRole]);
 
   console.log("App.jsx state — authLoaded:", authLoaded, "user:", user);
-  // Redirect authenticated users away from /login
-  if (authLoaded && user && location.pathname === "/login") {
-    return <Navigate to="/" replace />;
-  }
-  if (authLoaded && user && location.pathname === "/signup") {
-    return <Navigate to="/" replace />;
-  }
+  // Redirect authenticated users away from /login or /signup
   if (!authLoaded) {
     return (
       <div style={{
         height: "100vh",
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#fff"
       }}>
-        <img src="/logo.png" alt="Level Up Cincinnati" style={{ height: "64px" }} />
+        <img src="/logo.png" alt="Level Up Cincinnati" style={{ height: "64px", marginBottom: "1rem" }} />
+        <div style={{ fontSize: "0.9rem", color: "#888" }}>
+          Just a sec — awesome is on its way…
+        </div>
       </div>
     );
+  }
+
+  if (authLoaded && user && (location.pathname === "/login" || location.pathname === "/signup")) {
+    return <Navigate to="/" replace />;
   }
 
   if (!user) {
@@ -247,7 +275,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/test-update" element={<CreateUpdate />} />
-        <Route path="*" element={<Navigate to={user ? "/" : "/login"} replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }

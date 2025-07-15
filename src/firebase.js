@@ -21,7 +21,8 @@ const app = initializeApp(firebaseConfig);
 export const messaging = getMessaging(app);
 
 onMessage(messaging, (payload) => {
-  console.log("Message received. ", payload);
+  console.log("Foreground push message received:", payload);
+  // Optionally update UI here, but do not show a notification to avoid duplication
 });
 
 // Export Firebase utilities in alphabetical order

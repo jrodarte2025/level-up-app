@@ -223,8 +223,8 @@ export default function ProfileModal({
             </>
           )}
           <input type="url" placeholder="LinkedIn Profile URL" value={linkedinUrl} onChange={(e) => { onSave("linkedinUrl", e.target.value); setHasChanges(true); }} style={inputStyle(theme)} />
-        {console.log("authLoaded:", authLoaded, "isSelf:", isSelf, "Notification supported:", typeof Notification !== "undefined")}
-{authLoaded && isSelf ? (
+  {console.log("Rendering toggle? ", { authLoaded, notificationSupport: typeof Notification })}
+  {authLoaded && typeof Notification !== "undefined" && (
   <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
     <Switch
       checked={typeof Notification !== "undefined" && Notification.permission === "granted"}
@@ -254,11 +254,7 @@ export default function ProfileModal({
         : "Enable notifications"}
     </span>
   </label>
-) : (
-  <span style={{ fontSize: "0.85rem", color: theme.palette.text.secondary }}>
-    {authLoaded ? "Not viewing your own profile" : "Loading profile..."}
-  </span>
-)}
+  )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1.5rem" }}>
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.5rem" }}>
