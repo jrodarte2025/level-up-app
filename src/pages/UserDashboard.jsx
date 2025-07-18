@@ -460,7 +460,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
                 onChange={(e) => setLastName(e.target.value)}
                 style={{ width: "100%", padding: "0.5rem", borderRadius: "6px", border: "1px solid #ccc" }}
               />
-              {userRole === "student" ? (
+              {userRole?.includes("student") ? (
                 <>
                   <input
                     type="text"
