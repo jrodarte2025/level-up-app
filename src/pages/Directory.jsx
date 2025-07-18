@@ -146,7 +146,8 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
   const roleColors = {
     coach: "#1e2d5f",
     student: "#F15F5E",
-    board: "#0d9488"
+    board: "#0d9488",
+    "coach-board": "#7c3aed"
   };
 
   return (
@@ -262,11 +263,9 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                     let subtitle = "";
                     const roles = u.role?.split("-") || [];
 
-                    if (u.role === "coach-board" && u.title && u.company) {
+                    if (["coach", "coach-board"].includes(u.role) && u.title && u.company) {
                       subtitle = `${u.title} at ${u.company}`;
-                    } else if (roles.includes("coach") && u.title && u.company) {
-                      subtitle = `${u.title} at ${u.company}`;
-                    } else if (roles.includes("board") && (u.title || u.company)) {
+                    } else if (["board", "coach-board"].includes(u.role) && (u.title || u.company)) {
                       subtitle = `${u.title || ""}${u.company ? " at " + u.company : ""}`;
                     } else if (roles.includes("student") && u.major) {
                       subtitle = `${u.major}${u.graduationYear ? ", Class of " + u.graduationYear : ""}`;
@@ -561,7 +560,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                   {console.log("DEBUG selectedUser", selectedUser)}
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
-                    {(selectedUser.role?.split("-").some(r => ["coach", "board"].includes(r)) && selectedUser.title && selectedUser.company)
+                    {(["coach", "board", "coach-board"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
                       ? `${selectedUser.title} at ${selectedUser.company}`
                       : selectedUser.role === "student"
                       ? `${selectedUser.major || ""}${selectedUser.graduationYear ? ", Class of " + selectedUser.graduationYear : ""}`
@@ -908,7 +907,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                         <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                         {["coach", "board", "coach-board"].includes(editForm.role) ? (
                           <>
-                            {selectedUser.role === "board" && (
+                            {["board", "coach-board"].includes(selectedUser.role) && (
                               <input
                                 type="text"
                                 value={editForm.boardRole}
