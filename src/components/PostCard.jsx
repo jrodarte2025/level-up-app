@@ -176,17 +176,19 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEditClick }) => {
             {post.displayName || "Unknown User"} · {date}
           </Typography>
           <Box sx={{ mt: 0.5, mb: 1, display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {(post.role || "")
-              .split("-")
-              .filter(Boolean)
-              .map((role) => (
-                <Chip
-                  key={role}
-                  label={role.charAt(0).toUpperCase() + role.slice(1)}
-                  size="small"
-                  sx={{ fontSize: "0.7rem", textTransform: "capitalize" }}
-                />
-              ))}
+            {post.role === "coach-board" ? (
+              <Chip
+                label="Coach + Board"
+                size="small"
+                sx={{ fontSize: "0.7rem" }}
+              />
+            ) : post.role ? (
+              <Chip
+                label={post.role.charAt(0).toUpperCase() + post.role.slice(1)}
+                size="small"
+                sx={{ fontSize: "0.7rem", textTransform: "capitalize" }}
+              />
+            ) : null}
             {post.alumni && (
               <Chip
                 label="Alumni"

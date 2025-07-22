@@ -143,17 +143,19 @@ export default function ProfileModal({
           {user?.displayName || user?.email}
         </p>
         <div style={{ textAlign: "center", marginTop: "0.5rem", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-          {(user?.role || "")
-            .split("-")
-            .filter(Boolean)
-            .map((role) => (
-              <Chip
-                key={role}
-                label={role.charAt(0).toUpperCase() + role.slice(1)}
-                size="small"
-                sx={{ fontSize: "0.7rem", textTransform: "capitalize" }}
-              />
-            ))}
+          {user?.role === "coach-board" ? (
+            <Chip
+              label="Coach + Board"
+              size="small"
+              sx={{ fontSize: "0.7rem" }}
+            />
+          ) : user?.role ? (
+            <Chip
+              label={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              size="small"
+              sx={{ fontSize: "0.7rem", textTransform: "capitalize" }}
+            />
+          ) : null}
           {user?.alumni && (
             <Chip
               label="Alumni"
