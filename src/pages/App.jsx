@@ -245,7 +245,6 @@ export default function App() {
     setShowProfileReminder(missingFields);
   }, [firstName, lastName, major, graduationYear, company, jobTitle, userRole]);
 
-  console.log("App.jsx state — authLoaded:", authLoaded, "user:", user);
   // Redirect authenticated users away from /login or /signup
   if (!authLoaded) {
     return (

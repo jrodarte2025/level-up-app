@@ -24,7 +24,6 @@ const Comment = ({
 }) => {
   const theme = useTheme();
 
-  console.log("Rendering comment:", comment.id, { isEditing });
 
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);

@@ -17,7 +17,6 @@ export default function AppShell({
   tabs = [],
   children
 }) {
-  console.log("AppShell loaded with:", { selectedTab, title });
   const theme = useTheme();
 
   React.useEffect(() => {
