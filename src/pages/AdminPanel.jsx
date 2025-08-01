@@ -141,7 +141,6 @@ export default function AdminPanel({ tab }) {
   // Resource admin handler (add or edit)
   const handleAddResource = async (e) => {
     e.preventDefault();
-    console.log("Submitting:", editingResourceId, resourceForm);
     const newResource = {
       title: resourceForm.title,
       section: resourceForm.section,
@@ -284,13 +283,11 @@ export default function AdminPanel({ tab }) {
           window.google.maps.places &&
           typeof window.google.maps.places.Autocomplete === "function"
         ) {
-          console.log("✅ Google Places API loaded.");
           const autocomplete = new window.google.maps.places.Autocomplete(locationInputRef.current, {
             types: ["geocode"],
           });
           autocomplete.addListener("place_changed", () => {
             const place = autocomplete.getPlace();
-            console.log("📍 Selected place:", place);
             setForm((prev) => ({
               ...prev,
               location: place.formatted_address || place.name || prev.location,
@@ -376,7 +373,6 @@ export default function AdminPanel({ tab }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("✅ handleSubmit was called");
     if (!form.startTime || !form.endTime) {
       setSuccess("Please select valid start and end times.");
       return;
@@ -416,7 +412,6 @@ export default function AdminPanel({ tab }) {
 
     try {
       if (headerImageFile) {
-        console.log("📤 Resizing image:", headerImageFile.name);
         const resizedBlob = await resizeImage(headerImageFile, 800, 0.8);
         const resizedFile = new File([resizedBlob], headerImageFile.name, { type: "image/jpeg" });
         const storage = getStorage();
@@ -440,7 +435,6 @@ export default function AdminPanel({ tab }) {
           required: form.required,
           headerImage: headerImageUrl || events.find(e => e.id === editingId)?.headerImage || "",
         });
-        console.log("✏️ Event updated");
       } else {
         // Add new event, update local events list, show success message
         const newEventRef = await addDoc(collection(db, "events"), {
@@ -460,7 +454,6 @@ export default function AdminPanel({ tab }) {
         ]);
         setSuccess("Event created!");
         setTimeout(() => setSuccess(""), 3000);
-        console.log("✅ Event created");
       }
     } catch (error) {
       console.error("❌ Firestore error:", error);

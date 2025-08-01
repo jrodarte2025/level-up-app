@@ -17,7 +17,6 @@ export default function Login({ onLogin = () => {} }) {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      console.log("Attempting to register for notifications...");
       await registerForNotifications();
       onLogin();
     } catch (error) {

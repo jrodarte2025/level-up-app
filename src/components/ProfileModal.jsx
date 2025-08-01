@@ -225,7 +225,6 @@ export default function ProfileModal({
             </>
           )}
           <input type="url" placeholder="LinkedIn Profile URL" value={linkedinUrl} onChange={(e) => { onSave("linkedinUrl", e.target.value); setHasChanges(true); }} style={inputStyle(theme)} />
-  {console.log("Rendering toggle? ", { authLoaded, notificationSupport: typeof Notification })}
   {authLoaded && typeof Notification !== "undefined" && (
   <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
     <Switch
@@ -336,7 +335,6 @@ export default function ProfileModal({
                 });
               } catch (e) {
                 // Optionally handle error
-                // console.error("Error updating posts with new headshotUrl:", e);
               }
             }
             setCropImageSrc(null);

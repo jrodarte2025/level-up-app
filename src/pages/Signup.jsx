@@ -112,7 +112,6 @@ export default function Signup({ onSignupComplete }) {
         profileData.company = form.company;
         profileData.title = form.title;
       }
-      console.log("Final role being saved:", form.role);
       await setDoc(doc(db, "users", userCred.user.uid), profileData);
       // Confirm the Firestore document has been written before proceeding
       const writtenProfileDoc = await getDoc(doc(db, "users", userCred.user.uid));

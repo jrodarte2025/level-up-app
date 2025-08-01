@@ -558,7 +558,6 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 {/* Work Section */}
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
-                  {console.log("DEBUG selectedUser", selectedUser)}
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
                     {(["coach", "board", "coach-board"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
                       ? `${selectedUser.title} at ${selectedUser.company}`
