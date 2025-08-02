@@ -281,7 +281,14 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                     } else if (roles.includes("student") && u.major) {
                       subtitle = `${u.major}${u.graduationYear ? ", Class of " + u.graduationYear : ""}`;
                     } else if (u.role === "admin") {
-                      subtitle = `${u.title || "Level Up Team"}${u.company ? " at " + u.company : ""}`;
+                      // For admin users, show title if available, otherwise just company
+                      if (u.title && u.company) {
+                        subtitle = `${u.title} at ${u.company}`;
+                      } else if (u.title) {
+                        subtitle = u.title;
+                      } else if (u.company) {
+                        subtitle = u.company;
+                      }
                     }
                     return subtitle || u.email;
                   })()}
@@ -489,7 +496,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                       {/* Work Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
                         <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
-                        {["coach", "board", "coach-board", "future-coach"].includes(editForm.role) ? (
+                        {["coach", "board", "coach-board", "future-coach", "admin"].includes(editForm.role) ? (
                           <>
                             {["board", "coach-board"].includes(editForm.role) && (
                               <input
@@ -611,12 +618,12 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
-                    {(["coach", "board", "coach-board", "future-coach"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
-                      ? `${selectedUser.title} at ${selectedUser.company}`
+                    {(["coach", "board", "coach-board", "future-coach", "admin"].includes(selectedUser.role))
+                      ? (selectedUser.title && selectedUser.company
+                        ? `${selectedUser.title} at ${selectedUser.company}`
+                        : selectedUser.title || selectedUser.company || "—")
                       : selectedUser.role === "student"
                       ? `${selectedUser.major || ""}${selectedUser.graduationYear ? ", Class of " + selectedUser.graduationYear : ""}`
-                      : selectedUser.role === "admin" && (selectedUser.title || selectedUser.company)
-                      ? `${selectedUser.title || ""}${selectedUser.company ? " at " + selectedUser.company : ""}`
                       : "—"}
                   </p>
                 </div>
@@ -956,7 +963,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                       {/* Work Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
                         <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
-                        {["coach", "board", "coach-board", "future-coach"].includes(editForm.role) ? (
+                        {["coach", "board", "coach-board", "future-coach", "admin"].includes(editForm.role) ? (
                           <>
                             {["board", "coach-board"].includes(selectedUser.role) && (
                               <input
@@ -1078,12 +1085,12 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
-                    {(["coach", "board", "coach-board", "future-coach"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
-                      ? `${selectedUser.title} at ${selectedUser.company}`
+                    {(["coach", "board", "coach-board", "future-coach", "admin"].includes(selectedUser.role))
+                      ? (selectedUser.title && selectedUser.company
+                        ? `${selectedUser.title} at ${selectedUser.company}`
+                        : selectedUser.title || selectedUser.company || "—")
                       : selectedUser.role === "student"
                       ? `${selectedUser.major || ""}${selectedUser.graduationYear ? ", Class of " + selectedUser.graduationYear : ""}`
-                      : selectedUser.role === "admin" && (selectedUser.title || selectedUser.company)
-                      ? `${selectedUser.title || ""}${selectedUser.company ? " at " + selectedUser.company : ""}`
                       : "—"}
                   </p>
                 </div>
