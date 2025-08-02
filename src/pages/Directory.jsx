@@ -149,6 +149,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
     { key: "coach", label: "Coaches" },
     { key: "student", label: "Students" },
     { key: "board", label: "Board" },
+    { key: "future-coach", label: "Future Coaches" },
   ];
 
   // Role badge background colors
@@ -156,7 +157,8 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
     coach: "#1e2d5f",
     student: "#F15F5E",
     board: "#0d9488",
-    "coach-board": "#7c3aed"
+    "coach-board": "#7c3aed",
+    "future-coach": "#f59e0b"
   };
 
   return (
@@ -272,7 +274,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                     let subtitle = "";
                     const roles = u.role?.split("-") || [];
 
-                    if (["coach", "coach-board"].includes(u.role) && u.title && u.company) {
+                    if (["coach", "coach-board", "future-coach"].includes(u.role) && u.title && u.company) {
                       subtitle = `${u.title} at ${u.company}`;
                     } else if (["board", "coach-board"].includes(u.role) && (u.title || u.company)) {
                       subtitle = `${u.title || ""}${u.company ? " at " + u.company : ""}`;
@@ -286,24 +288,64 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 </div>
                 {/* Role and alumni badges */}
                 <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
-                  {(u.role || "")
-                    .split("-")
-                    .filter(Boolean)
-                    .map((r) => (
-                      <div
-                        key={r}
-                        style={{
-                          fontSize: "0.75rem",
-                          fontWeight: 500,
-                          padding: "0.2rem 0.5rem",
-                          borderRadius: "4px",
-                          color: "#fff",
-                          backgroundColor: roleColors[r] || "#6b7280"
-                        }}
-                      >
-                        {r.charAt(0).toUpperCase() + r.slice(1)}
-                      </div>
-                    ))}
+                  {(() => {
+                    const role = u.role || "";
+                    // Handle special roles that shouldn't be split
+                    if (role === "future-coach") {
+                      return (
+                        <div
+                          key={role}
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 500,
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "4px",
+                            color: "#fff",
+                            backgroundColor: roleColors[role] || "#6b7280"
+                          }}
+                        >
+                          Future Coach
+                        </div>
+                      );
+                    }
+                    // Handle coach-board as a single badge
+                    if (role === "coach-board") {
+                      return (
+                        <div
+                          key={role}
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 500,
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "4px",
+                            color: "#fff",
+                            backgroundColor: roleColors[role] || "#6b7280"
+                          }}
+                        >
+                          Coach + Board
+                        </div>
+                      );
+                    }
+                    // For other roles, use the original logic
+                    return role
+                      .split("-")
+                      .filter(Boolean)
+                      .map((r) => (
+                        <div
+                          key={r}
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 500,
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "4px",
+                            color: "#fff",
+                            backgroundColor: roleColors[r] || "#6b7280"
+                          }}
+                        >
+                          {r.charAt(0).toUpperCase() + r.slice(1)}
+                        </div>
+                      ));
+                  })()}
                   {u.alumni && (
                     <div
                       style={{
@@ -379,7 +421,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
               fontSize: "0.75rem",
               fontWeight: 600
             }}>
-              {selectedUser.role === "admin" ? "Level Up Team" : selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)}
+              {selectedUser.role === "admin" ? "Level Up Team" : selectedUser.role === "future-coach" ? "Future Coach" : selectedUser.role === "coach-board" ? "Coach + Board" : selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)}
             </div>
             <button
               onClick={() => setSelectedUser(null)}
@@ -447,7 +489,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                       {/* Work Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
                         <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
-                        {["coach", "board", "coach-board"].includes(editForm.role) ? (
+                        {["coach", "board", "coach-board", "future-coach"].includes(editForm.role) ? (
                           <>
                             {["board", "coach-board"].includes(editForm.role) && (
                               <input
@@ -544,6 +586,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                           <option value="coach">Coach</option>
                           <option value="board">Board Member</option>
                           <option value="coach-board">Coach + Board</option>
+                          <option value="future-coach">Future Coach</option>
                         </select>
                         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.85rem" }}>
                           <input
@@ -568,7 +611,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
-                    {(["coach", "board", "coach-board"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
+                    {(["coach", "board", "coach-board", "future-coach"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
                       ? `${selectedUser.title} at ${selectedUser.company}`
                       : selectedUser.role === "student"
                       ? `${selectedUser.major || ""}${selectedUser.graduationYear ? ", Class of " + selectedUser.graduationYear : ""}`
@@ -845,7 +888,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
               fontSize: "0.75rem",
               fontWeight: 600
             }}>
-              {selectedUser.role === "admin" ? "Level Up Team" : selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)}
+              {selectedUser.role === "admin" ? "Level Up Team" : selectedUser.role === "future-coach" ? "Future Coach" : selectedUser.role === "coach-board" ? "Coach + Board" : selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)}
             </div>
             <button
               onClick={() => setSelectedUser(null)}
@@ -913,7 +956,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                       {/* Work Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
                         <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
-                        {["coach", "board", "coach-board"].includes(editForm.role) ? (
+                        {["coach", "board", "coach-board", "future-coach"].includes(editForm.role) ? (
                           <>
                             {["board", "coach-board"].includes(selectedUser.role) && (
                               <input
@@ -1010,6 +1053,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                           <option value="coach">Coach</option>
                           <option value="board">Board Member</option>
                           <option value="coach-board">Coach + Board</option>
+                          <option value="future-coach">Future Coach</option>
                         </select>
                         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.85rem" }}>
                           <input
@@ -1034,7 +1078,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
-                    {(["coach", "board", "coach-board"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
+                    {(["coach", "board", "coach-board", "future-coach"].includes(selectedUser.role) && selectedUser.title && selectedUser.company)
                       ? `${selectedUser.title} at ${selectedUser.company}`
                       : selectedUser.role === "student"
                       ? `${selectedUser.major || ""}${selectedUser.graduationYear ? ", Class of " + selectedUser.graduationYear : ""}`

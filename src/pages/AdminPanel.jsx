@@ -4,7 +4,8 @@ const roleOptions = [
   { value: "student", label: "Student" },
   { value: "coach", label: "Coach" },
   { value: "board", label: "Board Member" },
-  { value: "coach-board", label: "Coach + Board" }
+  { value: "coach-board", label: "Coach + Board" },
+  { value: "future-coach", label: "Future Coach" }
 ];
 
 // Example: selectedUser and update handlers for role/alumni assignment
