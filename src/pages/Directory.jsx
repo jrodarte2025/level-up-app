@@ -156,9 +156,10 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
   const roleColors = {
     coach: "#1e2d5f",
     student: "#F15F5E",
-    board: "#0d9488",
+    board: "#2D7D7D",
     "coach-board": "#7c3aed",
-    "future-coach": "#f59e0b"
+    "future-coach": "#34D399",
+    admin: "#6B7280"
   };
 
   return (
@@ -298,6 +299,23 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   {(() => {
                     const role = u.role || "";
                     // Handle special roles that shouldn't be split
+                    if (role === "admin") {
+                      return (
+                        <div
+                          key={role}
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 500,
+                            padding: "0.2rem 0.5rem",
+                            borderRadius: "4px",
+                            color: "#fff",
+                            backgroundColor: roleColors[role] || "#6b7280"
+                          }}
+                        >
+                          Level Up Team
+                        </div>
+                      );
+                    }
                     if (role === "future-coach") {
                       return (
                         <div
@@ -349,7 +367,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                             backgroundColor: roleColors[r] || "#6b7280"
                           }}
                         >
-                          {r.charAt(0).toUpperCase() + r.slice(1)}
+                          {r === "admin" ? "Level Up Team" : r.charAt(0).toUpperCase() + r.slice(1)}
                         </div>
                       ));
                   })()}
@@ -665,20 +683,19 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                 {/* Matched User Section */}
                 {(() => {
-                  // Find the match for the selected user, regardless of logged-in user
-                  const match = users.find((m) =>
-                    m.id !== selectedUser.id &&
-                    (
-                      (["coach", "coach-board"].includes(m.role) && selectedUser.role === "student" && m.id === users.find(u =>
-                        ["coach", "coach-board"].includes(u.role) && u.id !== selectedUser.id &&
-                        matches.some(match => match.studentId === selectedUser.id && match.coachId === u.id)
-                      )?.id) ||
-                      (m.role === "student" && ["coach", "coach-board"].includes(selectedUser.role) && m.id === users.find(u =>
-                        u.role === "student" && u.id !== selectedUser.id &&
-                        matches.some(match => match.coachId === selectedUser.id && match.studentId === u.id)
-                      )?.id)
-                    )
+                  // Find the match for the selected user
+                  const matchData = matches.find(match => 
+                    match.studentId === selectedUser.id || match.coachId === selectedUser.id
                   );
+                  
+                  if (!matchData) return null;
+                  
+                  // Get the other user in the match
+                  const matchedUserId = matchData.studentId === selectedUser.id 
+                    ? matchData.coachId 
+                    : matchData.studentId;
+                  
+                  const match = users.find(u => u.id === matchedUserId);
                   return match ? (
                     <div style={{
                       marginTop: "2rem",
@@ -1148,20 +1165,19 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                 {/* Matched User Section */}
                 {(() => {
-                  // Find the match for the selected user, regardless of logged-in user
-                  const match = users.find((m) =>
-                    m.id !== selectedUser.id &&
-                    (
-                      (["coach", "coach-board"].includes(m.role) && selectedUser.role === "student" && m.id === users.find(u =>
-                        ["coach", "coach-board"].includes(u.role) && u.id !== selectedUser.id &&
-                        matches.some(match => match.studentId === selectedUser.id && match.coachId === u.id)
-                      )?.id) ||
-                      (m.role === "student" && ["coach", "coach-board"].includes(selectedUser.role) && m.id === users.find(u =>
-                        u.role === "student" && u.id !== selectedUser.id &&
-                        matches.some(match => match.coachId === selectedUser.id && match.studentId === u.id)
-                      )?.id)
-                    )
+                  // Find the match for the selected user
+                  const matchData = matches.find(match => 
+                    match.studentId === selectedUser.id || match.coachId === selectedUser.id
                   );
+                  
+                  if (!matchData) return null;
+                  
+                  // Get the other user in the match
+                  const matchedUserId = matchData.studentId === selectedUser.id 
+                    ? matchData.coachId 
+                    : matchData.studentId;
+                  
+                  const match = users.find(u => u.id === matchedUserId);
                   return match ? (
                     <div style={{
                       marginTop: "2rem",
