@@ -119,7 +119,16 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
   // Compute filtered list, excluding the current user
   const filtered = users.filter((u) => {
-    const matchesRole = filter === "all" ? true : u.role === filter;
+    let matchesRole = false;
+    if (filter === "all") {
+      matchesRole = true;
+    } else if (filter === "coach") {
+      matchesRole = ["coach", "coach-board"].includes(u.role);
+    } else if (filter === "board") {
+      matchesRole = ["board", "coach-board"].includes(u.role);
+    } else {
+      matchesRole = u.role === filter;
+    }
     const isNotMe = u.id !== myUserId;
     const searchLower = search.toLowerCase();
     const nameString = `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
@@ -610,11 +619,11 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   const match = users.find((m) =>
                     m.id !== selectedUser.id &&
                     (
-                      (m.role === "coach" && selectedUser.role === "student" && m.id === users.find(u =>
-                        u.role === "coach" && u.id !== selectedUser.id &&
+                      (["coach", "coach-board"].includes(m.role) && selectedUser.role === "student" && m.id === users.find(u =>
+                        ["coach", "coach-board"].includes(u.role) && u.id !== selectedUser.id &&
                         matches.some(match => match.studentId === selectedUser.id && match.coachId === u.id)
                       )?.id) ||
-                      (m.role === "student" && selectedUser.role === "coach" && m.id === users.find(u =>
+                      (m.role === "student" && ["coach", "coach-board"].includes(selectedUser.role) && m.id === users.find(u =>
                         u.role === "student" && u.id !== selectedUser.id &&
                         matches.some(match => match.coachId === selectedUser.id && match.studentId === u.id)
                       )?.id)
@@ -1092,11 +1101,11 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   const match = users.find((m) =>
                     m.id !== selectedUser.id &&
                     (
-                      (m.role === "coach" && selectedUser.role === "student" && m.id === users.find(u =>
-                        u.role === "coach" && u.id !== selectedUser.id &&
+                      (["coach", "coach-board"].includes(m.role) && selectedUser.role === "student" && m.id === users.find(u =>
+                        ["coach", "coach-board"].includes(u.role) && u.id !== selectedUser.id &&
                         matches.some(match => match.studentId === selectedUser.id && match.coachId === u.id)
                       )?.id) ||
-                      (m.role === "student" && selectedUser.role === "coach" && m.id === users.find(u =>
+                      (m.role === "student" && ["coach", "coach-board"].includes(selectedUser.role) && m.id === users.find(u =>
                         u.role === "student" && u.id !== selectedUser.id &&
                         matches.some(match => match.coachId === selectedUser.id && match.studentId === u.id)
                       )?.id)

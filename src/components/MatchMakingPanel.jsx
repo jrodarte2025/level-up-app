@@ -58,9 +58,9 @@ const MatchMakingPanel = () => {
         );
         const allStudents = allStudentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Fetch all coaches
+        // Fetch all coaches (including coach-board users)
         const allCoachesSnap = await getDocs(
-          query(collection(db, "users"), where("role", "==", "coach"))
+          query(collection(db, "users"), where("role", "in", ["coach", "coach-board"]))
         );
         const allCoaches = allCoachesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -291,7 +291,7 @@ const MatchMakingPanel = () => {
                       {coach.firstName} {coach.lastName}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Coach
+                      {coach.role === "coach-board" ? "Coach + Board" : "Coach"}
                     </Typography>
                   </Box>
                 </Box>
@@ -389,7 +389,7 @@ const MatchMakingPanel = () => {
                         {userA.firstName} {userA.lastName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {userA.role}
+                        {userA.role === "coach-board" ? "Coach + Board" : userA.role.charAt(0).toUpperCase() + userA.role.slice(1)}
                       </Typography>
                     </Box>
 
@@ -412,7 +412,7 @@ const MatchMakingPanel = () => {
                         {userB.firstName} {userB.lastName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {userB.role}
+                        {userB.role === "coach-board" ? "Coach + Board" : userB.role.charAt(0).toUpperCase() + userB.role.slice(1)}
                       </Typography>
                     </Box>
                   </Box>
