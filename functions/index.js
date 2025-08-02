@@ -95,7 +95,7 @@ exports.sendEventNotification = onDocumentCreated('events/{eventId}', async (eve
   const eventData = event.data?.data();
   const message = {
     notification: {
-      title: `📅 Event Added: ${eventData.title}`,
+      title: `📅 Event Added: ${eventData.name}`,
       body: "Tap to view the event details"
     },
     tokens

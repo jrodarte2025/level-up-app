@@ -50,28 +50,17 @@ export default function App() {
   // Register for push notifications when authenticated and authLoaded is true
   useEffect(() => {
     if (!authLoaded || !user) return;
-    const registerForNotifications = async () => {
-      if (typeof Notification === "undefined" || Notification.permission === "denied") return;
-
-      const { getMessaging, getToken } = await import("firebase/messaging");
-      const messaging = getMessaging();
-
-      if (Notification.permission === "default") {
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") return;
-      }
-
-      const token = await getToken(messaging, {
-        vapidKey: "BGIu5yYG52Ry8kOt1wfY7KkJ-ZilDdT95o1zrGlsUdF907-URK4qvBnZ3sf2xua1JTxOAxIaNopmQw8apLSaEEQ"
-      });
-
-      if (auth.currentUser && token) {
-        const { doc, setDoc } = await import("firebase/firestore");
-        const tokenRef = doc(db, "notification_tokens", auth.currentUser.uid);
-        await setDoc(tokenRef, { token }, { merge: true });
+    
+    const initNotifications = async () => {
+      const { registerForNotifications } = await import("../utils/notifications");
+      const result = await registerForNotifications();
+      
+      if (!result.success) {
+        console.log("Notification registration failed:", result.error);
       }
     };
-    registerForNotifications();
+    
+    initNotifications();
   }, [authLoaded, user]);
 
   // Allow initial selected tab to be set from navigation state

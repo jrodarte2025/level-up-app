@@ -32,6 +32,9 @@ export default function ProfileModal({
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState(
+    typeof Notification !== "undefined" ? Notification.permission : "default"
+  );
 
   React.useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -39,6 +42,21 @@ export default function ProfileModal({
     });
     return () => unsubscribe();
   }, []);
+
+  // Sync notification permission state when modal opens
+  React.useEffect(() => {
+    // Debug mobile Safari notification support
+    console.log("📱 ProfileModal Debug:");
+    console.log("📱 User Agent:", navigator.userAgent);
+    console.log("📱 Notification API:", typeof Notification !== "undefined" ? "✅ Available" : "❌ Not Available");
+    console.log("📱 Service Worker:", "serviceWorker" in navigator ? "✅ Available" : "❌ Not Available");
+    console.log("📱 authLoaded:", authLoaded);
+    
+    if (typeof Notification !== "undefined") {
+      setNotificationPermission(Notification.permission);
+      console.log("📱 Current permission:", Notification.permission);
+    }
+  }, [authLoaded]);
 
   const isSelf = auth.currentUser?.uid && user?.uid && auth.currentUser.uid === user.uid;
 
@@ -225,36 +243,69 @@ export default function ProfileModal({
             </>
           )}
           <input type="url" placeholder="LinkedIn Profile URL" value={linkedinUrl} onChange={(e) => { onSave("linkedinUrl", e.target.value); setHasChanges(true); }} style={inputStyle(theme)} />
-  {authLoaded && typeof Notification !== "undefined" && (
-  <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
-    <Switch
-      checked={typeof Notification !== "undefined" && Notification.permission === "granted"}
-      onChange={async () => {
-        if (typeof Notification === "undefined") return;
+  
+  {/* Notification toggle or compatibility message */}
+  {authLoaded && (
+    typeof Notification !== "undefined" ? (
+      <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
+        <Switch
+          checked={notificationPermission === "granted"}
+          onChange={async () => {
+            if (typeof Notification === "undefined") return;
 
-        if (Notification.permission === "granted") {
-          alert("To disable notifications, please change your browser settings.");
-        } else {
-          const permission = await Notification.requestPermission();
-          if (permission === "granted") {
-            const registration = await navigator.serviceWorker.ready;
-            const { getMessaging, getToken } = await import("firebase/messaging");
-            const messaging = getMessaging();
-            await getToken(messaging, {
-              vapidKey: "BGIu5yYG52Ry8kOt1wfY7KkJ-ZilDdT95o1zrGlsUdF907-URK4qvBnZ3sf2xua1JTxOAxIaNopmQw8apLSaEEQ",
-              serviceWorkerRegistration: registration
-            });
-          }
-        }
-      }}
-      color="primary"
-    />
-    <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>
-      {typeof Notification !== "undefined" && Notification.permission === "granted"
-        ? "Notifications enabled"
-        : "Enable notifications"}
-    </span>
-  </label>
+            if (notificationPermission === "granted") {
+              // Better UX: Provide instructions instead of just an alert
+              const message = "To disable notifications:\n• Chrome/Edge: Go to Settings > Privacy > Site Settings > Notifications\n• Firefox: Click the lock icon in address bar > Permissions\n• Safari: Go to Safari > Preferences > Websites > Notifications";
+              alert(message);
+            } else {
+              try {
+                const { registerForNotifications } = await import("../utils/notifications");
+                const result = await registerForNotifications();
+                
+                if (result.success) {
+                  // Update the local state to reflect the permission change
+                  setNotificationPermission("granted");
+                } else {
+                  console.warn("Notification registration failed:", result.error);
+                  
+                  // Provide more helpful error messages for Safari
+                  if (result.error.includes("Safari") || result.error.includes("FCM")) {
+                    alert(`Notifications not available: ${result.error}\n\nSafari on iOS requires version 16.4+ for web push notifications.`);
+                  } else {
+                    alert(`Failed to enable notifications: ${result.error}\n\nPlease try again or check browser settings.`);
+                  }
+                }
+              } catch (error) {
+                console.error("Error enabling notifications:", error);
+                alert("Failed to enable notifications. Please try again.");
+              }
+            }
+          }}
+          color="primary"
+        />
+        <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>
+          {notificationPermission === "granted"
+            ? "Notifications enabled"
+            : "Enable notifications"}
+        </span>
+      </label>
+    ) : (
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        gap: "0.75rem", 
+        padding: "0.5rem",
+        backgroundColor: "#f8f9fa",
+        borderRadius: "6px",
+        border: "1px solid #dee2e6"
+      }}>
+        <span style={{ fontSize: "1rem" }}>🔔</span>
+        <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+          <strong>Push Notifications</strong><br/>
+          Requires iOS 16.4+ or newer browser
+        </div>
+      </div>
+    )
   )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1.5rem" }}>
