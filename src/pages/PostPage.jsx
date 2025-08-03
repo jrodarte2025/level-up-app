@@ -156,6 +156,18 @@ const PostPage = () => {
     setIsSubmitting(true);
 
     const commentRef = collection(db, "posts", postId, "comments");
+    
+    // If replying, get parent comment info
+    let replyToUser = null;
+    let replyToText = null;
+    if (replyTo) {
+      const parentComment = comments.find(c => c.id === replyTo);
+      if (parentComment) {
+        replyToUser = parentComment.displayName;
+        replyToText = parentComment.text?.substring(0, 50) + (parentComment.text?.length > 50 ? '...' : '');
+      }
+    }
+    
     const commentData = {
       userId: user?.uid || user?.email,
       displayName: fullUser?.displayName ||
@@ -165,6 +177,8 @@ const PostPage = () => {
       text: newComment,
       timestamp: serverTimestamp(),
       parentCommentId: replyTo || null,
+      replyToUser: replyToUser,
+      replyToText: replyToText,
       headshotUrl: fullUser?.headshotUrl || "",
     };
 
@@ -181,9 +195,30 @@ const PostPage = () => {
   }, {});
 
   const renderComments = (parentId = "root", depth = 0) => {
-    // Ensure comments are rendered directly, not wrapped in a Box or styled container
-    return (groupedComments[parentId] || []).map((c) =>
-      <Box key={c.id} sx={{ mb: 3 }}>
+    const maxDepth = 4; // Limit nesting to prevent excessive indentation
+    const currentComments = groupedComments[parentId] || [];
+    
+    return currentComments.map((c) => (
+      <Box 
+        key={c.id} 
+        sx={{ 
+          mb: depth === 0 ? 3 : 2,
+          ml: depth > 0 ? 2 : 0,
+          pl: depth > 0 ? 2 : 0,
+          borderLeft: depth > 0 ? `3px solid ${theme.palette.divider}` : 'none',
+          position: 'relative',
+          '&::before': depth > 0 ? {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: '3px',
+            background: `linear-gradient(to bottom, ${theme.palette.primary.main}20, ${theme.palette.divider})`,
+            borderRadius: '2px 0 0 2px'
+          } : {}
+        }}
+      >
         <Comment
           comment={{ ...c, postId }}
           avatarUrl={c.headshotUrl || ""}
@@ -214,10 +249,50 @@ const PostPage = () => {
           }}
           replyCount={commentCounts[c.id] || 0}
           userId={user?.uid || user?.email}
-          depth={0}
+          depth={depth}
+          maxDepth={maxDepth}
         />
+        
+        {/* Render nested replies */}
+        {depth < maxDepth && groupedComments[c.id] && groupedComments[c.id].length > 0 && (
+          <Box sx={{ mt: 1 }}>
+            {renderComments(c.id, depth + 1)}
+          </Box>
+        )}
+        
+        {/* Show "more replies" indicator if max depth reached */}
+        {depth === maxDepth && groupedComments[c.id] && groupedComments[c.id].length > 0 && (
+          <Box 
+            sx={{ 
+              mt: 1, 
+              ml: 2, 
+              pl: 2,
+              borderLeft: `2px solid ${theme.palette.divider}`,
+              opacity: 0.7
+            }}
+          >
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: theme.palette.text.secondary,
+                fontStyle: 'italic',
+                cursor: 'pointer',
+                '&:hover': {
+                  color: theme.palette.primary.main,
+                  textDecoration: 'underline'
+                }
+              }}
+              onClick={() => {
+                // TODO: Implement expand deep replies functionality
+                console.log('Expand deep replies for comment:', c.id);
+              }}
+            >
+              View {groupedComments[c.id].length} more {groupedComments[c.id].length === 1 ? 'reply' : 'replies'}...
+            </Typography>
+          </Box>
+        )}
       </Box>
-    );
+    ));
   };
 
   return (
@@ -331,7 +406,7 @@ const PostPage = () => {
         <input
           ref={inputRef}
           type="text"
-          placeholder={replyTo ? "Replying..." : "Write a comment..."}
+          placeholder={replyTo ? `Reply to ${comments.find(c => c.id === replyTo)?.displayName || 'comment'}...` : "Write a comment..."}
           value={editingCommentId ? editedCommentText : newComment}
           onChange={(e) => {
             editingCommentId
@@ -357,18 +432,43 @@ const PostPage = () => {
           disabled={isSubmitting}
         />
         {replyTo && (
-          <div style={{ fontSize: "0.875rem", marginTop: "1.25rem", color: theme.palette.text.primary }}>
-            Replying to{" "}
-            <strong>
-              {comments.find((c) => c.id === replyTo)?.displayName || "a comment"}
-            </strong>.{" "}
+          <Box sx={{ 
+            fontSize: "0.875rem", 
+            mt: 1.5, 
+            p: 1.5,
+            backgroundColor: theme.palette.action.hover,
+            borderRadius: 1,
+            borderLeft: `4px solid ${theme.palette.primary.main}`,
+            color: theme.palette.text.primary 
+          }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Replying to{" "}
+              <strong>
+                {comments.find((c) => c.id === replyTo)?.displayName || "a comment"}
+              </strong>
+            </Typography>
+            <Typography variant="caption" sx={{ 
+              color: theme.palette.text.secondary, 
+              fontStyle: 'italic',
+              display: 'block',
+              mb: 1
+            }}>
+              "{comments.find((c) => c.id === replyTo)?.text?.substring(0, 100)}{comments.find((c) => c.id === replyTo)?.text?.length > 100 ? '...' : ''}"
+            </Typography>
             <button
               onClick={() => setReplyTo(null)}
-              style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}
+              style={{ 
+                color: "#ef4444", 
+                background: "none", 
+                border: "none", 
+                cursor: "pointer",
+                fontSize: "0.8rem",
+                fontWeight: 500
+              }}
             >
-              Cancel
+              Cancel Reply
             </button>
-          </div>
+          </Box>
         )}
         <button
           type="submit"

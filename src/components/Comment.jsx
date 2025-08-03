@@ -5,7 +5,6 @@ import { db } from "../firebase";
 import { Heart, MessageCircle, Pencil, Trash } from "lucide-react";
 import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { Link } from "react-router-dom";
 
 const Comment = ({
   comment,
@@ -17,9 +16,9 @@ const Comment = ({
   editedText,
   setEditedText,
   onSubmitEdit,
-  suppressReplies = false,
   replyCount = 0,
   depth = 0,
+  maxDepth = 4,
   userId
 }) => {
   const theme = useTheme();
@@ -53,22 +52,56 @@ const Comment = ({
     : "";
 
   return (
-    <Box sx={{ mb: 3, pb: 2, borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
+    <Box sx={{ 
+      mb: depth === 0 ? 3 : 2, 
+      pb: 2, 
+      borderBottom: depth === 0 ? `1px solid ${theme.palette.divider}` : 'none',
+      backgroundColor: depth > 0 ? `${theme.palette.action.hover}20` : 'transparent',
+      borderRadius: depth > 0 ? 1 : 0,
+      p: depth > 0 ? 1.5 : 0
+    }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
         {comment.headshotUrl && (
           <img
             src={comment.headshotUrl}
             alt={comment.displayName || "User avatar"}
-            style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }}
+            style={{ 
+              width: depth > 0 ? 28 : 32, 
+              height: depth > 0 ? 28 : 32, 
+              borderRadius: "50%", 
+              objectFit: "cover",
+              border: depth > 0 ? `2px solid ${theme.palette.primary.main}40` : 'none'
+            }}
           />
         )}
         <Box>
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 600, fontSize: "0.875rem", color: theme.palette.text.primary }}
+            sx={{ 
+              fontWeight: 600, 
+              fontSize: depth > 0 ? "0.8rem" : "0.875rem", 
+              color: theme.palette.text.primary 
+            }}
           >
             {comment.displayName || "Unknown user"}
           </Typography>
+          {/* Show reply context if this comment is a reply */}
+          {comment.replyToUser && (
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: theme.palette.text.secondary,
+                fontSize: "0.7rem",
+                display: 'block',
+                mt: 0.25
+              }}
+            >
+              <span style={{ color: theme.palette.primary.main }}>@{comment.replyToUser}</span>
+              {comment.replyToText && (
+                <span style={{ fontStyle: 'italic' }}> · "{comment.replyToText}"</span>
+              )}
+            </Typography>
+          )}
           <Typography
             variant="caption"
             sx={{ color: theme.palette.text.secondary }}
@@ -117,6 +150,18 @@ const Comment = ({
         </form>
       ) : (
         <Typography variant="body1" sx={{ mt: 1, color: theme.palette.text.primary, lineHeight: 1.65 }}>
+          {comment.replyToUser && depth > 0 && (
+            <Typography 
+              component="span" 
+              sx={{ 
+                color: theme.palette.primary.main, 
+                fontWeight: 500,
+                mr: 0.5
+              }}
+            >
+              @{comment.replyToUser}
+            </Typography>
+          )}
           {comment.text}
         </Typography>
       )}
@@ -131,18 +176,46 @@ const Comment = ({
         }}
       >
         <Box sx={{ display: "flex", gap: 2 }}>
-          {depth < 1 && (
-            <button onClick={() => onReply(comment)}>
+          {depth < maxDepth - 1 && (
+            <button 
+              onClick={() => onReply(comment)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: theme.palette.text.secondary,
+                display: "flex",
+                alignItems: "center",
+                fontSize: "0.8rem",
+                fontWeight: 500
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = theme.palette.primary.main)}
+              onMouseLeave={e => (e.currentTarget.style.color = theme.palette.text.secondary)}
+            >
               <MessageCircle style={{ width: 16, height: 16, marginRight: 4 }} /> Reply
             </button>
           )}
-          <button onClick={() => onLike(comment.id)}>
+          <button 
+            onClick={() => onLike(comment.id)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: isLiked ? "#ef4444" : theme.palette.text.secondary,
+              display: "flex",
+              alignItems: "center",
+              fontSize: "0.8rem",
+              fontWeight: 500
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = isLiked ? "#dc2626" : "#ef4444")}
+            onMouseLeave={e => (e.currentTarget.style.color = isLiked ? "#ef4444" : theme.palette.text.secondary)}
+          >
             <Heart
               style={{
                 width: 16,
                 height: 16,
                 marginRight: 4,
-                stroke: isLiked ? "#ef4444" : theme.palette.text.secondary,
+                stroke: isLiked ? "#ef4444" : "currentColor",
                 fill: isLiked ? "#ef4444" : "none"
               }}
             />
@@ -182,61 +255,23 @@ const Comment = ({
           )}
         </Box>
 
-        {replyCount > 0 && (
-          <Link
-            to={`/post/${comment.postId}/comment/${comment.id}`}
-            style={{
-              fontSize: "0.8rem",
+        {/* Reply count indicator - only show for top-level comments with replies */}
+        {depth === 0 && replyCount > 0 && (
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: "0.75rem",
               color: theme.palette.primary.main,
               fontWeight: 500,
               display: "inline-flex",
               alignItems: "center",
-              gap: "0.25rem",
-              textDecoration: "none"
+              gap: 0.5
             }}
           >
-            <MessageCircle size={14} /> View thread ({replyCount})
-          </Link>
+            <MessageCircle size={12} /> {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+          </Typography>
         )}
       </Box>
-      {!suppressReplies && comment.replies?.length > 0 && depth < 1 && (
-        <Box
-          sx={{
-            mt: 2,
-            pl: 2,
-            borderLeft: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.default,
-            borderRadius: 1
-          }}
-        >
-          {comment.replies.map((reply) => (
-            <Comment
-              key={reply.id}
-              comment={reply}
-              onReply={onReply}
-              onLike={onLike}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              isEditing={isEditing && reply.id === comment.id}
-              editedText={editedText}
-              setEditedText={setEditedText}
-              onSubmitEdit={onSubmitEdit}
-              suppressReplies={suppressReplies}
-              depth={depth + 1}
-              replyCount={reply.replyCount}
-              userId={userId}
-            />
-          ))}
-        </Box>
-      )}
-      {depth === 1 && (
-        <Typography variant="caption" sx={{ fontSize: "0.75rem", color: theme.palette.text.secondary, mb: 0.5 }}>
-          Replying to {comment.replyingToName || "a comment"}:
-        </Typography>
-      )}
-      {depth === 0 && (
-        <Box sx={{ mb: 6 }} />
-      )}
     </Box>
   );
 };
