@@ -1,16 +1,52 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import { Link } from "react-router-dom";
 import { MessageCircle, Heart, Link as LinkIcon } from "lucide-react";
 import { Paper, Typography, Box, Divider, Chip } from "@mui/material";
+import ReactionBar from "./ReactionBar";
+import EmojiPicker from "./EmojiPicker";
 
-const PostCard = ({ post, onCommentClick, onLikeClick, onEditClick }) => {
+const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditClick }) => {
   const [imageError, setImageError] = React.useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const addReactionButtonRef = useRef(null);
 
   const date = post.timestamp?.seconds
     ? new Date(post.timestamp.seconds * 1000).toLocaleDateString()
     : "";
+
+  // Process reactions for ReactionBar
+  const getEmojiKey = (emoji) => {
+    const emojiMap = {
+      "👍": "thumbs_up",
+      "❤️": "heart",
+      "😂": "laughing",
+      "😮": "wow",
+      "😢": "sad",
+      "🔥": "fire",
+      "👏": "clap",
+      "🎉": "celebration"
+    };
+    return emojiMap[emoji] || "heart";
+  };
+
+  // Convert post reactions to format expected by ReactionBar
+  const processedReactions = {};
+  const userReactions = {};
+  
+  if (post.reactions) {
+    Object.entries(post.reactions).forEach(([emoji, count]) => {
+      const key = getEmojiKey(emoji);
+      processedReactions[key] = count;
+    });
+  }
+
+  const handleEmojiClick = (emojiKey, emoji) => {
+    if (onEmojiReaction) {
+      onEmojiReaction(post.id, emojiKey, emoji);
+    }
+  };
 
   return (
     <Box
@@ -200,8 +236,170 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEditClick }) => {
           </Box>
         </Box>
       </Box>
-      <Divider sx={{ mt: 2.5, mb: 1.25 }} />
+      {/* Comment Previews */}
+      {post.recentComments && post.recentComments.length > 0 && (
+        <Box sx={{ mt: { xs: 2, sm: 2.5 }, mb: 1.25 }}>
+          <Divider sx={{ mb: { xs: 1.5, sm: 2 } }} />
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: 'text.secondary', 
+              fontWeight: 600, 
+              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              mb: { xs: 1, sm: 1.5 },
+              display: 'block'
+            }}
+          >
+            Recent Comments
+          </Typography>
+          {post.recentComments.map((comment, index) => (
+            <Box
+              key={comment.id}
+              sx={{
+                mb: index < post.recentComments.length - 1 ? { xs: 1, sm: 1.5 } : 0,
+                p: { xs: 1, sm: 1.5 },
+                backgroundColor: (theme) => theme.palette.action.hover,
+                borderRadius: 1,
+                borderLeft: '3px solid',
+                borderLeftColor: (theme) => theme.palette.primary.main,
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: (theme) => theme.palette.action.selected,
+                  transform: 'translateX(2px)'
+                },
+                '&:active': {
+                  transform: 'translateX(1px)',
+                  backgroundColor: (theme) => theme.palette.action.selected,
+                }
+              }}
+              onClick={() => onCommentClick(post.id)}
+            >
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: { xs: 0.5, sm: 1 }, 
+                mb: 0.5,
+                flexWrap: { xs: 'wrap', sm: 'nowrap' }
+              }}>
+                {comment.headshotUrl ? (
+                  <img
+                    src={comment.headshotUrl}
+                    alt={comment.displayName}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      backgroundColor: (theme) => theme.palette.primary.main,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.6rem',
+                      fontWeight: 600,
+                      color: 'white',
+                      flexShrink: 0
+                    }}
+                  >
+                    {comment.displayName?.charAt(0) || '?'}
+                  </Box>
+                )}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                    color: 'text.primary',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: { xs: '120px', sm: '160px' }
+                  }}
+                >
+                  {comment.displayName || 'Unknown User'}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                    flexShrink: 0
+                  }}
+                >
+                  {comment.timestamp?.seconds
+                    ? new Date(comment.timestamp.seconds * 1000).toLocaleDateString([], {
+                        month: 'short',
+                        day: 'numeric'
+                      })
+                    : ''}
+                </Typography>
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  lineHeight: 1.4,
+                  color: 'text.primary',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: { xs: 3, sm: 2 },
+                  WebkitBoxOrient: 'vertical',
+                  pl: { xs: 3, sm: 3.5 },
+                  wordBreak: 'break-word'
+                }}
+              >
+                {comment.text}
+              </Typography>
+            </Box>
+          ))}
+          {post.commentCount > post.recentComments.length && (
+            <Box
+              sx={{
+                mt: 1,
+                textAlign: 'center',
+                cursor: 'pointer'
+              }}
+              onClick={() => onCommentClick(post.id)}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  '&:hover': {
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                View {post.commentCount - post.recentComments.length} more comments
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
+      
+      <Divider sx={{ mt: post.recentComments && post.recentComments.length > 0 ? 1.25 : 2.5, mb: 1.25 }} />
       <Box display="flex" gap={2} alignItems="center" sx={{ mt: 2, opacity: 0.7 }}>
+        {/* Emoji Reactions */}
+        <ReactionBar
+          reactions={processedReactions}
+          userReactions={userReactions}
+          onReactionClick={handleEmojiClick}
+          onAddReaction={() => setShowEmojiPicker(true)}
+          commentId={post.id}
+          addButtonRef={addReactionButtonRef}
+        />
+        
         <Box
           component="button"
           onClick={() => onCommentClick(post.id)}
@@ -224,35 +422,16 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEditClick }) => {
             {post.commentCount || 0}
           </Typography>
         </Box>
-        <Box
-          component="button"
-          onClick={() => onLikeClick(post.id)}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            border: "none",
-            background: "none",
-            color: "text.secondary",
-            cursor: "pointer",
-            "&:hover": { color: "error.main" },
-          }}
-        >
-          <Heart
-            size={18}
-            style={{
-              fill: post.isLiked ? "#ef4444" : "none",
-              stroke: post.isLiked ? "#ef4444" : "currentColor"
-            }}
-          />
-          <Typography
-            variant="caption"
-            sx={{ color: (theme) => theme.palette.text.secondary }}
-          >
-            {post.reactionCount || 0}
-          </Typography>
-        </Box>
       </Box>
+      
+      {/* Emoji Picker */}
+      <EmojiPicker
+        isOpen={showEmojiPicker}
+        onEmojiSelect={handleEmojiClick}
+        onClose={() => setShowEmojiPicker(false)}
+        anchorEl={addReactionButtonRef.current}
+        userReactions={userReactions}
+      />
     </Box>
   );
 };

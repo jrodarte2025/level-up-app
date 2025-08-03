@@ -1,0 +1,104 @@
+/* Emoji Reaction Animations */
+@keyframes reactionPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes reactionCountIncrement {
+  0% {
+    transform: scale(1);
+    color: inherit;
+  }
+  50% {
+    transform: scale(1.3);
+    color: #1976d2;
+  }
+  100% {
+    transform: scale(1);
+    color: inherit;
+  }
+}
+
+@keyframes emojiPickerSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes replyPreviewSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseButton {
+  0% {
+    box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(25, 118, 210, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(25, 118, 210, 0);
+  }
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.1);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+/* Smooth transitions for interactive elements */
+.reaction-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reaction-button:hover {
+  animation: reactionPop 0.3s ease-in-out;
+}
+
+.emoji-picker-container {
+  animation: emojiPickerSlideIn 0.25s ease-out;
+}
+
+.reply-preview {
+  animation: replyPreviewSlide 0.2s ease-out;
+}
+
+.pulse-on-click {
+  animation: pulseButton 0.6s ease-out;
+}
+
+.heart-liked {
+  animation: heartBeat 0.8s ease-in-out;
+}

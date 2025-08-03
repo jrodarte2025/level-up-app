@@ -20,6 +20,11 @@ import { getAuth } from "firebase/auth";
 import { MessageCircle, Heart, Pencil, Trash } from "lucide-react";
 import Comment from "../components/Comment";
 import HeaderBar from "../components/HeaderBar";
+import CommentInput from "../components/CommentInput";
+import TypingIndicator from "../components/TypingIndicator";
+import ReactionBar from "../components/ReactionBar";
+import EmojiPicker from "../components/EmojiPicker";
+import { useTyping } from "../contexts/TypingContext";
 
 const PostPage = () => {
   const { postId } = useParams();
@@ -44,6 +49,14 @@ const PostPage = () => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedCommentText, setEditedCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Post reaction states
+  const [postReactions, setPostReactions] = useState({});
+  const [userPostReactions, setUserPostReactions] = useState({});
+  const [showPostEmojiPicker, setShowPostEmojiPicker] = useState(false);
+  const postAddReactionButtonRef = useRef(null);
+  
+  const { typingUsers, markCommentAsNew, isCommentNew } = useTyping();
 
   const inputRef = useRef(null);
 
@@ -89,7 +102,7 @@ const PostPage = () => {
     setCommentCounts(repliesTally);
   }, [comments]);
 
-  // Firestore-enabled like handler
+  // Firestore-enabled like handler (legacy heart support)
   const handleLike = async (commentId) => {
     const userId = user?.uid || user?.email;
     const reactionRef = doc(db, "posts", postId, "comments", commentId, "reactions", userId);
@@ -114,6 +127,92 @@ const PostPage = () => {
         [commentId + "_liked"]: true,
       }));
     }
+  };
+
+  // Enhanced emoji reaction handler for comments
+  const handleEmojiReaction = async (commentId, emojiKey, emoji) => {
+    const userId = user?.uid || user?.email;
+    const reactionRef = doc(db, "posts", postId, "comments", commentId, "reactions", userId);
+    const existing = await getDoc(reactionRef);
+
+    if (existing.exists() && existing.data().emoji === emoji) {
+      // Remove reaction if same emoji
+      await deleteDoc(reactionRef);
+    } else {
+      // Add or update reaction
+      await setDoc(reactionRef, {
+        emoji: emoji,
+        emojiKey: emojiKey,
+        userId,
+        timestamp: serverTimestamp()
+      });
+    }
+  };
+
+  // Post emoji reaction handler
+  const handlePostEmojiReaction = async (emojiKey, emoji) => {
+    const userId = user?.uid || user?.email;
+    const reactionRef = doc(db, "posts", postId, "reactions", userId);
+    const existing = await getDoc(reactionRef);
+
+    if (existing.exists() && existing.data().emoji === emoji) {
+      // Remove reaction if same emoji
+      await deleteDoc(reactionRef);
+    } else {
+      // Add or update reaction
+      await setDoc(reactionRef, {
+        emoji: emoji,
+        emojiKey: emojiKey,
+        userId,
+        timestamp: serverTimestamp()
+      });
+    }
+  };
+
+  // Listen to post reactions
+  useEffect(() => {
+    if (!postId || !user) return;
+
+    const userId = user?.uid || user?.email;
+    const postReactionsRef = collection(db, "posts", postId, "reactions");
+
+    const unsubscribe = onSnapshot(postReactionsRef, (snapshot) => {
+      const reactionCounts = {};
+      const userReactionStatus = {};
+
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const emoji = data.emoji || "❤️";
+        const reactionUserId = doc.id;
+        
+        // Map emoji to key
+        const emojiKey = getEmojiKey(emoji);
+        reactionCounts[emojiKey] = (reactionCounts[emojiKey] || 0) + 1;
+        
+        if (reactionUserId === userId) {
+          userReactionStatus[emojiKey] = true;
+        }
+      });
+
+      setPostReactions(reactionCounts);
+      setUserPostReactions(userReactionStatus);
+    });
+
+    return () => unsubscribe();
+  }, [postId, user]);
+
+  const getEmojiKey = (emoji) => {
+    const emojiMap = {
+      "👍": "thumbs_up",
+      "❤️": "heart",
+      "😂": "laughing",
+      "😮": "wow",
+      "😢": "sad",
+      "🔥": "fire",
+      "👏": "clap",
+      "🎉": "celebration"
+    };
+    return emojiMap[emoji] || "heart";
   };
 
   useEffect(() => {
@@ -182,7 +281,11 @@ const PostPage = () => {
       headshotUrl: fullUser?.headshotUrl || "",
     };
 
-    await addDoc(commentRef, commentData);
+    const newCommentDoc = await addDoc(commentRef, commentData);
+    
+    // Mark comment as new for highlighting
+    markCommentAsNew(newCommentDoc.id);
+    
     setNewComment("");
     setReplyTo(null);
     setIsSubmitting(false);
@@ -222,8 +325,10 @@ const PostPage = () => {
         <Comment
           comment={{ ...c, postId }}
           avatarUrl={c.headshotUrl || ""}
+          isNew={isCommentNew(c.id)}
           onReply={() => setReplyTo(c.id)}
           onLike={() => handleLike(c.id)}
+          onEmojiReaction={handleEmojiReaction}
           onDelete={async () => {
             await deleteDoc(doc(db, "posts", postId, "comments", c.id));
           }}
@@ -393,108 +498,68 @@ const PostPage = () => {
 
       <Divider sx={{ my: 3, borderColor: theme.palette.divider }} />
 
+      {/* Post Reactions and Comments Header */}
       <Box sx={{ mb: "1rem" }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: "0.5rem", color: theme.palette.text.primary }}>
-          {comments.filter((c) => !c.parentCommentId).length} Comments
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <ReactionBar
+            reactions={postReactions}
+            userReactions={userPostReactions}
+            onReactionClick={handlePostEmojiReaction}
+            onAddReaction={() => setShowPostEmojiPicker(true)}
+            commentId={postId}
+            addButtonRef={postAddReactionButtonRef}
+          />
+          <Typography 
+            variant="subtitle2" 
+            sx={{ 
+              fontWeight: 600, 
+              color: theme.palette.text.primary,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5
+            }}
+          >
+            <MessageCircle size={16} />
+            {comments.filter((c) => !c.parentCommentId).length} Comments
+          </Typography>
+        </Box>
+        
+        {/* Typing Indicator */}
+        <TypingIndicator 
+          typingUsers={typingUsers[postId] || []} 
+          postId={postId}
+        />
+        
         {/* Render comments directly, no extra wrapper adding background, padding, or border */}
         {renderComments()}
       </Box>
 
       {!editingCommentId && (
-      <form onSubmit={handleSubmit} style={{ marginTop: "2rem" }}>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder={replyTo ? `Reply to ${comments.find(c => c.id === replyTo)?.displayName || 'comment'}...` : "Write a comment..."}
-          value={editingCommentId ? editedCommentText : newComment}
-          onChange={(e) => {
-            editingCommentId
-              ? setEditedCommentText(e.target.value)
-              : setNewComment(e.target.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit(e);
-            }
-          }}
-          style={{
-            width: "100%",
-            padding: "0.75rem 1rem",
-            fontSize: "1rem",
-            borderRadius: "9999px",
-            border: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
-            outline: "none",
-            color: theme.palette.text.primary
-          }}
-          disabled={isSubmitting}
-        />
-        {replyTo && (
-          <Box sx={{ 
-            fontSize: "0.875rem", 
-            mt: 1.5, 
-            p: 1.5,
-            backgroundColor: theme.palette.action.hover,
-            borderRadius: 1,
-            borderLeft: `4px solid ${theme.palette.primary.main}`,
-            color: theme.palette.text.primary 
-          }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              Replying to{" "}
-              <strong>
-                {comments.find((c) => c.id === replyTo)?.displayName || "a comment"}
-              </strong>
-            </Typography>
-            <Typography variant="caption" sx={{ 
-              color: theme.palette.text.secondary, 
-              fontStyle: 'italic',
-              display: 'block',
-              mb: 1
-            }}>
-              "{comments.find((c) => c.id === replyTo)?.text?.substring(0, 100)}{comments.find((c) => c.id === replyTo)?.text?.length > 100 ? '...' : ''}"
-            </Typography>
-            <button
-              onClick={() => setReplyTo(null)}
-              style={{ 
-                color: "#ef4444", 
-                background: "none", 
-                border: "none", 
-                cursor: "pointer",
-                fontSize: "0.8rem",
-                fontWeight: 500
-              }}
-            >
-              Cancel Reply
-            </button>
-          </Box>
-        )}
-        <button
-          type="submit"
-          disabled={
-            isSubmitting ||
-            (editingCommentId
-              ? !editedCommentText.trim()
-              : !newComment.trim())
-          }
-          style={{
-            marginTop: "0.75rem",
-            padding: "0.5rem 1.25rem",
-            backgroundColor: isSubmitting ? "#9CA3AF" : "#1e2d5f",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            fontWeight: 600,
-            cursor: isSubmitting ? "default" : "pointer"
-          }}
-        >
-          {isSubmitting
-            ? editingCommentId ? "Updating..." : "Posting..."
-            : editingCommentId ? "Update" : "Comment"}
-        </button>
-      </form>
+        <Box sx={{ mt: 3 }}>
+          <CommentInput
+            value={newComment}
+            onChange={setNewComment}
+            onSubmit={handleSubmit}
+            onCancel={() => setReplyTo(null)}
+            placeholder={replyTo ? `Reply to ${comments.find(c => c.id === replyTo)?.displayName || 'comment'}...` : "Write a comment..."}
+            isSubmitting={isSubmitting}
+            replyTo={replyTo}
+            replyToUser={comments.find(c => c.id === replyTo)?.displayName}
+            replyToText={comments.find(c => c.id === replyTo)?.text?.substring(0, 100) + (comments.find(c => c.id === replyTo)?.text?.length > 100 ? '...' : '')}
+            autoFocus={!!replyTo}
+            postId={postId}
+          />
+        </Box>
       )}
+      
+      {/* Post Emoji Picker */}
+      <EmojiPicker
+        isOpen={showPostEmojiPicker}
+        onEmojiSelect={handlePostEmojiReaction}
+        onClose={() => setShowPostEmojiPicker(false)}
+        anchorEl={postAddReactionButtonRef.current}
+        userReactions={userPostReactions}
+      />
     </Box>
   );
 };
