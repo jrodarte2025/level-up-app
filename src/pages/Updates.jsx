@@ -6,7 +6,9 @@ import {
 import { db, auth } from "../firebase";
 import PostCard from "../components/PostCard";
 import CardWrapper from "../components/CardWrapper";
-import { Container, Typography, Box } from "@mui/material";
+import UpdateRequestModal from "../components/UpdateRequestModal";
+import { Container, Typography, Box, Button, Fab } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function Updates() {
@@ -17,6 +19,7 @@ export default function Updates() {
   const [reactionsByPost, setReactionsByPost] = useState({});
   const user = auth.currentUser;
   const [userRole, setUserRole] = useState(null);
+  const [showUpdateRequestModal, setShowUpdateRequestModal] = useState(false);
 
   // Load user role (optimized)
   useEffect(() => {
@@ -160,10 +163,26 @@ export default function Updates() {
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ mt: 0.5, fontSize: "0.9rem" }}
+          sx={{ mt: 0.5, fontSize: "0.9rem", mb: 2 }}
         >
           Stay connected with updates, wins, and announcements.
         </Typography>
+        
+        {/* Request Update Button */}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setShowUpdateRequestModal(true)}
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+            px: 3,
+            py: 1
+          }}
+        >
+          Share Update
+        </Button>
       </Box> 
       {posts.map((post) => (
         <PostCard
@@ -182,6 +201,12 @@ export default function Updates() {
           onEmojiReaction={handlePostEmojiReaction}
         />
       ))}
+      
+      {/* Update Request Modal */}
+      <UpdateRequestModal
+        open={showUpdateRequestModal}
+        onClose={() => setShowUpdateRequestModal(false)}
+      />
     </Container>
   );
 }
