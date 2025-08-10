@@ -4,6 +4,7 @@ import { db, storage, auth } from "../firebase";
 import { collection, doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
+import RichTextEditor from "./RichTextEditor";
 
 export default function CreateUpdate({ postToEdit = null, onFinish = () => {} }) {
   const [title, setTitle] = useState("");
@@ -122,21 +123,16 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
         fullWidth
       />
 
-      <TextField
-        label="Body"
-        multiline
-        minRows={4}
-        maxRows={10}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        fullWidth
-        inputProps={{
-          style: {
-            WebkitUserSelect: "text",
-            userSelect: "text"
-          }
-        }}
-      />
+      <Box>
+        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+          Body
+        </Typography>
+        <RichTextEditor
+          content={content}
+          onChange={setContent}
+          placeholder="Write your update here. You can format text with bold, italic, lists, and more..."
+        />
+      </Box>
 
       <Select
         value={postType}

@@ -10,6 +10,7 @@ export default function Login({ onLogin = () => {} }) {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [resetMessage, setResetMessage] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -21,20 +22,72 @@ export default function Login({ onLogin = () => {} }) {
       onLogin();
     } catch (error) {
       console.error("Login failed:", error);
-      setLoginError(error.message);
+      // Provide user-friendly error messages
+      switch (error.code) {
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+        case 'auth/invalid-email':
+        case 'auth/user-not-found':
+          setLoginError("Invalid email or password. Please try again.");
+          break;
+        case 'auth/user-disabled':
+          setLoginError("This account has been disabled. Please contact support.");
+          break;
+        case 'auth/too-many-requests':
+          setLoginError("Too many failed attempts. Please try again later.");
+          break;
+        case 'auth/network-request-failed':
+          setLoginError("Network error. Please check your connection.");
+          break;
+        default:
+          setLoginError("Unable to sign in. Please try again.");
+      }
     }
   };
 
   const handlePasswordReset = async () => {
     if (!email) {
-      setResetMessage("Please enter your email first.");
+      setResetMessage("Please enter your email address to reset your password.");
       return;
     }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setResetMessage("Please enter a valid email address.");
+      return;
+    }
+    
+    setIsResetting(true);
+    
     try {
-      await sendPasswordResetEmail(auth, email);
-      setResetMessage("Password reset email sent.");
+      await sendPasswordResetEmail(auth, email, {
+        url: window.location.origin + '/login',
+        handleCodeInApp: false
+      });
+      setResetMessage("Password reset email sent! Please check your inbox and spam folder.");
+      setLoginError(""); // Clear any existing login errors
     } catch (error) {
-      setResetMessage(error.message);
+      console.error("Password reset error:", error);
+      // Provide user-friendly error messages
+      switch (error.code) {
+        case 'auth/invalid-email':
+          setResetMessage("Invalid email address format.");
+          break;
+        case 'auth/user-not-found':
+          setResetMessage("No account found with this email address.");
+          break;
+        case 'auth/too-many-requests':
+          setResetMessage("Too many attempts. Please try again later.");
+          break;
+        case 'auth/network-request-failed':
+          setResetMessage("Network error. Please check your connection and try again.");
+          break;
+        default:
+          setResetMessage("Failed to send reset email. Please try again.");
+      }
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -88,13 +141,16 @@ export default function Login({ onLogin = () => {} }) {
               type="button"
               className="button-link"
               onClick={handlePasswordReset}
+              disabled={isResetting}
               style={{
-                color: theme.palette.primary.main,
+                color: isResetting ? theme.palette.text.disabled : theme.palette.primary.main,
                 textDecoration: "underline",
-                fontWeight: 500
+                fontWeight: 500,
+                cursor: isResetting ? "not-allowed" : "pointer",
+                opacity: isResetting ? 0.6 : 1
               }}
             >
-              Forgot password?
+              {isResetting ? "Sending..." : "Forgot password?"}
             </button>
           </p>
           <button type="submit" className="button-primary" style={{ width: "100%" }}>
@@ -136,15 +192,33 @@ export default function Login({ onLogin = () => {} }) {
           <div style={{
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
-            padding: "1.5rem 2rem",
+            padding: "2rem",
             borderRadius: "12px",
             boxShadow: "0 6px 20px rgba(0,0,0,0.2)",
-            maxWidth: "360px",
+            maxWidth: "400px",
+            width: "90%",
             textAlign: "center"
           }}>
-            <p style={{ fontSize: "1rem", marginBottom: "1rem" }}>{resetMessage}</p>
-            <button className="button-primary" onClick={() => setResetMessage("")}>
-              OK
+            <div style={{ 
+              fontSize: "2rem", 
+              marginBottom: "1rem",
+              color: resetMessage.includes("sent") ? "#4caf50" : "#ff9800"
+            }}>
+              {resetMessage.includes("sent") ? "✓" : "ℹ"}
+            </div>
+            <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1.25rem", fontWeight: 600 }}>
+              {resetMessage.includes("sent") ? "Email Sent!" : "Action Required"}
+            </h3>
+            <p style={{ fontSize: "1rem", marginBottom: "1.5rem", lineHeight: "1.5" }}>{resetMessage}</p>
+            <button 
+              className="button-primary" 
+              onClick={() => setResetMessage("")}
+              style={{
+                backgroundColor: resetMessage.includes("sent") ? "#4caf50" : theme.palette.primary.main,
+                minWidth: "100px"
+              }}
+            >
+              {resetMessage.includes("sent") ? "Got it" : "OK"}
             </button>
           </div>
         </div>

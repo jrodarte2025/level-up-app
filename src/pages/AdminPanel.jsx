@@ -58,6 +58,7 @@ import { useTheme } from "@mui/material/styles";
 import { resizeImage } from "../utils/resizeImage";
 import CropModal from "../components/CropModal";
 import CreateUpdate from "../components/CreateUpdate";
+import RichTextEditor from "../components/RichTextEditor";
 import { db, auth } from "../firebase";
 import { collection, addDoc, Timestamp, getDocs, deleteDoc, doc, updateDoc, query, where, getDoc, setDoc, orderBy, onSnapshot } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -199,6 +200,7 @@ export default function AdminPanel({ tab }) {
     required: true,
   });
   const [headerImageFile, setHeaderImageFile] = useState(null);
+  const [existingHeaderImage, setExistingHeaderImage] = useState(null);
   const [events, setEvents] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
@@ -315,8 +317,13 @@ export default function AdminPanel({ tab }) {
 
 
   const handleDelete = async (eventId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this event? This action cannot be undone.");
+    if (!confirmDelete) return;
+    
     await deleteDoc(doc(db, "events", eventId));
     setEvents(prev => prev.filter(e => e.id !== eventId));
+    setSuccess("Event deleted successfully!");
+    setTimeout(() => setSuccess(""), 3000);
   };
 
 
@@ -360,6 +367,8 @@ export default function AdminPanel({ tab }) {
       required: event.required,
     });
     setEditingId(event.id);
+    setExistingHeaderImage(event.headerImage || null);
+    setHeaderImageFile(null);
     // Scroll to top when editing begins
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -434,7 +443,7 @@ export default function AdminPanel({ tab }) {
           description: form.description,
           groups: form.groups === "both" ? ["students", "coaches"] : [form.groups],
           required: form.required,
-          headerImage: headerImageUrl || events.find(e => e.id === editingId)?.headerImage || "",
+          headerImage: headerImageUrl || existingHeaderImage || "",
         });
       } else {
         // Add new event, update local events list, show success message
@@ -473,6 +482,7 @@ export default function AdminPanel({ tab }) {
       required: true,
     });
     setHeaderImageFile(null);
+    setExistingHeaderImage(null);
     setEditingId(null);
     if (editingId) {
       setSuccess("Event updated!");
@@ -562,6 +572,8 @@ export default function AdminPanel({ tab }) {
                   type="button"
                   onClick={() => {
                     setEditingId(null);
+                    setExistingHeaderImage(null);
+                    setHeaderImageFile(null);
                     setForm({
                       name: "",
                       date: "",
@@ -688,26 +700,12 @@ export default function AdminPanel({ tab }) {
                   textTransform: "uppercase",
                   letterSpacing: "0.04em"
                 }}>
-                  Description (supports Markdown)
+                  Description
                 </label>
-                <textarea
-                  name="description"
-                  placeholder="Enter details about the event. Markdown supported for bold, links, lists, etc."
-                  value={form.description}
-                  onChange={handleChange}
-                  rows={4}
-                  required
-                  style={{
-                    padding: "0.65rem",
-                    fontSize: "1rem",
-                    fontWeight: 400,
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-                    borderRadius: "6px",
-                    border: `1px solid ${theme.palette.divider}`,
-                    color: theme.palette.text.primary,
-                    backgroundColor: theme.palette.background.default,
-                    lineHeight: "1.5",
-                  }}
+                <RichTextEditor
+                  content={form.description}
+                  onChange={(value) => setForm(prev => ({ ...prev, description: value }))}
+                  placeholder="Enter details about the event. You can format text with bold, italic, lists, and more..."
                 />
                 <select
                   name="groups"
@@ -743,6 +741,46 @@ export default function AdminPanel({ tab }) {
                   }}>
                     Header Image (1200 × 675px recommended)
                   </label>
+                  {(existingHeaderImage || headerImageFile) && (
+                    <div style={{
+                      marginTop: "0.5rem",
+                      marginBottom: "0.5rem",
+                      position: "relative",
+                      display: "inline-block"
+                    }}>
+                      <img
+                        src={headerImageFile ? URL.createObjectURL(headerImageFile) : existingHeaderImage}
+                        alt="Header preview"
+                        style={{
+                          maxWidth: "300px",
+                          maxHeight: "169px",
+                          borderRadius: "6px",
+                          border: `1px solid ${theme.palette.divider}`
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setHeaderImageFile(null);
+                          setExistingHeaderImage(null);
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: "0.5rem",
+                          right: "0.5rem",
+                          backgroundColor: "rgba(0,0,0,0.7)",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          padding: "0.25rem 0.5rem",
+                          cursor: "pointer",
+                          fontSize: "0.75rem"
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
@@ -753,7 +791,7 @@ export default function AdminPanel({ tab }) {
                       reader.onload = () => setCropImageSrc(reader.result);
                       reader.readAsDataURL(file);
                     }}
-                    style={{ marginTop: "0.5rem" }}
+                    style={{ marginTop: "0.5rem", display: "block" }}
                   />
                 </div>
                 <button type="submit" className="button-primary">

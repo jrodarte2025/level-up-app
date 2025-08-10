@@ -33,6 +33,7 @@ import MenuBookIcon    from '@mui/icons-material/MenuBook';
 import ChatBubbleIcon  from '@mui/icons-material/ChatBubble';
 import Resources from "./Resources";
 import Updates from "./Updates";
+import { TypingProvider } from "../contexts/TypingContext";
 import "../App.css";
 
 export default function App() {
@@ -296,7 +297,7 @@ export default function App() {
 
   // Main app with universal header and bottom navigation (now with React Router)
   return (
-    <>
+    <TypingProvider>
       {showProfile && (
         <ProfileModal
           user={user}
@@ -483,6 +484,6 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/test-update" element={<CreateUpdate />} />
       </Routes>
-    </>
+    </TypingProvider>
   );
 }

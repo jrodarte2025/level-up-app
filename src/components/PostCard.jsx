@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
+import DOMPurify from "dompurify";
 import { Link } from "react-router-dom";
 import { MessageCircle, Heart, Link as LinkIcon } from "lucide-react";
 import { Paper, Typography, Box, Divider, Chip } from "@mui/material";
@@ -94,49 +95,125 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
       )}
       {post.body && (
         <Box sx={{ mt: post.title ? 1.25 : 0 }}>
-          <ReactMarkdown
-            rehypePlugins={[rehypeSanitize]}
-            components={{
-              h1: () => null,
-              h2: () => null,
-              p: ({ node, ...props }) => (
-                <Typography
-                  component="p"
-                  sx={{
-                    fontSize: {
-                      xs: "0.9rem",
-                      sm: "1rem",
-                      md: "1rem"
-                    },
-                    lineHeight: 1.65,
-                    mb: 1.5,
-                    color: (theme) => theme.palette.text.primary,
-                    wordBreak: "break-word"
-                  }}
-                  {...props}
-                />
-              ),
-              a: ({ node, ...props }) => (
-                <a
-                  {...props}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: "#1e40af",
-                    textDecoration: "underline"
-                  }}
-                />
-              ),
-              strong: ({ node, ...props }) => (
-                <strong style={{ fontWeight: 600 }}>{props.children}</strong>
-              ),
-              em: ({ node, ...props }) => (
-                <em style={{ fontStyle: "italic" }}>{props.children}</em>
-              )
-            }}
-          >
-            {post.body}
-          </ReactMarkdown>
+          {/* Check if content is HTML (new posts) or Markdown (legacy posts) */}
+          {post.body.includes('<') && post.body.includes('>') ? (
+            <Box
+              dangerouslySetInnerHTML={{ 
+                __html: DOMPurify.sanitize(post.body, {
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'h1', 'h2', 'h3'],
+                  ALLOWED_ATTR: ['href', 'target', 'rel']
+                })
+              }}
+              sx={{
+                '& p': {
+                  fontSize: { xs: "0.9rem", sm: "1rem" },
+                  lineHeight: 1.65,
+                  marginBottom: '1em',
+                  color: (theme) => theme.palette.text.primary,
+                  wordBreak: 'break-word',
+                },
+                '& strong, & b': {
+                  fontWeight: 600,
+                },
+                '& em, & i': {
+                  fontStyle: 'italic',
+                },
+                '& a': {
+                  color: '#1e40af',
+                  textDecoration: 'underline',
+                  '&:hover': {
+                    color: '#1e3a8a',
+                  },
+                },
+                '& ul, & ol': {
+                  paddingLeft: '1.5rem',
+                  margin: '0.5em 0',
+                },
+                '& li': {
+                  marginBottom: '0.25em',
+                },
+                '& blockquote': {
+                  borderLeft: '3px solid #e5e7eb',
+                  marginLeft: 0,
+                  marginRight: 0,
+                  paddingLeft: '1rem',
+                  color: '#6b7280',
+                  fontStyle: 'italic',
+                },
+                '& pre': {
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '0.375rem',
+                  color: '#111827',
+                  fontFamily: 'monospace',
+                  fontSize: '0.875em',
+                  padding: '0.75rem 1rem',
+                  overflowX: 'auto',
+                },
+                '& code': {
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '0.25rem',
+                  color: '#111827',
+                  fontFamily: 'monospace',
+                  fontSize: '0.875em',
+                  padding: '0.125rem 0.25rem',
+                },
+                '& h1, & h2, & h3': {
+                  fontWeight: 600,
+                  lineHeight: 1.3,
+                  marginTop: '1em',
+                  marginBottom: '0.5em',
+                },
+                '& h1': { fontSize: '1.5rem' },
+                '& h2': { fontSize: '1.25rem' },
+                '& h3': { fontSize: '1.125rem' },
+              }}
+            />
+          ) : (
+            /* Fallback for legacy Markdown posts */
+            <ReactMarkdown
+              rehypePlugins={[rehypeSanitize]}
+              components={{
+                h1: () => null,
+                h2: () => null,
+                p: ({ node, ...props }) => (
+                  <Typography
+                    component="p"
+                    sx={{
+                      fontSize: {
+                        xs: "0.9rem",
+                        sm: "1rem",
+                        md: "1rem"
+                      },
+                      lineHeight: 1.65,
+                      mb: 1.5,
+                      color: (theme) => theme.palette.text.primary,
+                      wordBreak: "break-word"
+                    }}
+                    {...props}
+                  />
+                ),
+                a: ({ node, ...props }) => (
+                  <a
+                    {...props}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "#1e40af",
+                      textDecoration: "underline"
+                    }}
+                  />
+                ),
+                strong: ({ node, ...props }) => (
+                  <strong style={{ fontWeight: 600 }}>{props.children}</strong>
+                ),
+                em: ({ node, ...props }) => (
+                  <em style={{ fontStyle: "italic" }}>{props.children}</em>
+                )
+              }}
+            >
+              {post.body}
+            </ReactMarkdown>
+          )}
         </Box>
       )}
       {post.link && (
@@ -389,7 +466,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
       )}
       
       <Divider sx={{ mt: post.recentComments && post.recentComments.length > 0 ? 1.25 : 2.5, mb: 1.25 }} />
-      <Box display="flex" gap={2} alignItems="center" sx={{ mt: 2, opacity: 0.7 }}>
+      <Box display="flex" gap={2} alignItems="center" sx={{ mt: 2 }}>
         {/* Emoji Reactions */}
         <ReactionBar
           reactions={processedReactions}
@@ -411,7 +488,12 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
             background: "none",
             color: "text.secondary",
             cursor: "pointer",
-            "&:hover": { color: "primary.main" },
+            opacity: 0.7,
+            transition: "opacity 0.2s",
+            "&:hover": { 
+              color: "primary.main",
+              opacity: 1
+            },
           }}
         >
           <MessageCircle size={18} />

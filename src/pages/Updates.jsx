@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
   collection, query, where, orderBy, onSnapshot, addDoc,
-  serverTimestamp, getDocs, deleteDoc, doc, getDoc, setDoc
+  serverTimestamp, getDocs, deleteDoc, doc, getDoc, setDoc, limit
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import PostCard from "../components/PostCard";
@@ -12,6 +12,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "fire
 export default function Updates() {
   const [posts, setPosts] = useState([]);
   const [commentsByPost, setCommentsByPost] = useState({});
+  const [commentCountsByPost, setCommentCountsByPost] = useState({});
   const [newComment, setNewComment] = useState({});
   const [reactionsByPost, setReactionsByPost] = useState({});
   const user = auth.currentUser;
@@ -58,14 +59,29 @@ export default function Updates() {
       snapshot.docs.forEach((docSnap) => {
         const postId = docSnap.id;
 
-        // Comments listener
-        const commentsUnsub = onSnapshot(collection(db, "posts", postId, "comments"), (snap) => {
+        // Recent comments listener - get 3 most recent comments
+        const recentCommentsQuery = query(
+          collection(db, "posts", postId, "comments"), 
+          orderBy("timestamp", "desc"),
+          limit(3)
+        );
+        const commentsUnsub = onSnapshot(recentCommentsQuery, (snap) => {
+          const comments = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setCommentsByPost(prev => ({
             ...prev,
-            [postId]: snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            [postId]: comments
           }));
         });
         postListenersRef.current[`${postId}-comments`] = commentsUnsub;
+
+        // Total comment count listener
+        const allCommentsUnsub = onSnapshot(collection(db, "posts", postId, "comments"), (snap) => {
+          setCommentCountsByPost(prev => ({
+            ...prev,
+            [postId]: snap.size
+          }));
+        });
+        postListenersRef.current[`${postId}-comment-count`] = allCommentsUnsub;
 
         // Reactions listener
         const reactionsUnsub = onSnapshot(collection(db, "posts", postId, "reactions"), (snap) => {
@@ -111,6 +127,26 @@ export default function Updates() {
     return !!userReactions["❤️"];
   };
 
+  // Enhanced emoji reaction handler for posts
+  const handlePostEmojiReaction = async (postId, emojiKey, emoji) => {
+    const userId = user?.uid || user?.email;
+    const reactionRef = doc(db, "posts", postId, "reactions", userId);
+    const existing = await getDoc(reactionRef);
+
+    if (existing.exists() && existing.data().emoji === emoji) {
+      // Remove reaction if same emoji
+      await deleteDoc(reactionRef);
+    } else {
+      // Add or update reaction
+      await setDoc(reactionRef, {
+        emoji: emoji,
+        emojiKey: emojiKey,
+        userId,
+        timestamp: serverTimestamp()
+      });
+    }
+  };
+
   return (
     <Container
       maxWidth="sm"
@@ -136,11 +172,14 @@ export default function Updates() {
             ...post,
             roles: Array.isArray(post.roles) ? post.roles : [],
             reactionCount: Object.values(reactionsByPost[post.id] || {}).reduce((a, b) => a + b, 0),
+            reactions: reactionsByPost[post.id] || {},
             isLiked: isLikedByUser(post.id),
-            commentCount: commentsByPost[post.id]?.length || 0,
+            commentCount: commentCountsByPost[post.id] || 0,
+            recentComments: commentsByPost[post.id]?.slice(0, 3) || [],
           }}
           onCommentClick={handleCommentClick}
           onLikeClick={handleLikeClick}
+          onEmojiReaction={handlePostEmojiReaction}
         />
       ))}
     </Container>

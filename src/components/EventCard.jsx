@@ -1,5 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import DOMPurify from "dompurify";
 import AvatarList from "./AvatarList";
 import { useTheme } from "@mui/material/styles";
 
@@ -187,26 +188,39 @@ export default function EventCard({
           <p style={{ marginBottom: "0.5rem", fontWeight: 500 }}>
             <strong>Details:</strong>
           </p>
-          <ReactMarkdown
-            components={{
-              p: ({ node, ...props }) => (
-                <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: 1.6 }} {...props} />
-              ),
-              a: ({ node, ...props }) => (
-                <a
-                  {...props}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: "#1e40af",
-                    textDecoration: "underline"
-                  }}
-                />
-              )
-            }}
-          >
-            {description}
-          </ReactMarkdown>
+          {/* Check if content is HTML (new events) or Markdown (legacy events) */}
+          {description && description.includes('<') && description.includes('>') ? (
+            <div
+              dangerouslySetInnerHTML={{ 
+                __html: DOMPurify.sanitize(description, {
+                  ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'h1', 'h2', 'h3'],
+                  ALLOWED_ATTR: ['href', 'target', 'rel']
+                })
+              }}
+              style={{ fontSize: "0.95rem", lineHeight: 1.6 }}
+            />
+          ) : (
+            <ReactMarkdown
+              components={{
+                p: ({ node, ...props }) => (
+                  <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: 1.6 }} {...props} />
+                ),
+                a: ({ node, ...props }) => (
+                  <a
+                    {...props}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "#1e40af",
+                      textDecoration: "underline"
+                    }}
+                  />
+                )
+              }}
+            >
+              {description}
+            </ReactMarkdown>
+          )}
           {attendingUsers.length > 0 && (
             <>
               <p style={{ marginTop: "1.5rem", marginBottom: "0.5rem", fontWeight: 500 }}>

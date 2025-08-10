@@ -39,11 +39,9 @@ const ReactionBar = ({
     }))
     .sort((a, b) => b.count - a.count); // Sort by count, most popular first
 
-  if (reactionArray.length === 0 && !isHovered) {
+  if (reactionArray.length === 0) {
     return (
       <Box
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         sx={{
           minHeight: 24,
           display: 'flex',
@@ -51,29 +49,30 @@ const ReactionBar = ({
           mt: 0
         }}
       >
-        <Fade in={isHovered} timeout={200}>
-          <Chip
-            ref={addButtonRef}
-            icon={<Plus size={12} />}
-            label="React"
-            size="small"
-            variant="outlined"
-            onClick={onAddReaction}
-            disabled={disabled}
-            sx={{
-              height: 24,
-              fontSize: '0.7rem',
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              borderColor: theme.palette.divider,
-              color: theme.palette.text.secondary,
-              '&:hover': {
-                borderColor: theme.palette.primary.main,
-                color: theme.palette.primary.main,
-                backgroundColor: `${theme.palette.primary.main}08`
-              }
-            }}
-          />
-        </Fade>
+        <Chip
+          ref={addButtonRef}
+          icon={<Plus size={12} />}
+          label="React"
+          size="small"
+          variant="outlined"
+          onClick={onAddReaction}
+          disabled={disabled}
+          sx={{
+            height: 24,
+            fontSize: '0.7rem',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            borderColor: theme.palette.divider,
+            color: theme.palette.text.secondary,
+            opacity: 0.7,
+            transition: 'opacity 0.2s',
+            '&:hover': {
+              opacity: 1,
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
+              backgroundColor: `${theme.palette.primary.main}08`
+            }
+          }}
+        />
       </Box>
     );
   }
