@@ -62,6 +62,7 @@ import RichTextEditor from "../components/RichTextEditor";
 import { db, auth } from "../firebase";
 import { collection, addDoc, Timestamp, getDocs, deleteDoc, doc, updateDoc, query, where, getDoc, setDoc, orderBy, onSnapshot } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { filterUpcomingEvents, sortEventsByDateTime } from "../utils/eventUtils";
 import "../App.css";
 
 import { loadGoogleMapsScript } from "../utils/loadGoogleMapsScript";
@@ -802,9 +803,7 @@ export default function AdminPanel({ tab }) {
           <hr style={{ margin: "2rem 0", border: "none", borderTop: "1px solid #e5e7eb" }} />
           <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "1rem" }}>📅 Upcoming Events</h3>
           <ul style={{ listStyle: "none", padding: 0 }}>
-            {events
-              .filter(e => e.date?.seconds * 1000 >= Date.now())
-              .sort((a, b) => (a.date?.seconds || 0) - (b.date?.seconds || 0))
+            {sortEventsByDateTime(filterUpcomingEvents(events))
               .map((event) => (
                 <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
                   <strong>{event.name}</strong>
@@ -853,7 +852,13 @@ export default function AdminPanel({ tab }) {
           <h3 style={{ fontSize: "1.125rem", fontWeight: 600, margin: "2rem 0 1rem" }}>📜 Past Events</h3>
           <ul style={{ listStyle: "none", padding: 0 }}>
             {events
-              .filter(e => e.date?.seconds * 1000 < Date.now())
+              .filter(e => {
+                // Show events that occurred yesterday or earlier
+                const eventDate = new Date(e.date?.seconds * 1000);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return eventDate < today;
+              })
               .sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0))
               .map((event) => (
                 <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#f9fafb" }}>

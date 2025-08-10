@@ -189,38 +189,68 @@ export default function EventCard({
             <strong>Details:</strong>
           </p>
           {/* Check if content is HTML (new events) or Markdown (legacy events) */}
-          {description && description.includes('<') && description.includes('>') ? (
-            <div
-              dangerouslySetInnerHTML={{ 
-                __html: DOMPurify.sanitize(description, {
+          {(() => {
+            // More robust HTML detection
+            const isHTML = description && 
+              (description.includes('<p>') || description.includes('<strong>') || 
+               description.includes('<em>') || description.includes('<ul>') || 
+               description.includes('<li>') || description.includes('<br'));
+            
+            if (isHTML) {
+              try {
+                const sanitizedHTML = DOMPurify.sanitize(description, {
                   ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'h1', 'h2', 'h3'],
                   ALLOWED_ATTR: ['href', 'target', 'rel']
-                })
-              }}
-              style={{ fontSize: "0.95rem", lineHeight: 1.6 }}
-            />
-          ) : (
-            <ReactMarkdown
-              components={{
-                p: ({ node, ...props }) => (
-                  <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: 1.6 }} {...props} />
-                ),
-                a: ({ node, ...props }) => (
-                  <a
-                    {...props}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      color: "#1e40af",
-                      textDecoration: "underline"
+                });
+                return (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+                    style={{ 
+                      fontSize: "0.95rem", 
+                      lineHeight: 1.6,
+                      '& p': { margin: '0 0 0.5rem 0' },
+                      '& p:last-child': { margin: 0 },
+                      '& ul, & ol': { margin: '0.5rem 0', paddingLeft: '1.5rem' },
+                      '& li': { margin: '0.25rem 0' }
                     }}
                   />
-                )
-              }}
-            >
-              {description}
-            </ReactMarkdown>
-          )}
+                );
+              } catch (error) {
+                console.warn('DOMPurify failed, falling back to text:', error);
+                // Fallback: strip HTML tags and show as plain text
+                const plainText = description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+                return (
+                  <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: 1.6 }}>
+                    {plainText}
+                  </p>
+                );
+              }
+            } else {
+              // Legacy Markdown content
+              return (
+                <ReactMarkdown
+                  components={{
+                    p: ({ node, ...props }) => (
+                      <p style={{ margin: 0, fontSize: "0.95rem", lineHeight: 1.6 }} {...props} />
+                    ),
+                    a: ({ node, ...props }) => (
+                      <a
+                        {...props}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "#1e40af",
+                          textDecoration: "underline"
+                        }}
+                      />
+                    )
+                  }}
+                >
+                  {description}
+                </ReactMarkdown>
+              );
+            }
+          })()}
           {attendingUsers.length > 0 && (
             <>
               <p style={{ marginTop: "1.5rem", marginBottom: "0.5rem", fontWeight: 500 }}>

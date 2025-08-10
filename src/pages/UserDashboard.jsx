@@ -6,6 +6,7 @@ import { getDocs, doc, setDoc, deleteDoc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { signOut } from "firebase/auth";
+import { processUpcomingEvents } from "../utils/eventUtils";
 
 export default function UserDashboard({ setShowAdminPanel }) {
   const theme = useTheme();
@@ -250,7 +251,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
     setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const sortedEvents = [...events].sort((a, b) => a.date?.seconds - b.date?.seconds);
+  const sortedEvents = processUpcomingEvents([...events]);
 
   const filteredEvents = sortedEvents.filter((event) => {
     const isCoach = event.groups?.includes("coaches");
