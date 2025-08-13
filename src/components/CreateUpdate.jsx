@@ -36,6 +36,19 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
       setForStudents(postToEdit.visibleTo?.includes("student") || false);
       setForCoaches(postToEdit.visibleTo?.includes("coach") || false);
       setForBoard(postToEdit.visibleTo?.includes("board") || false);
+      
+      // Ensure the form is visible when editing
+      setTimeout(() => {
+        const formElement = document.getElementById('update-form');
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Add a pulse animation to draw attention
+          formElement.style.animation = 'pulse 0.5s ease-in-out 2';
+          setTimeout(() => {
+            formElement.style.animation = '';
+          }, 1000);
+        }
+      }, 100);
     }
   }, [postToEdit]);
 
@@ -94,26 +107,62 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
 
   return (
     <Box
+      id="update-form"
       sx={{
         backgroundColor: { xs: "transparent", sm: "#fff" },
         borderRadius: { xs: 0, sm: "12px" },
         padding: { xs: "1rem", sm: "1.5rem" },
-        boxShadow: { xs: "none", sm: "0 4px 8px rgba(0,0,0,0.05)" },
+        boxShadow: { xs: "none", sm: postToEdit ? "0 0 12px rgba(251,191,36,0.3)" : "0 4px 8px rgba(0,0,0,0.05)" },
+        border: postToEdit ? "2px solid #fbbf24" : "none",
         maxWidth: { xs: "100%", sm: 600 },
         mx: "auto",
         display: "flex",
         flexDirection: "column",
-        gap: 2
+        gap: 2,
+        scrollMarginTop: "1rem",
+        transition: "all 0.3s ease"
       }}
     >
-      <Typography variant="h6" fontWeight={600}>
-        Create Update
+      {/* Edit mode banner */}
+      {postToEdit && (
+        <Box sx={{
+          backgroundColor: "#fef3c7",
+          color: "#92400e",
+          padding: "0.75rem 1rem",
+          borderRadius: "6px",
+          fontWeight: 500,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1
+        }}>
+          <span>You're editing an existing update.</span>
+          <Button
+            onClick={onFinish}
+            sx={{
+              color: "#92400e",
+              textTransform: "none",
+              fontWeight: 500,
+              "&:hover": {
+                backgroundColor: "rgba(146, 64, 14, 0.1)"
+              }
+            }}
+          >
+            Cancel Edit
+          </Button>
+        </Box>
+      )}
+      
+      <Typography variant="h6" fontWeight={600} sx={{ color: postToEdit ? "#92400e" : "inherit" }}>
+        {postToEdit ? "Edit Update" : "Create Update"}
       </Typography>
       <Typography
         variant="body2"
         sx={{ color: "#6b7280", fontSize: "0.875rem", mb: 1 }}
       >
-        Share announcements, resources, or wins with selected groups.
+        {postToEdit 
+          ? "Modify your update below. Changes will be saved immediately."
+          : "Share announcements, resources, or wins with selected groups."}
       </Typography>
 
       <TextField
@@ -254,19 +303,23 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
       <Button
         variant="contained"
         sx={{
-          backgroundColor: "#1e2a78",
+          backgroundColor: postToEdit ? "#92400e" : "#1e2a78",
           textTransform: "none",
           fontWeight: 500,
           fontSize: "1rem",
           borderRadius: "8px",
           "&:hover": {
-            backgroundColor: "#17205f"
+            backgroundColor: postToEdit ? "#78350f" : "#17205f"
           }
         }}
         onClick={handleSubmit}
         disabled={!title.trim() || !content.trim() || submitting}
       >
-        {submitting ? "Posting..." : success ? "Posted!" : "Post Update"}
+        {submitting 
+          ? (postToEdit ? "Updating..." : "Posting...") 
+          : success 
+            ? (postToEdit ? "Updated!" : "Posted!") 
+            : (postToEdit ? "Save Changes" : "Post Update")}
       </Button>
     </Box>
   );

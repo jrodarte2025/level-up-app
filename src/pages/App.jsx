@@ -98,9 +98,17 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState(null);
 
   const showToast = (msg, duration = 3000) => {
+    console.log("🔔 Showing toast:", msg);
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), duration);
   };
+  
+  // Debug: Log when toastMessage changes
+  useEffect(() => {
+    if (toastMessage !== null) {
+      console.log("📢 Toast message changed to:", toastMessage);
+    }
+  }, [toastMessage]);
 
   // Listen for auth state changes
   useEffect(() => {
@@ -168,7 +176,12 @@ export default function App() {
         setMajor(data.major || "");
         setGraduationYear(data.graduationYear || "");
         setLinkedinUrl(data.linkedinUrl || "");
+        // Mark profile as loaded after setting all fields
+        setProfileLoaded(true);
         // do not return here; continue to storage fallback only if no Firestore image
+      } else {
+        // Even if no profile exists, mark as loaded to allow the reminder to show
+        setProfileLoaded(true);
       }
       try {
         const storage = getStorage();
@@ -225,15 +238,19 @@ export default function App() {
   const [reminderDismissed, setReminderDismissed] = useState(() => {
     return sessionStorage.getItem("dismissProfileReminder") === "true";
   });
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
+    // Only check for missing fields after profile has been loaded
+    if (!profileLoaded) return;
+    
     const isStudent = userRole === "student";
     const isCoachLike = ["coach", "board", "employee"].includes(userRole);
     const missingFields = !firstName || !lastName ||
       (userRole === "student" && (!major || !graduationYear)) ||
       (isCoachLike && (!company || !jobTitle));
     setShowProfileReminder(missingFields);
-  }, [firstName, lastName, major, graduationYear, company, jobTitle, userRole]);
+  }, [firstName, lastName, major, graduationYear, company, jobTitle, userRole, profileLoaded]);
 
   // Redirect authenticated users away from /login or /signup
   if (!authLoaded) {

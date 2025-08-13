@@ -1496,9 +1496,23 @@ export default function AdminPanel({ tab }) {
                 </div>
                 {expandedPostId === p.id && (
                   <>
-                    <ReactMarkdown style={{ marginTop: "0.75em", marginBottom: "0.5em", color: "#1e293b" }}>
-                      {p.body}
-                    </ReactMarkdown>
+                    {/* Check if content is HTML (new posts) or Markdown (legacy posts) */}
+                    {p.body && p.body.includes('<') && p.body.includes('>') ? (
+                      <div 
+                        dangerouslySetInnerHTML={{ __html: p.body }}
+                        style={{ 
+                          marginTop: "0.75em", 
+                          marginBottom: "0.5em", 
+                          color: "#1e293b",
+                          lineHeight: 1.6
+                        }}
+                        className="post-content-html"
+                      />
+                    ) : (
+                      <ReactMarkdown style={{ marginTop: "0.75em", marginBottom: "0.5em", color: "#1e293b" }}>
+                        {p.body}
+                      </ReactMarkdown>
+                    )}
                     {p.link && (
                       <div style={{ wordBreak: "break-word", margin: "0.5rem 0" }}>
                         <a
@@ -1534,6 +1548,16 @@ export default function AdminPanel({ tab }) {
                       <button className="button-primary" onClick={(e) => {
                         e.stopPropagation();
                         setEditingPostId(p.id);
+                        
+                        // Scroll to top smoothly
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        
+                        // Also scroll the container if it exists
+                        const adminContainer = document.querySelector('[style*="overflowY"]');
+                        if (adminContainer) {
+                          adminContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                        
                         setTimeout(() => {
                           document.querySelector('[name="title"]').value = p.title;
                           document.querySelector('[name="body"]').value = p.body;
