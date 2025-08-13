@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Chip, Switch } from "@mui/material";
 import CropModal from "./CropModal";
 import { resizeImage } from "../utils/resizeImage";
+import { validateImageFile, getOptimalImageSize } from "../utils/imageValidation";
 import { useTheme } from "@mui/material/styles";
 import { getDocs, updateDoc, collection, query, where } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
@@ -150,8 +151,21 @@ export default function ProfileModal({
             onChange={(e) => {
               const file = e.target.files[0];
               if (!file) return;
+              
+              // Validate the image file
+              const validation = validateImageFile(file);
+              if (!validation.isValid) {
+                alert(validation.errors.join('\n'));
+                e.target.value = ''; // Reset input
+                return;
+              }
+              
               const reader = new FileReader();
               reader.onload = () => setCropImageSrc(reader.result);
+              reader.onerror = () => {
+                alert("Failed to read the image file. Please try again.");
+                e.target.value = ''; // Reset input
+              };
               reader.readAsDataURL(file);
             }}
             style={{ display: "none" }}
@@ -367,28 +381,36 @@ export default function ProfileModal({
           imageSrc={cropImageSrc}
           onCancel={() => setCropImageSrc(null)}
           onCropComplete={async (croppedFile) => {
-            const resizedBlob = await resizeImage(croppedFile, 800, 0.8);
-            const resizedFile = new File([resizedBlob], croppedFile.name, { type: "image/jpeg" });
-            await onProfileImageChange({ target: { files: [resizedFile] } });
-            // Update all posts with new headshotUrl
-            if (user && user.uid) {
-              try {
-                const postsRef = collection(db, "posts");
-                const q = query(postsRef, where("userId", "==", user.uid));
-                const snapshot = await getDocs(q);
+            try {
+              const optimal = getOptimalImageSize();
+              const resizedBlob = await resizeImage(croppedFile, optimal.maxWidth, optimal.quality);
+              const resizedFile = new File([resizedBlob], "profile.jpg", { type: "image/jpeg" });
+              await onProfileImageChange({ target: { files: [resizedFile] } });
+              
+              // Update all posts with new headshotUrl
+              if (user && user.uid) {
+                try {
+                  const postsRef = collection(db, "posts");
+                  const q = query(postsRef, where("userId", "==", user.uid));
+                  const snapshot = await getDocs(q);
 
-                const storage = getStorage();
-                const profileRef = ref(storage, `users/${user.uid}/profile.jpg`);
-                const url = await getDownloadURL(profileRef);
+                  const storage = getStorage();
+                  const profileRef = ref(storage, `users/${user.uid}/profile.jpg`);
+                  const url = await getDownloadURL(profileRef);
 
-                snapshot.forEach((doc) => {
-                  updateDoc(doc.ref, { headshotUrl: url });
-                });
-              } catch (e) {
-                // Optionally handle error
+                  snapshot.forEach((doc) => {
+                    updateDoc(doc.ref, { headshotUrl: url });
+                  });
+                } catch (e) {
+                  // Optionally handle error
+                }
               }
+              setCropImageSrc(null);
+            } catch (error) {
+              console.error("Error processing cropped image:", error);
+              alert("Failed to process the image. Please try again.");
+              setCropImageSrc(null);
             }
-            setCropImageSrc(null);
           }}
         />
       )}

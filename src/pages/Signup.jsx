@@ -7,6 +7,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useTheme } from "@mui/material/styles";
+import { validateImageFile, getOptimalImageSize } from "../utils/imageValidation";
+import { resizeImage } from "../utils/resizeImage";
 
 export default function Signup({ onSignupComplete }) {
   const [step, setStep] = useState(1);
@@ -53,16 +55,28 @@ export default function Signup({ onSignupComplete }) {
 
   const handleHeadshotChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setCropImageSrc(reader.result);
-          setShowCropModal(true);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    
+    // Validate the image file
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      alert(validation.errors.join('\n'));
+      e.target.value = ''; // Reset input
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (reader.result) {
+        setCropImageSrc(reader.result);
+        setShowCropModal(true);
+      }
+    };
+    reader.onerror = () => {
+      alert("Failed to read the image file. Please try again.");
+      e.target.value = ''; // Reset input
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
@@ -537,12 +551,28 @@ export default function Signup({ onSignupComplete }) {
           {showCropModal && cropImageSrc && (
             <CropModal
               imageSrc={cropImageSrc}
-              open={true}
-              onClose={() => setShowCropModal(false)}
-              onCropComplete={async (croppedFile) => {
+              onCancel={() => {
                 setShowCropModal(false);
-                setHeadshotFile(croppedFile);
-                setPreviewUrl(URL.createObjectURL(croppedFile));
+                setCropImageSrc(null);
+              }}
+              onCropComplete={async (croppedFile) => {
+                try {
+                  setShowCropModal(false);
+                  
+                  // Resize the image for optimal performance
+                  const optimal = getOptimalImageSize();
+                  const resizedBlob = await resizeImage(croppedFile, optimal.maxWidth, optimal.quality);
+                  const finalFile = new File([resizedBlob], "profile.jpg", { type: "image/jpeg" });
+                  
+                  setHeadshotFile(finalFile);
+                  setPreviewUrl(URL.createObjectURL(finalFile));
+                  setCropImageSrc(null);
+                } catch (error) {
+                  console.error("Error processing cropped image:", error);
+                  alert("Failed to process the image. Please try again.");
+                  setShowCropModal(false);
+                  setCropImageSrc(null);
+                }
               }}
             />
           )}

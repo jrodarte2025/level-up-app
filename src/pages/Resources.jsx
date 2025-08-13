@@ -8,6 +8,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import SchoolIcon from "@mui/icons-material/School";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PeopleIcon from "@mui/icons-material/People";
+import FeedbackIcon from "@mui/icons-material/Feedback";
 
 export default function Resources() {
   const theme = useTheme();
@@ -170,6 +171,7 @@ export default function Resources() {
               {section.includes("Professional") && <SchoolIcon sx={{ fontSize: 20, color: theme.palette.text.secondary }} />}
               {section.includes("Forms") && <DescriptionIcon sx={{ fontSize: 20, color: theme.palette.text.secondary }} />}
               {section.includes("Networking") && <PeopleIcon sx={{ fontSize: 20, color: theme.palette.text.secondary }} />}
+              {section.includes("Support & Feedback") && <FeedbackIcon sx={{ fontSize: 20, color: theme.palette.text.secondary }} />}
               <Typography
                 variant="subtitle1"
                 fontWeight={600}

@@ -1199,6 +1199,7 @@ export default function AdminPanel({ tab }) {
               <option value="Annual Calendar">Annual Calendar</option>
               <option value="Launch Network">Launch Network</option>
               <option value="Things to Do">Things to Do</option>
+              <option value="Support & Feedback">Support & Feedback</option>
             </select>
             <div>
               <label style={{

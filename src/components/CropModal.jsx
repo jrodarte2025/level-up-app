@@ -13,8 +13,17 @@ export default function CropModal({ imageSrc, onCancel, onCropComplete, aspect =
   }, []);
 
   const handleConfirm = async () => {
-    const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-    onCropComplete(croppedImage);
+    try {
+      if (!croppedAreaPixels) {
+        alert("Please adjust the crop area before confirming.");
+        return;
+      }
+      const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
+      onCropComplete(croppedImage);
+    } catch (error) {
+      console.error("Crop failed:", error);
+      alert(error.message || "Failed to crop image. Please try again.");
+    }
   };
 
   return (
@@ -36,7 +45,7 @@ export default function CropModal({ imageSrc, onCancel, onCropComplete, aspect =
         boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
         textAlign: "center"
       }}>
-        <div style={{ position: "relative", width: "100%", height: 300 }}>
+        <div style={{ position: "relative", width: "100%", height: 300, backgroundColor: "#f0f0f0" }}>
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -45,6 +54,13 @@ export default function CropModal({ imageSrc, onCancel, onCropComplete, aspect =
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={handleCropComplete}
+            cropShape="rect"
+            showGrid={true}
+            style={{
+              containerStyle: {
+                backgroundColor: "#f0f0f0"
+              }
+            }}
           />
         </div>
         <Slider
