@@ -95,6 +95,8 @@ const Comment = ({
     return emojiMap[emoji] || "heart";
   };
 
+  const [imageError, setImageError] = useState(false);
+  
   const timestamp = comment.timestamp?.seconds
     ? new Date(comment.timestamp.seconds * 1000).toLocaleTimeString([], {
         hour: "numeric",
@@ -144,10 +146,11 @@ const Comment = ({
       }
     }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-        {comment.headshotUrl && (
+        {comment.headshotUrl && !imageError ? (
           <img
             src={comment.headshotUrl}
             alt={comment.displayName || "User avatar"}
+            onError={() => setImageError(true)}
             style={{ 
               width: depth > 0 ? 28 : 32, 
               height: depth > 0 ? 28 : 32, 
@@ -156,6 +159,24 @@ const Comment = ({
               border: depth > 0 ? `2px solid ${theme.palette.primary.main}40` : 'none'
             }}
           />
+        ) : (
+          <Box
+            sx={{
+              width: depth > 0 ? 28 : 32,
+              height: depth > 0 ? 28 : 32,
+              borderRadius: "50%",
+              backgroundColor: theme.palette.primary.main || "#1e2a78",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: depth > 0 ? "0.7rem" : "0.75rem",
+              fontWeight: 600,
+              color: "#ffffff",
+              border: depth > 0 ? `2px solid ${theme.palette.primary.main}40` : 'none'
+            }}
+          >
+            {comment.displayName?.charAt(0)?.toUpperCase() || "?"}
+          </Box>
         )}
         <Box>
           <Typography

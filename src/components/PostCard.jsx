@@ -10,6 +10,7 @@ import EmojiPicker from "./EmojiPicker";
 
 const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditClick }) => {
   const [imageError, setImageError] = React.useState(false);
+  const [commentImageErrors, setCommentImageErrors] = React.useState({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const addReactionButtonRef = useRef(null);
 
@@ -359,10 +360,13 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                 mb: 0.5,
                 flexWrap: { xs: 'wrap', sm: 'nowrap' }
               }}>
-                {comment.headshotUrl ? (
+                {comment.headshotUrl && !commentImageErrors[comment.id] ? (
                   <img
                     src={comment.headshotUrl}
                     alt={comment.displayName}
+                    onError={() => {
+                      setCommentImageErrors(prev => ({ ...prev, [comment.id]: true }));
+                    }}
                     style={{
                       width: 20,
                       height: 20,
@@ -376,7 +380,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                       width: 20,
                       height: 20,
                       borderRadius: '50%',
-                      backgroundColor: (theme) => theme.palette.primary.main,
+                      backgroundColor: '#1e2a78',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -386,7 +390,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                       flexShrink: 0
                     }}
                   >
-                    {comment.displayName?.charAt(0) || '?'}
+                    {comment.displayName?.charAt(0)?.toUpperCase() || '?'}
                   </Box>
                 )}
                 <Typography
