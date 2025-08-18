@@ -1,8 +1,14 @@
 [
   {
-    "origin": ["http://localhost:5174"],
-    "method": ["GET"],
+    "origin": [
+      "http://localhost:5174",
+      "http://localhost:5173",
+      "https://level-up-app-c9f47.firebaseapp.com",
+      "https://level-up-app-c9f47.web.app",
+      "https://app.levelupcincinnati.org"
+    ],
+    "method": ["GET", "POST", "OPTIONS"],
     "maxAgeSeconds": 3600,
-    "responseHeader": ["Content-Type"]
+    "responseHeader": ["Content-Type", "Authorization"]
   }
 ]

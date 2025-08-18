@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Typography, Box } from "@mui/material";
 import ApprovalsPanel from "../components/ApprovalsPanel";
 import MatchMakingPanel from "../components/MatchMakingPanel";
+import PasswordResetPanel from "../components/PasswordResetPanel";
 import CardWrapper from "../components/CardWrapper";
 import {
   collection,
@@ -71,7 +72,7 @@ const AdminMatches = () => {
         setSuccess={() => {}}
       />
 
-      <CardWrapper sx={{ p: { xs: 0, sm: 4 }, mb: 0 }}>
+      <CardWrapper sx={{ p: { xs: 0, sm: 4 }, mb: 4 }}>
         <MatchMakingPanel
           coaches={coaches}
           students={students}
@@ -83,6 +84,10 @@ const AdminMatches = () => {
           handleCreateMatch={handleCreateMatch}
           handleDeleteMatch={handleDeleteMatch}
         />
+      </CardWrapper>
+
+      <CardWrapper sx={{ p: { xs: 0, sm: 4 }, mb: 0 }}>
+        <PasswordResetPanel />
       </CardWrapper>
     </Box>
   );
