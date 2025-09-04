@@ -180,7 +180,7 @@ export default function EventCard({
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
               target="_blank"
               rel="noreferrer"
-              style={{ color: "#1e2d5f", textDecoration: "underline" }}
+              style={{ color: theme.palette.primary.main, textDecoration: "underline" }}
             >
               {location}
             </a>
@@ -203,17 +203,38 @@ export default function EventCard({
                   ALLOWED_ATTR: ['href', 'target', 'rel']
                 });
                 return (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
-                    style={{ 
-                      fontSize: "0.95rem", 
-                      lineHeight: 1.6,
-                      '& p': { margin: '0 0 0.5rem 0' },
-                      '& p:last-child': { margin: 0 },
-                      '& ul, & ol': { margin: '0.5rem 0', paddingLeft: '1.5rem' },
-                      '& li': { margin: '0.25rem 0' }
-                    }}
-                  />
+                  <>
+                    <style>
+                      {`
+                        .event-description-content a {
+                          color: ${theme.palette.primary.main};
+                          text-decoration: underline;
+                        }
+                        .event-description-content p {
+                          margin: 0 0 0.5rem 0;
+                        }
+                        .event-description-content p:last-child {
+                          margin: 0;
+                        }
+                        .event-description-content ul,
+                        .event-description-content ol {
+                          margin: 0.5rem 0;
+                          padding-left: 1.5rem;
+                        }
+                        .event-description-content li {
+                          margin: 0.25rem 0;
+                        }
+                      `}
+                    </style>
+                    <div
+                      className="event-description-content"
+                      dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+                      style={{ 
+                        fontSize: "0.95rem", 
+                        lineHeight: 1.6
+                      }}
+                    />
+                  </>
                 );
               } catch (error) {
                 console.warn('DOMPurify failed, falling back to text:', error);
@@ -239,7 +260,7 @@ export default function EventCard({
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
-                          color: "#1e40af",
+                          color: theme.palette.primary.main,
                           textDecoration: "underline"
                         }}
                       />
@@ -278,11 +299,11 @@ export default function EventCard({
           )}
           {isRSVPed && (
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem", gap: "1rem", flexWrap: "wrap" }}>
-              <p style={{ fontSize: "0.85rem", margin: 0, color: "#6b7280" }}>
+              <p style={{ fontSize: "0.85rem", margin: 0, color: theme.palette.text.secondary }}>
                 Add to calendar:{" "}
-                <a href={generateCalendarLinks().google} target="_blank" rel="noreferrer" style={{ color: "#1e2d5f", textDecoration: "underline" }}>Google</a>,{" "}
-                <a href={generateCalendarLinks().ics} download={`${name}.ics`} style={{ color: "#1e2d5f", textDecoration: "underline" }}>iCal</a>,{" "}
-                <a href={generateCalendarLinks().outlook} download={`${name}.ics`} style={{ color: "#1e2d5f", textDecoration: "underline" }}>Outlook</a>
+                <a href={generateCalendarLinks().google} target="_blank" rel="noreferrer" style={{ color: theme.palette.primary.main, textDecoration: "underline" }}>Google</a>,{" "}
+                <a href={generateCalendarLinks().ics} download={`${name}.ics`} style={{ color: theme.palette.primary.main, textDecoration: "underline" }}>iCal</a>,{" "}
+                <a href={generateCalendarLinks().outlook} download={`${name}.ics`} style={{ color: theme.palette.primary.main, textDecoration: "underline" }}>Outlook</a>
               </p>
               <p
                 onClick={(e) => {

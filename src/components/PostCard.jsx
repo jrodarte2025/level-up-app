@@ -5,10 +5,12 @@ import DOMPurify from "dompurify";
 import { Link } from "react-router-dom";
 import { MessageCircle, Heart, Link as LinkIcon } from "lucide-react";
 import { Paper, Typography, Box, Divider, Chip } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import ReactionBar from "./ReactionBar";
 import EmojiPicker from "./EmojiPicker";
 
 const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditClick }) => {
+  const theme = useTheme();
   const [imageError, setImageError] = React.useState(false);
   const [commentImageErrors, setCommentImageErrors] = React.useState({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -120,10 +122,10 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                   fontStyle: 'italic',
                 },
                 '& a': {
-                  color: '#1e40af',
+                  color: (theme) => theme.palette.primary.main,
                   textDecoration: 'underline',
                   '&:hover': {
-                    color: '#1e3a8a',
+                    color: (theme) => theme.palette.primary.dark,
                   },
                 },
                 '& ul, & ol': {
@@ -199,7 +201,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      color: "#1e40af",
+                      color: theme.palette.primary.main,
                       textDecoration: "underline"
                     }}
                   />
@@ -226,7 +228,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
             rel="noopener noreferrer"
             sx={{
               display: "inline-block",
-              color: "#1e2a78",
+              color: (theme) => theme.palette.primary.main,
               fontWeight: 500,
               textDecoration: "underline",
               fontSize: "0.95rem",
