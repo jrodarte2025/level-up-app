@@ -261,6 +261,7 @@ export default function AdminPanel({ tab }) {
           const u = userSnap.data();
           return {
             id: r.userId,
+            rsvpDocId: r.id, // Store the actual RSVP document ID for deletion
             role: u.role,
             displayName: u.displayName || `${u.firstName} ${u.lastName}`
           };
@@ -559,7 +560,25 @@ export default function AdminPanel({ tab }) {
           }}>
           </p>
           <hr style={{ border: "none", borderTop: "1px solid #e5e7eb", marginBottom: "1.5rem" }} />
-          {success && <p style={{ color: success.includes("Cannot") ? "red" : "green", marginBottom: "1rem" }}>{success}</p>}
+          {success && (
+            <div style={{ 
+              position: "fixed", 
+              top: "1rem", 
+              right: "1rem", 
+              backgroundColor: success.includes("Cannot") || success.includes("Error") ? "#fee2e2" : "#dcfce7", 
+              color: success.includes("Cannot") || success.includes("Error") ? "#dc2626" : "#16a34a", 
+              padding: "0.75rem 1rem", 
+              borderRadius: "8px", 
+              border: `1px solid ${success.includes("Cannot") || success.includes("Error") ? "#fecaca" : "#bbf7d0"}`,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              zIndex: 9999,
+              maxWidth: "300px",
+              fontWeight: 500,
+              fontSize: "0.9rem"
+            }}>
+              {success}
+            </div>
+          )}
           <div style={{
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
@@ -1013,14 +1032,25 @@ export default function AdminPanel({ tab }) {
                             onClick={async () => {
                               const confirmed = window.confirm(`Are you sure you want to remove ${u.displayName} from this event?`);
                               if (!confirmed) return;
+                              
+                              // Show immediate feedback by updating UI optimistically
+                              const originalAttendees = [...rsvpAttendees];
+                              const updatedAttendees = rsvpAttendees.filter(attendee => attendee.id !== u.id);
+                              setRsvpAttendees(updatedAttendees);
+                              
                               try {
-                                await deleteDoc(doc(db, "rsvps", `${u.id}_${rsvpEvent.id}`));
-                                // Reload RSVPs to refresh the UI
-                                await loadRsvpsForEvent(rsvpEvent.id);
+                                // Use the actual RSVP document ID stored in rsvpDocId
+                                await deleteDoc(doc(db, "rsvps", u.rsvpDocId));
+                                // Show success notification immediately
                                 setSuccess(`${u.displayName} removed from event.`);
                                 setTimeout(() => setSuccess(""), 3000);
                               } catch (error) {
                                 console.error("Error removing RSVP:", error);
+                                console.error("RSVP Doc ID:", u.rsvpDocId);
+                                console.error("User ID:", u.id);
+                                console.error("Event ID:", rsvpEvent.id);
+                                // Revert the optimistic update on error
+                                setRsvpAttendees(originalAttendees);
                                 setSuccess("Error removing RSVP. Please try again.");
                                 setTimeout(() => setSuccess(""), 3000);
                               }
@@ -1048,19 +1078,29 @@ export default function AdminPanel({ tab }) {
             <h4 style={{ margin: "0.25rem 0" }}>Add RSVP</h4>
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Search users... (type name to find user)"
               value={rsvpSearchInput}
               onChange={(e) => {
                 const val = e.target.value;
                 setRsvpSearchInput(val);
-                const match = allUsers.find(u => `${u.firstName} ${u.lastName}` === val);
+                // More flexible matching - search by first name, last name, or full name
+                const match = allUsers.find(u => {
+                  const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
+                  const searchTerm = val.toLowerCase();
+                  return fullName === searchTerm || 
+                         fullName.includes(searchTerm) ||
+                         u.firstName?.toLowerCase() === searchTerm ||
+                         u.lastName?.toLowerCase() === searchTerm;
+                });
                 setRsvpSelectedUser(match || null);
               }}
               style={{
                 width: "100%",
                 padding: "0.5rem",
                 fontSize: "0.9rem",
-                marginBottom: "0.5rem"
+                marginBottom: "0.5rem",
+                border: `1px solid ${rsvpSelectedUser ? "#10b981" : "#d1d5db"}`,
+                borderRadius: "4px"
               }}
               list="rsvp-user-options"
             />
@@ -1069,6 +1109,29 @@ export default function AdminPanel({ tab }) {
                 <option key={u.id} value={`${u.firstName} ${u.lastName}`} />
               ))}
             </datalist>
+            {rsvpSelectedUser && (
+              <div style={{
+                fontSize: "0.8rem",
+                color: "#10b981",
+                marginBottom: "0.5rem",
+                padding: "0.25rem",
+                backgroundColor: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                borderRadius: "4px"
+              }}>
+                ✓ Selected: {rsvpSelectedUser.firstName} {rsvpSelectedUser.lastName} ({rsvpSelectedUser.role})
+              </div>
+            )}
+            {rsvpSearchInput && !rsvpSelectedUser && (
+              <div style={{
+                fontSize: "0.8rem",
+                color: "#dc2626",
+                marginBottom: "0.5rem",
+                padding: "0.25rem"
+              }}>
+                No user found matching "{rsvpSearchInput}"
+              </div>
+            )}
             <button
               className="button-primary"
               onClick={async () => {
@@ -1079,6 +1142,21 @@ export default function AdminPanel({ tab }) {
                 }
 
                 const userId = rsvpSelectedUser.id;
+                const userToAdd = {
+                  id: userId,
+                  rsvpDocId: `${userId}_${rsvpEvent.id}`,
+                  role: rsvpSelectedUser.role,
+                  displayName: `${rsvpSelectedUser.firstName} ${rsvpSelectedUser.lastName}`
+                };
+
+                // Optimistically add user to UI immediately
+                const originalAttendees = [...rsvpAttendees];
+                setRsvpAttendees(prev => [...prev, userToAdd]);
+                
+                // Clear the search input immediately
+                const selectedUserName = `${rsvpSelectedUser.firstName} ${rsvpSelectedUser.lastName}`;
+                setRsvpSearchInput("");
+                setRsvpSelectedUser(null);
 
                 try {
                   await setDoc(doc(db, "rsvps", `${userId}_${rsvpEvent.id}`), {
@@ -1087,14 +1165,13 @@ export default function AdminPanel({ tab }) {
                     attending: true
                   });
 
-                  // Reload RSVPs to refresh the UI
-                  await loadRsvpsForEvent(rsvpEvent.id);
-                  setRsvpSearchInput("");
-                  setRsvpSelectedUser(null);
-                  setSuccess(`${rsvpSelectedUser.firstName} ${rsvpSelectedUser.lastName} added to event!`);
+                  // Show success notification immediately
+                  setSuccess(`${selectedUserName} added to event!`);
                   setTimeout(() => setSuccess(""), 3000);
                 } catch (error) {
                   console.error("Error adding RSVP:", error);
+                  // Revert optimistic update on error
+                  setRsvpAttendees(originalAttendees);
                   setSuccess("Error adding RSVP. Please try again.");
                   setTimeout(() => setSuccess(""), 3000);
                 }
@@ -1182,9 +1259,23 @@ export default function AdminPanel({ tab }) {
           )}
           {/* Success message for resource add/edit */}
           {success && (
-            <p style={{ color: success.includes("updated") ? "green" : "inherit", marginBottom: "1rem" }}>
+            <div style={{ 
+              position: "fixed", 
+              top: "1rem", 
+              right: "1rem", 
+              backgroundColor: success.includes("Error") ? "#fee2e2" : "#dcfce7", 
+              color: success.includes("Error") ? "#dc2626" : "#16a34a", 
+              padding: "0.75rem 1rem", 
+              borderRadius: "8px", 
+              border: `1px solid ${success.includes("Error") ? "#fecaca" : "#bbf7d0"}`,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              zIndex: 9999,
+              maxWidth: "300px",
+              fontWeight: 500,
+              fontSize: "0.9rem"
+            }}>
               {success}
-            </p>
+            </div>
           )}
           <form onSubmit={handleAddResource} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <input
