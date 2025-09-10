@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import EventCard from "../components/EventCard";
+import GuestCountModal from "../components/GuestCountModal";
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
 import { getDocs, doc, setDoc, deleteDoc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
@@ -82,6 +83,10 @@ export default function UserDashboard({ setShowAdminPanel }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [rsvpUsers, setRsvpUsers] = useState([]);
   const [showRsvpList, setShowRsvpList] = useState(false);
+  
+  // Guest modal state
+  const [guestModalOpen, setGuestModalOpen] = useState(false);
+  const [pendingRsvpEvent, setPendingRsvpEvent] = useState(null);
   useEffect(() => {
     if (!user) return;
     const loadRole = async () => {
@@ -108,11 +113,16 @@ export default function UserDashboard({ setShowAdminPanel }) {
       const rsvpSnap = await getDocs(
         query(collection(db, "rsvps"), where("eventId", "==", selectedEvent.id))
       );
-      const userIds = rsvpSnap.docs.map(d => d.data().userId);
-      if (userIds.length === 0) {
+      const rsvpData = rsvpSnap.docs.map(d => ({
+        userId: d.data().userId,
+        guestCount: d.data().guestCount || 0
+      }));
+      if (rsvpData.length === 0) {
         setRsvpUsers([]);
         return;
       }
+      
+      const userIds = rsvpData.map(r => r.userId);
 
       // 2) fetch all users and filter to those IDs
       const usersSnap = await getDocs(collection(db, "users"));
@@ -123,20 +133,24 @@ export default function UserDashboard({ setShowAdminPanel }) {
       // 3) for each user, prefer headshotUrl, then profileImage, then fallback to Storage
       const storage = getStorage();
       matched = await Promise.all(matched.map(async u => {
+        // Find guest count for this user
+        const userRsvpData = rsvpData.find(r => r.userId === u.id);
+        const guestCount = userRsvpData?.guestCount || 0;
+        
         // 1) Firestore headshotUrl
         if (u.headshotUrl) {
-          return { ...u, profileImage: u.headshotUrl };
+          return { ...u, profileImage: u.headshotUrl, guestCount };
         }
         // 2) Existing stored profileImage field
         if (u.profileImage) {
-          return u;
+          return { ...u, guestCount };
         }
         // 3) Fallback to Storage lookup
         try {
           const url = await getDownloadURL(ref(storage, `users/${u.id}/profile.jpg`));
-          return { ...u, profileImage: url };
+          return { ...u, profileImage: url, guestCount };
         } catch {
-          return u;
+          return { ...u, guestCount };
         }
       }));
 
@@ -223,7 +237,10 @@ export default function UserDashboard({ setShowAdminPanel }) {
       snapshot.docs.forEach((doc) => {
         const rsvp = doc.data();
         if (rsvp.userId === user?.uid) {
-          data[rsvp.eventId] = true;
+          data[rsvp.eventId] = {
+            attending: true,
+            guestCount: rsvp.guestCount || 0
+          };
         }
       });
       setRsvps(data);
@@ -232,19 +249,48 @@ export default function UserDashboard({ setShowAdminPanel }) {
     return () => unsub();
   }, [user]);
 
-  const handleRSVP = async (eventId) => {
+  const handleRSVP = async (eventId, forceCancel = false) => {
     const key = `${user.uid}_${eventId}`;
     const rsvpDocRef = doc(db, "rsvps", key);
+    
+    // Find the event to check if guests are allowed
+    const event = events.find(e => e.id === eventId);
 
-    if (rsvps[eventId]) {
+    if (rsvps[eventId] || forceCancel) {
+      // Cancel existing RSVP
       await deleteDoc(rsvpDocRef);
     } else {
-      await setDoc(rsvpDocRef, {
-        userId: user.uid,
-        eventId,
-        attending: true,
-      });
+      // Check if event allows guests
+      if (event?.allowGuests) {
+        // Show guest modal
+        setPendingRsvpEvent(event);
+        setGuestModalOpen(true);
+      } else {
+        // Direct RSVP without guests
+        await setDoc(rsvpDocRef, {
+          userId: user.uid,
+          eventId,
+          attending: true,
+          guestCount: 0,
+        });
+      }
     }
+  };
+
+  const handleGuestRSVP = async (guestCount) => {
+    if (!pendingRsvpEvent) return;
+    
+    const key = `${user.uid}_${pendingRsvpEvent.id}`;
+    const rsvpDocRef = doc(db, "rsvps", key);
+    
+    await setDoc(rsvpDocRef, {
+      userId: user.uid,
+      eventId: pendingRsvpEvent.id,
+      attending: true,
+      guestCount: guestCount,
+    });
+    
+    setPendingRsvpEvent(null);
   };
 
   const toggleFilter = (key) => {
@@ -332,7 +378,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
               <EventCard
                 key={event.id}
                 event={event}
-                isRSVPed={!!rsvps[event.id]}
+                isRSVPed={!!rsvps[event.id]?.attending}
                 isMatchGoing={!!matchRsvps[event.id]}
                 onRSVP={handleRSVP}
                 onClick={() => {
@@ -596,6 +642,18 @@ export default function UserDashboard({ setShowAdminPanel }) {
           </div>
         </div>
       )}
+
+      {/* Guest Count Modal */}
+      <GuestCountModal
+        isOpen={guestModalOpen}
+        onClose={() => {
+          setGuestModalOpen(false);
+          setPendingRsvpEvent(null);
+        }}
+        onConfirm={handleGuestRSVP}
+        eventName={pendingRsvpEvent?.name || ""}
+        isRSVPing={true}
+      />
     </div>
   );
 }

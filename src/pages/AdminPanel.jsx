@@ -199,6 +199,7 @@ export default function AdminPanel({ tab }) {
     description: "",
     groups: "both",
     required: true,
+    allowGuests: false,
   });
   const [headerImageFile, setHeaderImageFile] = useState(null);
   const [existingHeaderImage, setExistingHeaderImage] = useState(null);
@@ -263,7 +264,8 @@ export default function AdminPanel({ tab }) {
             id: r.userId,
             rsvpDocId: r.id, // Store the actual RSVP document ID for deletion
             role: u.role,
-            displayName: u.displayName || `${u.firstName} ${u.lastName}`
+            displayName: u.displayName || `${u.firstName} ${u.lastName}`,
+            guestCount: r.guestCount || 0
           };
         } catch (error) {
           console.error(`Error fetching user ${r.userId}:`, error);
@@ -382,6 +384,7 @@ export default function AdminPanel({ tab }) {
         ? "both"
         : event.groups[0],
       required: event.required,
+      allowGuests: event.allowGuests || false,
     });
     setEditingId(event.id);
     setExistingHeaderImage(event.headerImage || null);
@@ -460,6 +463,7 @@ export default function AdminPanel({ tab }) {
           description: form.description,
           groups: form.groups === "both" ? ["students", "coaches"] : [form.groups],
           required: form.required,
+          allowGuests: form.allowGuests,
           headerImage: headerImageUrl || existingHeaderImage || "",
         });
       } else {
@@ -472,6 +476,7 @@ export default function AdminPanel({ tab }) {
           description: form.description,
           groups: form.groups === "both" ? ["students", "coaches"] : [form.groups],
           required: form.required,
+          allowGuests: form.allowGuests,
           createdBy: auth.currentUser?.email || "unknown",
           headerImage: headerImageUrl,
         });
@@ -497,6 +502,7 @@ export default function AdminPanel({ tab }) {
       description: "",
       groups: "both",
       required: true,
+      allowGuests: false,
     });
     setHeaderImageFile(null);
     setExistingHeaderImage(null);
@@ -617,7 +623,8 @@ export default function AdminPanel({ tab }) {
                       location: "",
                       description: "",
                       groups: "both",
-                      required: true
+                      required: true,
+                      allowGuests: false
                     });
                   }}
                 >
@@ -764,6 +771,13 @@ export default function AdminPanel({ tab }) {
                 <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 500 }}>
                   <input type="checkbox" name="required" checked={form.required} onChange={handleChange} />
                   Required Event
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 500 }}>
+                  <input type="checkbox" name="allowGuests" checked={form.allowGuests} onChange={handleChange} />
+                  Allow Guests
+                  <span style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "0.5rem" }}>
+                    (People can bring additional guests when RSVPing)
+                  </span>
                 </label>
                 <div>
                   <label style={{
@@ -1027,7 +1041,18 @@ export default function AdminPanel({ tab }) {
                             borderBottom: "1px solid #e5e7eb"
                           }}
                         >
-                          <span>{u.displayName}</span>
+                          <div style={{ display: "flex", flexDirection: "column" }}>
+                            <span>{u.displayName}</span>
+                            {u.guestCount > 0 && (
+                              <span style={{ 
+                                fontSize: "0.75rem", 
+                                color: "#6b7280", 
+                                fontStyle: "italic" 
+                              }}>
+                                + {u.guestCount} guest{u.guestCount !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
                           <button
                             onClick={async () => {
                               const confirmed = window.confirm(`Are you sure you want to remove ${u.displayName} from this event?`);
@@ -1074,6 +1099,61 @@ export default function AdminPanel({ tab }) {
                 ));
               })()
             )}
+            
+            {/* Guests Section */}
+            {(() => {
+              const totalGuests = rsvpAttendees
+                .filter(u => rsvpRoleFilter === "all" || u.role === rsvpRoleFilter)
+                .reduce((sum, u) => sum + (u.guestCount || 0), 0);
+              
+              if (totalGuests > 0) {
+                return (
+                  <div style={{ marginBottom: "1rem" }}>
+                    <strong>Guests</strong>
+                    <p style={{ 
+                      fontSize: "0.9rem", 
+                      color: "#6b7280", 
+                      margin: "0.25rem 0",
+                      fontStyle: "italic"
+                    }}>
+                      {totalGuests} additional guest{totalGuests !== 1 ? 's' : ''} attending
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+            
+            {/* Total Attendees */}
+            {rsvpAttendees.length > 0 && (
+              <div style={{ 
+                backgroundColor: theme.palette.background.default,
+                padding: "0.75rem",
+                borderRadius: "6px",
+                marginBottom: "1rem"
+              }}>
+                <strong style={{ color: theme.palette.text.primary }}>
+                  Total Attendees: {(() => {
+                    const filteredAttendees = rsvpAttendees.filter(u => 
+                      rsvpRoleFilter === "all" || u.role === rsvpRoleFilter
+                    );
+                    const totalPeople = filteredAttendees.length;
+                    const totalGuests = filteredAttendees.reduce((sum, u) => sum + (u.guestCount || 0), 0);
+                    return totalPeople + totalGuests;
+                  })()}
+                </strong>
+                <span style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "0.5rem" }}>
+                  ({rsvpAttendees.filter(u => rsvpRoleFilter === "all" || u.role === rsvpRoleFilter).length} RSVPs 
+                  {(() => {
+                    const totalGuests = rsvpAttendees
+                      .filter(u => rsvpRoleFilter === "all" || u.role === rsvpRoleFilter)
+                      .reduce((sum, u) => sum + (u.guestCount || 0), 0);
+                    return totalGuests > 0 ? ` + ${totalGuests} guests` : '';
+                  })()})
+                </span>
+              </div>
+            )}
+            
             <hr style={{ margin: "1rem 0" }} />
             <h4 style={{ margin: "0.25rem 0" }}>Add RSVP</h4>
             <input
@@ -1146,7 +1226,8 @@ export default function AdminPanel({ tab }) {
                   id: userId,
                   rsvpDocId: `${userId}_${rsvpEvent.id}`,
                   role: rsvpSelectedUser.role,
-                  displayName: `${rsvpSelectedUser.firstName} ${rsvpSelectedUser.lastName}`
+                  displayName: `${rsvpSelectedUser.firstName} ${rsvpSelectedUser.lastName}`,
+                  guestCount: 0 // Default to 0 guests for admin-added RSVPs
                 };
 
                 // Optimistically add user to UI immediately
@@ -1162,7 +1243,8 @@ export default function AdminPanel({ tab }) {
                   await setDoc(doc(db, "rsvps", `${userId}_${rsvpEvent.id}`), {
                     userId: userId,
                     eventId: rsvpEvent.id,
-                    attending: true
+                    attending: true,
+                    guestCount: 0
                   });
 
                   // Show success notification immediately
