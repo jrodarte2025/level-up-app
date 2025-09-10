@@ -240,34 +240,49 @@ export default function AdminPanel({ tab }) {
 
   // Load RSVPs for an event
   const loadRsvpsForEvent = async (eventId) => {
-    // fetch RSVP docs
-    const rsvpSnap = await getDocs(query(
-      collection(db, "rsvps"),
-      where("eventId", "==", eventId),
-      where("attending", "==", true)
-    ));
-    const rsvps = rsvpSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    try {
+      // fetch RSVP docs
+      const rsvpSnap = await getDocs(query(
+        collection(db, "rsvps"),
+        where("eventId", "==", eventId),
+        where("attending", "==", true)
+      ));
+      const rsvps = rsvpSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // fetch user details by document ID
-    const attendees = await Promise.all(rsvps.map(async (r) => {
-      try {
-        const userRef = doc(db, "users", r.userId);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) return null;
-        const u = userSnap.data();
-        return {
-          id: r.userId,
-          role: u.role,
-          displayName: u.displayName || `${u.firstName} ${u.lastName}`
-        };
-      } catch {
-        return null;
+      // fetch user details by document ID
+      const attendees = await Promise.all(rsvps.map(async (r) => {
+        try {
+          const userRef = doc(db, "users", r.userId);
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists()) {
+            console.warn(`User ${r.userId} not found for RSVP`);
+            return null;
+          }
+          const u = userSnap.data();
+          return {
+            id: r.userId,
+            role: u.role,
+            displayName: u.displayName || `${u.firstName} ${u.lastName}`
+          };
+        } catch (error) {
+          console.error(`Error fetching user ${r.userId}:`, error);
+          return null;
+        }
+      }));
+      
+      // Filter out null entries and update state
+      const validAttendees = attendees.filter(Boolean);
+      setRsvpAttendees(validAttendees);
+      
+      // Fetch all users for manual RSVP (only if not already loaded)
+      if (allUsers.length === 0) {
+        const allUserSnap = await getDocs(collection(db, "users"));
+        setAllUsers(allUserSnap.docs.map(d => ({ id: d.id, ...d.data() })));
       }
-    }));
-    setRsvpAttendees(attendees.filter(Boolean));
-    // Fetch all users for manual RSVP
-    const allUserSnap = await getDocs(collection(db, "users"));
-    setAllUsers(allUserSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (error) {
+      console.error("Error loading RSVPs:", error);
+      setRsvpAttendees([]);
+    }
   };
 
   const locationInputRef = useRef(null);
@@ -998,8 +1013,17 @@ export default function AdminPanel({ tab }) {
                             onClick={async () => {
                               const confirmed = window.confirm(`Are you sure you want to remove ${u.displayName} from this event?`);
                               if (!confirmed) return;
-                              await deleteDoc(doc(db, "rsvps", `${u.id}_${rsvpEvent.id}`));
-                              await loadRsvpsForEvent(rsvpEvent.id);
+                              try {
+                                await deleteDoc(doc(db, "rsvps", `${u.id}_${rsvpEvent.id}`));
+                                // Reload RSVPs to refresh the UI
+                                await loadRsvpsForEvent(rsvpEvent.id);
+                                setSuccess(`${u.displayName} removed from event.`);
+                                setTimeout(() => setSuccess(""), 3000);
+                              } catch (error) {
+                                console.error("Error removing RSVP:", error);
+                                setSuccess("Error removing RSVP. Please try again.");
+                                setTimeout(() => setSuccess(""), 3000);
+                              }
                             }}
                             style={{
                               backgroundColor: "#ef4444",
@@ -1056,17 +1080,24 @@ export default function AdminPanel({ tab }) {
 
                 const userId = rsvpSelectedUser.id;
 
-                await setDoc(doc(db, "rsvps", `${userId}_${rsvpEvent.id}`), {
-                  userId: userId,
-                  eventId: rsvpEvent.id,
-                  attending: true
-                });
+                try {
+                  await setDoc(doc(db, "rsvps", `${userId}_${rsvpEvent.id}`), {
+                    userId: userId,
+                    eventId: rsvpEvent.id,
+                    attending: true
+                  });
 
-                await loadRsvpsForEvent(rsvpEvent.id);
-                setRsvpSearchInput("");
-                setRsvpSelectedUser(null);
-                setSuccess("RSVP added!");
-                setTimeout(() => setSuccess(""), 3000);
+                  // Reload RSVPs to refresh the UI
+                  await loadRsvpsForEvent(rsvpEvent.id);
+                  setRsvpSearchInput("");
+                  setRsvpSelectedUser(null);
+                  setSuccess(`${rsvpSelectedUser.firstName} ${rsvpSelectedUser.lastName} added to event!`);
+                  setTimeout(() => setSuccess(""), 3000);
+                } catch (error) {
+                  console.error("Error adding RSVP:", error);
+                  setSuccess("Error adding RSVP. Please try again.");
+                  setTimeout(() => setSuccess(""), 3000);
+                }
               }}
             >
               Add RSVP
