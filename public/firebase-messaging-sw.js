@@ -7,16 +7,16 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
 });
 
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.7.3/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.7.3/firebase-messaging-compat.js');
 
 firebase.initializeApp({
   apiKey: "AIzaSyB3iCL2C6654eo6mrLboG45f0H_aifVWsw",
   authDomain: "level-up-app-c9f47.firebaseapp.com",
   projectId: "level-up-app-c9f47",
-  storageBucket: "level-up-app-c9f47.appspot.com",
+  storageBucket: "level-up-app-c9f47.firebasestorage.app",
   messagingSenderId: "256858356257",
-  appId: "Y1:256858356257:web:e849c127252e552b58c160"
+  appId: "1:256858356257:web:e849c127252e552b58c160"
 });
 
 const messaging = firebase.messaging();
@@ -34,7 +34,7 @@ messaging.onBackgroundMessage(function(payload) {
       body,
       icon: '/icons/icon-192.png',
       data: {
-        url: 'https://level-up-app-c9f47.web.app'
+        url: 'https://app.levelupcincinnati.org'
       }
     });
 

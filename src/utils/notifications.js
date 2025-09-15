@@ -2,7 +2,7 @@
 import { db, auth } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
 
-const VAPID_KEY = "BGIu5yYG52Ry8kOt1wfY7KkJ-ZilDdT95o1zrGlsUdF907-URK4qvBnZ3sf2xua1JTxOAxIaNopmQw8apLSaEEQ";
+const VAPID_KEY = "BEi0fTYMR3xxvHF3WXYbAHVa2xMj1n4ryBzFVHYj4IngmOJH7aL5CJB_wh50IIREf7oLqyDAB0KrO9kNh5iLibw";
 
 export async function registerForNotifications() {
   console.log("🔔 Starting notification registration...");
@@ -11,6 +11,23 @@ export async function registerForNotifications() {
   if (!("Notification" in window)) {
     console.warn("This browser does not support notifications.");
     return { success: false, error: "Browser not supported" };
+  }
+
+  // Check if PWA is installed for iOS Safari
+  const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                       !window.MSStream && 
+                       /Safari/i.test(navigator.userAgent);
+  
+  const isPWAInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                          window.navigator.standalone === true;
+
+  if (isIOSSafari && !isPWAInstalled) {
+    console.log("🔔 iOS Safari requires PWA installation for notifications");
+    return { 
+      success: false, 
+      error: "Please add this app to your home screen first to enable notifications",
+      requiresInstallation: true 
+    };
   }
 
   // Safari-specific checks

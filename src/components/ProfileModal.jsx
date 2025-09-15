@@ -37,6 +37,20 @@ export default function ProfileModal({
     typeof Notification !== "undefined" ? Notification.permission : "default"
   );
 
+  // Detect if app is installed as PWA
+  const isPWAInstalled = () => {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true ||
+           document.referrer.includes('android-app://');
+  };
+
+  // Detect iOS Safari
+  const isIOSSafari = () => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+           !window.MSStream &&
+           /Safari/i.test(navigator.userAgent);
+  };
+
   React.useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) setAuthLoaded(true);
@@ -51,6 +65,8 @@ export default function ProfileModal({
     console.log("📱 User Agent:", navigator.userAgent);
     console.log("📱 Notification API:", typeof Notification !== "undefined" ? "✅ Available" : "❌ Not Available");
     console.log("📱 Service Worker:", "serviceWorker" in navigator ? "✅ Available" : "❌ Not Available");
+    console.log("📱 PWA Installed:", isPWAInstalled());
+    console.log("📱 iOS Safari:", isIOSSafari());
     console.log("📱 authLoaded:", authLoaded);
     
     if (typeof Notification !== "undefined") {
@@ -258,9 +274,31 @@ export default function ProfileModal({
           )}
           <input type="url" placeholder="LinkedIn Profile URL" value={linkedinUrl} onChange={(e) => { onSave("linkedinUrl", e.target.value); setHasChanges(true); }} style={inputStyle(theme)} />
   
-  {/* Notification toggle or compatibility message */}
-  {authLoaded && (
-    typeof Notification !== "undefined" ? (
+  {/* iOS Installation Guide - Show if on iOS Safari and not installed as PWA */}
+  {authLoaded && isIOSSafari() && !isPWAInstalled() && (
+    <div style={{ 
+      padding: "1rem", 
+      backgroundColor: theme.palette.mode === 'dark' ? "rgba(66, 165, 245, 0.1)" : "#e3f2fd", 
+      borderRadius: "8px", 
+      fontSize: "0.85rem",
+      margin: "0.5rem 0",
+      border: `1px solid ${theme.palette.mode === 'dark' ? "rgba(66, 165, 245, 0.3)" : "#90caf9"}`
+    }}>
+      <div style={{ fontWeight: "600", marginBottom: "0.5rem", color: theme.palette.primary.main }}>
+        📲 Enable Push Notifications
+      </div>
+      <div style={{ lineHeight: "1.5", color: theme.palette.text.primary }}>
+        To receive notifications on iOS:
+        <br />1. Tap the Share button <span style={{ fontSize: "1.1em" }}>⬆️</span>
+        <br />2. Select "Add to Home Screen"
+        <br />3. Open Level Up from your home screen
+        <br />4. Enable notifications in settings
+      </div>
+    </div>
+  )}
+
+  {/* Notification toggle - show for non-iOS or installed PWA */}
+  {authLoaded && typeof Notification !== "undefined" && (!isIOSSafari() || isPWAInstalled()) && (
       <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
         <Switch
           checked={notificationPermission === "granted"}
@@ -303,23 +341,6 @@ export default function ProfileModal({
             : "Enable notifications"}
         </span>
       </label>
-    ) : (
-      <div style={{ 
-        display: "flex", 
-        alignItems: "center", 
-        gap: "0.75rem", 
-        padding: "0.5rem",
-        backgroundColor: "#f8f9fa",
-        borderRadius: "6px",
-        border: "1px solid #dee2e6"
-      }}>
-        <span style={{ fontSize: "1rem" }}>🔔</span>
-        <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
-          <strong>Push Notifications</strong><br/>
-          Requires iOS 16.4+ or newer browser
-        </div>
-      </div>
-    )
   )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1.5rem" }}>
