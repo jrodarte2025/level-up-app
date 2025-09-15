@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 /****
  * Import function triggers from their respective submodules:
  *
@@ -8,7 +10,7 @@
  */
 
 const { setGlobalOptions } = require("firebase-functions");
-const { onRequest, onCall } = require("firebase-functions/v2/https");
+const { onRequest } = require("firebase-functions/v2/https");
 const functions = require("firebase-functions");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const logger = require("firebase-functions/logger");

@@ -2,6 +2,12 @@ module.exports = {
   env: {
     es6: true,
     node: true,
+    commonjs: true,
+  },
+  globals: {
+    process: "readonly",
+    exports: "readonly",
+    require: "readonly",
   },
   parserOptions: {
     ecmaVersion: "latest",
