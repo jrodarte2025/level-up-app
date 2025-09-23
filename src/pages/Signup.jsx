@@ -9,6 +9,7 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "fire
 import { useTheme } from "@mui/material/styles";
 import { validateImageFile, getOptimalImageSize } from "../utils/imageValidation";
 import { resizeImage } from "../utils/resizeImage";
+import { formatPhoneNumber, validatePhoneNumber, normalizePhoneNumber } from "../utils/phoneValidation";
 
 export default function Signup({ onSignupComplete }) {
   const [step, setStep] = useState(1);
@@ -25,12 +26,14 @@ export default function Signup({ onSignupComplete }) {
     company: "",
     title: "",
     linkedinUrl: "",
-    registrationCode: ""
+    registrationCode: "",
+    phoneNumber: ""
   });
   const [headshotFile, setHeadshotFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [verifiedCodeData, setVerifiedCodeData] = useState(null);
+  const [phoneError, setPhoneError] = useState("");
 
   // Crop modal state (replaces react-easy-crop logic)
   const [showCropModal, setShowCropModal] = useState(false);
@@ -117,6 +120,7 @@ export default function Signup({ onSignupComplete }) {
         isAdmin: codeData.isAdmin === true,
         headshotUrl,
         linkedinUrl: form.linkedinUrl,
+        phoneNumber: form.phoneNumber ? normalizePhoneNumber(form.phoneNumber) : "",
         registrationCodeUsed: form.registrationCode.trim(),
       };
       if (form.role === "student") {
@@ -486,6 +490,51 @@ export default function Signup({ onSignupComplete }) {
               fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
             }}
           />
+          <div>
+            <input
+              name="phoneNumber"
+              type="tel"
+              placeholder="Phone Number (optional)"
+              value={formatPhoneNumber(form.phoneNumber)}
+              onChange={(e) => {
+                const rawValue = e.target.value;
+                const cleaned = rawValue.replace(/\D/g, '');
+
+                // Limit to 11 digits max (1 + 10 digit phone number)
+                if (cleaned.length <= 11) {
+                  handleChange({ target: { name: 'phoneNumber', value: cleaned } });
+
+                  const validation = validatePhoneNumber(cleaned);
+                  if (!validation.isValid && cleaned.length > 0) {
+                    setPhoneError(validation.error || "Invalid phone number");
+                  } else {
+                    setPhoneError("");
+                  }
+                }
+              }}
+              style={{
+                width: "100%",
+                maxWidth: "100%",
+                padding: "0.75rem",
+                fontSize: "1rem",
+                borderRadius: "6px",
+                border: `1px solid ${phoneError ? '#ef4444' : theme.palette.divider}`,
+                color: theme.palette.text.primary,
+                boxSizing: "border-box",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+              }}
+            />
+            {phoneError && (
+              <p style={{
+                color: "#ef4444",
+                fontSize: "0.8rem",
+                marginTop: "0.25rem",
+                marginBottom: 0
+              }}>
+                {phoneError}
+              </p>
+            )}
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%" }}>
             <button
               type="submit"
@@ -625,7 +674,12 @@ export default function Signup({ onSignupComplete }) {
             <p><strong>Company:</strong> {form.company}</p>
           )}
           <p><strong>Role:</strong> {form.role.charAt(0).toUpperCase() + form.role.slice(1)}</p>
-          <p><strong>LinkedIn:</strong> <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer">{form.linkedinUrl}</a></p>
+          {form.linkedinUrl && (
+            <p><strong>LinkedIn:</strong> <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer">{form.linkedinUrl}</a></p>
+          )}
+          {form.phoneNumber && (
+            <p><strong>Phone:</strong> {formatPhoneNumber(form.phoneNumber)}</p>
+          )}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem", width: "100%" }}>
             <button
               onClick={handleBack}

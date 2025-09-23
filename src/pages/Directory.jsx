@@ -6,6 +6,7 @@ import { getStorage, ref as storageRef, getDownloadURL } from "firebase/storage"
 import { auth } from "../firebase";
 import "../App.css";
 import { useTheme } from "@mui/material/styles";
+import { formatPhoneNumber, validatePhoneNumber, normalizePhoneNumber } from "../utils/phoneValidation";
 
 // roleFilter: "all" | "coach" | "student" | "board"
 export default function Directory({ roleFilter = "all", showAdminPanel = false }) {
@@ -223,7 +224,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   firstName: u.firstName || "",
                   lastName: u.lastName || "",
                   email: u.email || "",
-                  phone: u.phone || "",
+                  phoneNumber: u.phoneNumber || "",
                   title: u.title || "",
                   company: u.company || "",
                   major: u.major || "",
@@ -231,7 +232,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   linkedinUrl: u.linkedinUrl || "",
                   boardRole: u.boardRole || "",
                   role: u.role || "student",
-                  alumni: u.alumni || false,
+                  alumni: u.alumni || false
                 });
               }}
               className="directory-user-card"
@@ -571,10 +572,16 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                           style={inputStyle}
                         />
                         <input
-                          type="text"
-                          value={editForm.phone}
-                          onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                          placeholder="Phone"
+                          type="tel"
+                          value={formatPhoneNumber(editForm.phoneNumber || "")}
+                          onChange={e => {
+                            const rawValue = e.target.value;
+                            const cleaned = rawValue.replace(/\D/g, '');
+                            if (cleaned.length <= 11) {
+                              setEditForm({ ...editForm, phoneNumber: cleaned });
+                            }
+                          }}
+                          placeholder="Phone Number (optional)"
                           style={inputStyle}
                         />
                       </div>
@@ -657,10 +664,10 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                       {selectedUser.email}
                     </a>
                   </p>
-                  {selectedUser.phone && (
+                  {selectedUser.phoneNumber && (
                     <p style={{ margin: 0 }}>
-                      <a href={`tel:${selectedUser.phone}`} style={{ color: theme.palette.text.primary, fontSize: "1rem" }}>
-                        {selectedUser.phone}
+                      <a href={`tel:${selectedUser.phoneNumber}`} style={{ color: theme.palette.text.primary, fontSize: "1rem" }}>
+                        {formatPhoneNumber(selectedUser.phoneNumber)}
                       </a>
                     </p>
                   )}
@@ -717,7 +724,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                           firstName: match.firstName || "",
                           lastName: match.lastName || "",
                           email: match.email || "",
-                          phone: match.phone || "",
+                          phoneNumber: match.phoneNumber || "",
                           title: match.title || "",
                           company: match.company || "",
                           major: match.major || "",
@@ -763,9 +770,20 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
               }}>
                 <button
                   onClick={async () => {
+                    // Validate phone number before saving
+                    const phoneValidation = validatePhoneNumber(editForm.phoneNumber);
+                    if (editForm.phoneNumber && !phoneValidation.isValid) {
+                      alert(phoneValidation.error || "Please enter a valid phone number.");
+                      return;
+                    }
+
                     const userRef = doc(db, "users", selectedUser.id);
-                    await setDoc(userRef, editForm, { merge: true });
-                    setUsers(users.map(u => u.id === selectedUser.id ? { ...u, ...editForm } : u));
+                    const dataToSave = {
+                      ...editForm,
+                      phoneNumber: editForm.phoneNumber ? normalizePhoneNumber(editForm.phoneNumber) : ""
+                    };
+                    await setDoc(userRef, dataToSave, { merge: true });
+                    setUsers(users.map(u => u.id === selectedUser.id ? { ...u, ...dataToSave } : u));
                     setSelectedUser(null);
                     setIsEditing(false);
                   }}
@@ -1037,10 +1055,16 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                           style={inputStyle}
                         />
                         <input
-                          type="text"
-                          value={editForm.phone}
-                          onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
-                          placeholder="Phone"
+                          type="tel"
+                          value={formatPhoneNumber(editForm.phoneNumber || "")}
+                          onChange={e => {
+                            const rawValue = e.target.value;
+                            const cleaned = rawValue.replace(/\D/g, '');
+                            if (cleaned.length <= 11) {
+                              setEditForm({ ...editForm, phoneNumber: cleaned });
+                            }
+                          }}
+                          placeholder="Phone Number (optional)"
                           style={inputStyle}
                         />
                       </div>
@@ -1123,10 +1147,10 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                       {selectedUser.email}
                     </a>
                   </p>
-                  {selectedUser.phone && (
+                  {selectedUser.phoneNumber && (
                     <p style={{ margin: 0 }}>
-                      <a href={`tel:${selectedUser.phone}`} style={{ color: theme.palette.text.primary, fontSize: "1rem" }}>
-                        {selectedUser.phone}
+                      <a href={`tel:${selectedUser.phoneNumber}`} style={{ color: theme.palette.text.primary, fontSize: "1rem" }}>
+                        {formatPhoneNumber(selectedUser.phoneNumber)}
                       </a>
                     </p>
                   )}
@@ -1199,7 +1223,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                           firstName: match.firstName || "",
                           lastName: match.lastName || "",
                           email: match.email || "",
-                          phone: match.phone || "",
+                          phoneNumber: match.phoneNumber || "",
                           title: match.title || "",
                           company: match.company || "",
                           major: match.major || "",
@@ -1243,9 +1267,20 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
               }}>
                 <button
                   onClick={async () => {
+                    // Validate phone number before saving
+                    const phoneValidation = validatePhoneNumber(editForm.phoneNumber);
+                    if (editForm.phoneNumber && !phoneValidation.isValid) {
+                      alert(phoneValidation.error || "Please enter a valid phone number.");
+                      return;
+                    }
+
                     const userRef = doc(db, "users", selectedUser.id);
-                    await setDoc(userRef, editForm, { merge: true });
-                    setUsers(users.map(u => u.id === selectedUser.id ? { ...u, ...editForm } : u));
+                    const dataToSave = {
+                      ...editForm,
+                      phoneNumber: editForm.phoneNumber ? normalizePhoneNumber(editForm.phoneNumber) : ""
+                    };
+                    await setDoc(userRef, dataToSave, { merge: true });
+                    setUsers(users.map(u => u.id === selectedUser.id ? { ...u, ...dataToSave } : u));
                     setSelectedUser(null);
                     setIsEditing(false);
                   }}

@@ -578,10 +578,10 @@ exports.listUserPhotos = functions.https.onRequest(async (req, res) => {
 
 // Coaches function - for external website integration
 exports.coaches = onRequest(
-  { 
-    memory: "256MB", 
+  {
+    memory: "256MB",
     timeoutSeconds: 60,
-    cors: true 
+    cors: true
   },
   async (req, res) => {
     try {
@@ -590,56 +590,89 @@ exports.coaches = onRequest(
         .collection('users')
         .where('role', 'in', ['coach', 'coach-board'])
         .get();
-      
+
       const coaches = [];
-      
+
       for (const doc of usersSnapshot.docs) {
         const userData = doc.data();
-        let profileImageUrl = null;
-        
-        // Try to get profile image URL
+        let headshotUrl = null;
+
+        // Try to get profile image URL - check multiple possible locations
         try {
           const bucket = admin.storage().bucket();
-          const file = bucket.file(`users/${doc.id}/profile.jpg`);
-          const [exists] = await file.exists();
-          
-          if (exists) {
-            const [url] = await file.getSignedUrl({
-              action: 'read',
-              expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-            });
-            profileImageUrl = url;
+
+          // Try different possible image paths
+          const imagePaths = [
+            `users/${doc.id}/profile.jpg`,
+            `users/${doc.id}/profile.png`,
+            `headshots/${doc.id}.jpg`,
+            `headshots/${doc.id}.png`,
+            `headshots/coach_${doc.id}.jpg`,
+            `headshots/coach_${doc.id}.png`
+          ];
+
+          for (const imagePath of imagePaths) {
+            const file = bucket.file(imagePath);
+            const [exists] = await file.exists();
+
+            if (exists) {
+              // Generate a public URL that doesn't expire
+              const bucketName = bucket.name;
+              headshotUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(imagePath)}?alt=media`;
+              logger.info(`Found image for coach ${doc.id} at ${imagePath}`);
+              break;
+            }
+          }
+
+          if (!headshotUrl) {
+            logger.info(`No image found for coach ${doc.id}`);
           }
         } catch (error) {
           logger.warn(`Could not get profile image for coach ${doc.id}:`, error);
         }
-        
+
+        // Combine first and last name into single name field
+        const name = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
+
         coaches.push({
           id: doc.id,
+          name: name || 'Coach',
+          title: userData.jobTitle || userData.title || '',
+          company: userData.company || '',
+          cohort: userData.cohort || userData.graduationYear || 'Coach',
+          headshotUrl: headshotUrl,
+          linkedinUrl: userData.linkedinUrl || userData.linkedIn || '',
+          // Keep original fields for backward compatibility
           firstName: userData.firstName || '',
           lastName: userData.lastName || '',
-          company: userData.company || '',
           jobTitle: userData.jobTitle || '',
-          profileImageUrl,
+          profileImageUrl: headshotUrl,
           role: userData.role
         });
       }
-      
-      res.json({ coaches });
-      
+
+      // Return in the format expected by the website
+      res.json({
+        success: true,
+        coaches: coaches
+      });
+
     } catch (error) {
       logger.error('Error fetching coaches:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error'
+      });
     }
   }
 );
 
-// Students function - for external website integration  
+// Students function - for external website integration
 exports.students = onRequest(
-  { 
-    memory: "256MB", 
+  {
+    memory: "256MB",
     timeoutSeconds: 60,
-    cors: true 
+    cors: true
   },
   async (req, res) => {
     try {
@@ -648,45 +681,72 @@ exports.students = onRequest(
         .collection('users')
         .where('role', '==', 'student')
         .get();
-      
+
       const students = [];
-      
+
       for (const doc of usersSnapshot.docs) {
         const userData = doc.data();
-        let profileImageUrl = null;
-        
-        // Try to get profile image URL
+        let headshotUrl = null;
+
+        // Try to get profile image URL - check multiple possible locations
         try {
           const bucket = admin.storage().bucket();
-          const file = bucket.file(`users/${doc.id}/profile.jpg`);
-          const [exists] = await file.exists();
-          
-          if (exists) {
-            const [url] = await file.getSignedUrl({
-              action: 'read',
-              expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-            });
-            profileImageUrl = url;
+
+          // Try different possible image paths
+          const imagePaths = [
+            `users/${doc.id}/profile.jpg`,
+            `users/${doc.id}/profile.png`,
+            `headshots/${doc.id}.jpg`,
+            `headshots/${doc.id}.png`,
+            `headshots/student_${doc.id}.jpg`,
+            `headshots/student_${doc.id}.png`
+          ];
+
+          for (const imagePath of imagePaths) {
+            const file = bucket.file(imagePath);
+            const [exists] = await file.exists();
+
+            if (exists) {
+              // Generate a public URL that doesn't expire
+              const bucketName = bucket.name;
+              headshotUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(imagePath)}?alt=media`;
+              logger.info(`Found image for student ${doc.id} at ${imagePath}`);
+              break;
+            }
+          }
+
+          if (!headshotUrl) {
+            logger.info(`No image found for student ${doc.id}`);
           }
         } catch (error) {
           logger.warn(`Could not get profile image for student ${doc.id}:`, error);
         }
-        
+
         students.push({
           id: doc.id,
           firstName: userData.firstName || '',
           lastName: userData.lastName || '',
-          major: userData.major || '',
-          graduationYear: userData.graduationYear || '',
-          profileImageUrl
+          major: userData.major || userData.fieldOfStudy || '',
+          graduationYear: userData.graduationYear || userData.expectedGraduation || '',
+          headshotUrl: headshotUrl,
+          linkedinUrl: userData.linkedinUrl || userData.linkedIn || '',
+          // Keep original field for backward compatibility
+          profileImageUrl: headshotUrl
         });
       }
-      
-      res.json({ students });
-      
+
+      // Return in the format expected by the website
+      res.json({
+        success: true,
+        students: students
+      });
+
     } catch (error) {
       logger.error('Error fetching students:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error'
+      });
     }
   }
 );

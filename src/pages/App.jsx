@@ -185,6 +185,7 @@ export default function App() {
   const [major, setMajor] = useState("");
   const [graduationYear, setGraduationYear] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const [isHoveringProfile, setIsHoveringProfile] = useState(false);
 
@@ -282,6 +283,7 @@ export default function App() {
         setMajor(data.major || "");
         setGraduationYear(data.graduationYear || "");
         setLinkedinUrl(data.linkedinUrl || "");
+        setPhoneNumber(data.phoneNumber || "");
         // Mark profile as loaded after setting all fields
         setProfileLoaded(true);
         // do not return here; continue to storage fallback only if no Firestore image
@@ -435,6 +437,7 @@ export default function App() {
           company={company}
           jobTitle={jobTitle}
           linkedinUrl={linkedinUrl}
+          phoneNumber={phoneNumber}
           onProfileImageChange={handleProfileImageChange}
           onSave={(field, value) => {
             if (field === "submit") {
@@ -448,7 +451,8 @@ export default function App() {
                   : ["coach", "board", "employee"].includes(userRole)
                     ? { company, title: jobTitle }
                     : {}),
-                linkedinUrl
+                linkedinUrl,
+                phoneNumber
               }, { merge: true });
               setShowProfile(false);
               showToast("Profile updated successfully!");
@@ -460,7 +464,8 @@ export default function App() {
                 graduationYear: setGraduationYear,
                 company: setCompany,
                 jobTitle: setJobTitle,
-                linkedinUrl: setLinkedinUrl
+                linkedinUrl: setLinkedinUrl,
+                phoneNumber: setPhoneNumber
               };
               if (setters[field]) setters[field](value);
             }

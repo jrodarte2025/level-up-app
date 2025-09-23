@@ -7,6 +7,7 @@ import { useTheme } from "@mui/material/styles";
 import { getDocs, updateDoc, collection, query, where } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { db, auth } from "../firebase";
+import { formatPhoneNumber, validatePhoneNumber, normalizePhoneNumber } from "../utils/phoneValidation";
 
 export default function ProfileModal({
   user,
@@ -21,6 +22,7 @@ export default function ProfileModal({
   company,
   jobTitle,
   linkedinUrl,
+  phoneNumber,
   onProfileImageChange,
   onSave,
   onSignOut,
@@ -36,6 +38,7 @@ export default function ProfileModal({
   const [notificationPermission, setNotificationPermission] = useState(
     typeof Notification !== "undefined" ? Notification.permission : "default"
   );
+  const [phoneError, setPhoneError] = useState("");
 
   // Detect if app is installed as PWA
   const isPWAInstalled = () => {
@@ -273,6 +276,52 @@ export default function ProfileModal({
             </>
           )}
           <input type="url" placeholder="LinkedIn Profile URL" value={linkedinUrl} onChange={(e) => { onSave("linkedinUrl", e.target.value); setHasChanges(true); }} style={inputStyle(theme)} />
+          <div>
+            <input
+              type="tel"
+              placeholder="Phone Number (optional)"
+              value={formatPhoneNumber(phoneNumber || "")}
+              onChange={(e) => {
+                const rawValue = e.target.value;
+                const cleaned = rawValue.replace(/\D/g, '');
+
+                // Allow typing up to 11 digits (1 + 10 for US with country code)
+                if (cleaned.length <= 11) {
+                  // Store the cleaned number
+                  onSave("phoneNumber", cleaned);
+                  setHasChanges(true);
+
+                  // Only validate when they have enough digits or when field is empty
+                  if (cleaned.length === 0) {
+                    setPhoneError("");
+                  } else if (cleaned.length >= 10) {
+                    const validation = validatePhoneNumber(cleaned);
+                    if (!validation.isValid) {
+                      setPhoneError(validation.error || "Invalid phone number");
+                    } else {
+                      setPhoneError("");
+                    }
+                  } else {
+                    // While typing, don't show error until they have 10+ digits
+                    setPhoneError("");
+                  }
+                }
+              }}
+              style={{
+                ...inputStyle(theme),
+                borderColor: phoneError ? "#ef4444" : theme.palette.divider
+              }}
+            />
+            {phoneError && (
+              <div style={{
+                color: "#ef4444",
+                fontSize: "0.8rem",
+                marginTop: "0.25rem"
+              }}>
+                {phoneError}
+              </div>
+            )}
+          </div>
   
   {/* iOS Installation Guide - Show if on iOS Safari and not installed as PWA */}
   {authLoaded && isIOSSafari() && !isPWAInstalled() && (
@@ -357,6 +406,8 @@ export default function ProfileModal({
                   const missingStudentFields = userRole === "student" && (!major?.trim() || !graduationYear);
                   const missingCoachFields = userRole !== "student" && (!company?.trim() || !jobTitle?.trim());
                   const invalidLinkedIn = linkedinUrl?.trim() && !/^((https?:\/\/)?(www\.)?)?linkedin\.com\/.+$/.test(linkedinUrl);
+                  const phoneValidation = validatePhoneNumber(phoneNumber || '');
+                  const invalidPhone = phoneNumber && phoneNumber.length > 0 && !phoneValidation.isValid;
 
                   if (missingName || missingStudentFields || missingCoachFields) {
                     alert("Please complete all required fields.");
@@ -364,6 +415,10 @@ export default function ProfileModal({
                   }
                   if (invalidLinkedIn) {
                     alert("Please enter a valid LinkedIn URL.");
+                    return;
+                  }
+                  if (invalidPhone) {
+                    alert(phoneValidation.error || "Please enter a valid phone number.");
                     return;
                   }
 
