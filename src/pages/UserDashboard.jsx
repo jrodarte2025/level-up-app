@@ -272,6 +272,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
           eventId,
           attending: true,
           guestCount: 0,
+          rsvpTimestamp: serverTimestamp(),
         });
       }
     }
@@ -288,6 +289,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
       eventId: pendingRsvpEvent.id,
       attending: true,
       guestCount: guestCount,
+      rsvpTimestamp: serverTimestamp(),
     });
     
     setPendingRsvpEvent(null);

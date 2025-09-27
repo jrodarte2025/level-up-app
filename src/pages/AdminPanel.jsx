@@ -265,7 +265,8 @@ export default function AdminPanel({ tab }) {
             rsvpDocId: r.id, // Store the actual RSVP document ID for deletion
             role: u.role,
             displayName: u.displayName || `${u.firstName} ${u.lastName}`,
-            guestCount: r.guestCount || 0
+            guestCount: r.guestCount || 0,
+            rsvpTimestamp: r.rsvpTimestamp || null
           };
         } catch (error) {
           console.error(`Error fetching user ${r.userId}:`, error);
@@ -1044,12 +1045,25 @@ export default function AdminPanel({ tab }) {
                           <div style={{ display: "flex", flexDirection: "column" }}>
                             <span>{u.displayName}</span>
                             {u.guestCount > 0 && (
-                              <span style={{ 
-                                fontSize: "0.75rem", 
-                                color: "#6b7280", 
-                                fontStyle: "italic" 
+                              <span style={{
+                                fontSize: "0.75rem",
+                                color: "#6b7280",
+                                fontStyle: "italic"
                               }}>
                                 + {u.guestCount} guest{u.guestCount !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                            {u.rsvpTimestamp && (
+                              <span style={{
+                                fontSize: "0.7rem",
+                                color: "#9ca3af",
+                                marginTop: "0.25rem"
+                              }}>
+                                RSVP'd {new Date(u.rsvpTimestamp.seconds * 1000).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric"
+                                })}
                               </span>
                             )}
                           </div>
@@ -1244,7 +1258,8 @@ export default function AdminPanel({ tab }) {
                     userId: userId,
                     eventId: rsvpEvent.id,
                     attending: true,
-                    guestCount: 0
+                    guestCount: 0,
+                    rsvpTimestamp: Timestamp.now()
                   });
 
                   // Show success notification immediately
