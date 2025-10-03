@@ -25,6 +25,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
   const [matches, setMatches] = useState([]);
   // New: editing state for admin edit mode
   const [isEditing, setIsEditing] = useState(false);
+  const [copiedUid, setCopiedUid] = useState(false);
   // Load the current user's match and all matches
   useEffect(() => {
     const loadMatch = async () => {
@@ -71,6 +72,35 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
     setMyMatchSet(s);
   }, [myUserId, matches]);
   const editable = currentUserIsAdmin;
+
+  const copyUidToClipboard = (uid) => {
+    if (!uid) return;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(uid).then(() => {
+        setCopiedUid(true);
+        setTimeout(() => setCopiedUid(false), 1500);
+      }).catch(err => {
+        console.error("Clipboard error:", err);
+      });
+    } else {
+      // Fallback for insecure context or unsupported clipboard API
+      const textarea = document.createElement("textarea");
+      textarea.value = uid;
+      textarea.style.position = "fixed";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        setCopiedUid(true);
+        setTimeout(() => setCopiedUid(false), 1500);
+      } catch (err) {
+        console.error("Fallback copy failed:", err);
+      }
+      document.body.removeChild(textarea);
+    }
+  };
 
   // Fetch users from Firestore
   useEffect(() => {
@@ -639,6 +669,61 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   {selectedUser.firstName} {selectedUser.lastName}
                 </h2>
 
+                {/* Firebase UID Copy Section (Admin Only) */}
+                {currentUserIsAdmin && (
+                  <div style={{
+                    padding: "0.75rem",
+                    backgroundColor: theme.palette.mode === 'dark' ? "rgba(99, 102, 241, 0.1)" : "#f0f0f0",
+                    borderRadius: "6px",
+                    fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "0.5rem",
+                    marginBottom: "1.25rem"
+                  }}>
+                    <div style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.25rem",
+                      flex: 1,
+                      minWidth: 0
+                    }}>
+                      <span style={{ fontWeight: 600, color: theme.palette.text.primary }}>Firebase UID:</span>
+                      <span style={{
+                        fontFamily: "monospace",
+                        fontSize: "0.75rem",
+                        color: theme.palette.text.secondary,
+                        wordBreak: "break-all"
+                      }}>
+                        {selectedUser.id}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <button
+                        onClick={() => copyUidToClipboard(selectedUser.id)}
+                        style={{
+                          padding: "0.4rem 0.75rem",
+                          fontSize: "0.8rem",
+                          backgroundColor: "#1e2d5f",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        Copy ID
+                      </button>
+                      {copiedUid && (
+                        <span style={{ color: "#16a34a", fontSize: "0.75rem", fontWeight: 500 }}>
+                          Copied!
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Work Section */}
                 <div style={{ marginBottom: "1.25rem" }}>
                   <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
@@ -1121,6 +1206,61 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <h2 style={{ marginBottom: "1rem", fontSize: "1.25rem", fontWeight: 600, color: theme.palette.text.primary }}>
                   {selectedUser.firstName} {selectedUser.lastName}
                 </h2>
+
+                {/* Firebase UID Copy Section (Admin Only) */}
+                {currentUserIsAdmin && (
+                  <div style={{
+                    padding: "0.75rem",
+                    backgroundColor: theme.palette.mode === 'dark' ? "rgba(99, 102, 241, 0.1)" : "#f0f0f0",
+                    borderRadius: "6px",
+                    fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "0.5rem",
+                    marginBottom: "1.25rem"
+                  }}>
+                    <div style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.25rem",
+                      flex: 1,
+                      minWidth: 0
+                    }}>
+                      <span style={{ fontWeight: 600, color: theme.palette.text.primary }}>Firebase UID:</span>
+                      <span style={{
+                        fontFamily: "monospace",
+                        fontSize: "0.75rem",
+                        color: theme.palette.text.secondary,
+                        wordBreak: "break-all"
+                      }}>
+                        {selectedUser.id}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <button
+                        onClick={() => copyUidToClipboard(selectedUser.id)}
+                        style={{
+                          padding: "0.4rem 0.75rem",
+                          fontSize: "0.8rem",
+                          backgroundColor: "#1e2d5f",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap"
+                        }}
+                      >
+                        Copy ID
+                      </button>
+                      {copiedUid && (
+                        <span style={{ color: "#16a34a", fontSize: "0.75rem", fontWeight: 500 }}>
+                          Copied!
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Work Section */}
                 <div style={{ marginBottom: "1.25rem" }}>
