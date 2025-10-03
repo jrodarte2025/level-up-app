@@ -750,3 +750,92 @@ exports.students = onRequest(
     }
   }
 );
+
+// Email notification when a new user registers
+const nodemailer = require('nodemailer');
+
+exports.sendNewUserNotification = onDocumentCreated('users/{userId}', async (event) => {
+  try {
+    const userData = event.data?.data();
+    const userId = event.params.userId;
+
+    if (!userData) {
+      logger.warn('No user data found in document creation event');
+      return;
+    }
+
+    logger.info(`New user registered: ${userData.email || userId}`);
+
+    // Configure your email settings using Firebase environment config
+    // To set these, run: firebase functions:config:set gmail.email="your-email@gmail.com" gmail.password="your-app-password"
+    const gmailEmail = functions.config().gmail?.email;
+    const gmailPassword = functions.config().gmail?.password;
+    const adminEmail = functions.config().admin?.email;
+
+    if (!gmailEmail || !gmailPassword || !adminEmail) {
+      logger.warn('Gmail credentials or admin email not configured. Skipping email notification.');
+      logger.info('To configure, run:');
+      logger.info('firebase functions:config:set gmail.email="your-email@gmail.com" gmail.password="your-app-password" admin.email="admin@example.com"');
+      return;
+    }
+
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: gmailEmail,
+        pass: gmailPassword
+      }
+    });
+
+    // Format user info
+    const userName = userData.displayName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'N/A';
+    const userEmail = userData.email || 'N/A';
+    const userRole = userData.role || 'student';
+    const timestamp = new Date().toLocaleString();
+
+    // Email content
+    const mailOptions = {
+      from: gmailEmail,
+      to: adminEmail,
+      subject: `🎉 New User Registration - ${userName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1e2d5f;">New User Registered</h2>
+          <p>A new user has registered for the Level Up App!</p>
+
+          <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">User Details:</h3>
+            <p><strong>Name:</strong> ${userName}</p>
+            <p><strong>Email:</strong> ${userEmail}</p>
+            <p><strong>Role:</strong> ${userRole.charAt(0).toUpperCase() + userRole.slice(1)}</p>
+            <p><strong>Firebase UID:</strong> <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 3px;">${userId}</code></p>
+            <p><strong>Registration Time:</strong> ${timestamp}</p>
+          </div>
+
+          <p style="margin-top: 20px;">
+            <a href="https://level-up-app-c9f47.web.app"
+               style="background-color: #1e2d5f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              View in Admin Panel
+            </a>
+          </p>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
+          <p style="color: #666; font-size: 12px;">
+            This is an automated notification from Level Up App.<br>
+            Firebase Project: level-up-app-c9f47
+          </p>
+        </div>
+      `
+    };
+
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
+    logger.info(`New user notification email sent successfully: ${info.messageId}`);
+    logger.info(`Email sent to: ${adminEmail}`);
+
+  } catch (error) {
+    logger.error('Error sending new user notification email:', error);
+    // Don't throw - let the function complete even if email fails
+  }
+});
