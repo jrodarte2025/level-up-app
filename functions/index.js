@@ -755,16 +755,21 @@ exports.students = onRequest(
 const nodemailer = require('nodemailer');
 
 exports.sendNewUserNotification = onDocumentCreated('users/{userId}', async (event) => {
+  logger.info('=== sendNewUserNotification triggered ===');
+
   try {
     const userData = event.data?.data();
     const userId = event.params.userId;
+
+    logger.info(`Event data received for user ID: ${userId}`);
+    logger.info(`User data:`, JSON.stringify(userData));
 
     if (!userData) {
       logger.warn('No user data found in document creation event');
       return;
     }
 
-    logger.info(`New user registered: ${userData.email || userId}`);
+    logger.info(`Processing new user registration: ${userData.email || userId}`);
 
     // Configure your email settings using Firebase environment config
     // To set these, run: firebase functions:config:set gmail.email="your-email@gmail.com" gmail.password="your-app-password"
@@ -779,9 +784,11 @@ exports.sendNewUserNotification = onDocumentCreated('users/{userId}', async (eve
       return;
     }
 
-    // Create transporter
+    // Create transporter (works with both Gmail and Google Workspace)
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // use TLS
       auth: {
         user: gmailEmail,
         pass: gmailPassword
