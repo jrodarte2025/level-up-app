@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to validate phone number format
+    function isValidPhoneNumber(phone) {
+      return phone == '' || phone.matches('^[0-9]{10}');
+    }
+
+    // ADMIN CHECK - Updated to check isAdmin field
+    function isAdmin() {
+      let userData = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return userData.isAdmin == true || userData.role == "admin";
+    }
+
+    // USERS
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if (request.auth.uid == userId || isAdmin()) &&
+        (!('phoneNumber' in request.resource.data) ||
+         isValidPhoneNumber(request.resource.data.phoneNumber));
+      allow delete: if isAdmin(); // Added explicit delete rule for admins
+    }
+
+    // NOTIFICATION TOKENS
+    match /notification_tokens/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // POSTS
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+      // COMMENTS on posts
+      match /comments/{commentId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth.uid == request.resource.data.userId;
+        allow delete: if request.auth.uid == resource.data.userId;
+        // REACTIONS on comments
+        match /reactions/{reactionId} {
+          allow read: if request.auth != null;
+          allow write: if request.auth.uid == reactionId;
+          allow delete: if request.auth.uid == reactionId;
+        }
+      }
+      // REACTIONS on posts
+      match /reactions/{reactionId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth.uid == reactionId;
+        allow delete: if request.auth.uid == reactionId;
+      }
+    }
+
+    // MATCHES
+    match /matches/{matchId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // EVENTS
+    match /events/{eventId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // RESOURCES
+    match /resources/{resourceId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() && isValidRoles();
+      function isValidRoles() {
+        let allowed = ["student", "coach", "board", "employee"];
+        let data = request.resource.data.role;
+        return (data is string && allowed.hasAny([data])) ||
+               (data is list && data.size() > 0 && data.hasOnly(allowed));
+      }
+    }
+
+    // RSVPS
+    match /rsvps/{rsvpId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if request.auth != null &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // REGISTRATION CODES
+    match /registrationCodes/{codeId} {
+      allow read: if true; // Allow public read access for signup validation
+    }
+
+    // Allow collection listing for signed-in users
+    match /{document=**} {
+      allow list: if request.auth != null;
+    }
+  }
+}
