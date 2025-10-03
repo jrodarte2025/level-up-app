@@ -39,6 +39,7 @@ export default function ProfileModal({
     typeof Notification !== "undefined" ? Notification.permission : "default"
   );
   const [phoneError, setPhoneError] = useState("");
+  const [copiedUid, setCopiedUid] = useState(false);
 
   // Detect if app is installed as PWA
   const isPWAInstalled = () => {
@@ -79,6 +80,36 @@ export default function ProfileModal({
   }, [authLoaded]);
 
   const isSelf = auth.currentUser?.uid && user?.uid && auth.currentUser.uid === user.uid;
+
+  const copyUidToClipboard = () => {
+    const uid = user?.uid;
+    if (!uid) return;
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(uid).then(() => {
+        setCopiedUid(true);
+        setTimeout(() => setCopiedUid(false), 1500);
+      }).catch(err => {
+        console.error("Clipboard error:", err);
+      });
+    } else {
+      // Fallback for insecure context or unsupported clipboard API
+      const textarea = document.createElement("textarea");
+      textarea.value = uid;
+      textarea.style.position = "fixed";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        setCopiedUid(true);
+        setTimeout(() => setCopiedUid(false), 1500);
+      } catch (err) {
+        console.error("Fallback copy failed:", err);
+      }
+      document.body.removeChild(textarea);
+    }
+  };
 
   return (
     <div
@@ -260,6 +291,58 @@ export default function ProfileModal({
                 />
                 <span style={{ fontWeight: 500, fontSize: "0.85rem" }}>Alumni</span>
               </label>
+            </div>
+          )}
+          {isAdmin === true && (
+            <div style={{
+              padding: "0.75rem",
+              backgroundColor: theme.palette.mode === 'dark' ? "rgba(99, 102, 241, 0.1)" : "#f0f0f0",
+              borderRadius: "6px",
+              fontSize: "0.85rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "0.5rem"
+            }}>
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.25rem",
+                flex: 1,
+                minWidth: 0
+              }}>
+                <span style={{ fontWeight: 600, color: theme.palette.text.primary }}>Firebase UID:</span>
+                <span style={{
+                  fontFamily: "monospace",
+                  fontSize: "0.75rem",
+                  color: theme.palette.text.secondary,
+                  wordBreak: "break-all"
+                }}>
+                  {user?.uid}
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <button
+                  onClick={copyUidToClipboard}
+                  style={{
+                    padding: "0.4rem 0.75rem",
+                    fontSize: "0.8rem",
+                    backgroundColor: theme.palette.primary.main,
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  Copy ID
+                </button>
+                {copiedUid && (
+                  <span style={{ color: "#16a34a", fontSize: "0.75rem", fontWeight: 500 }}>
+                    Copied!
+                  </span>
+                )}
+              </div>
             </div>
           )}
           <input type="text" placeholder="First Name" value={firstName} onChange={(e) => { onSave("firstName", e.target.value); setHasChanges(true); }} style={inputStyle(theme)} />
