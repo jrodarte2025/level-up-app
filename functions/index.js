@@ -9,6 +9,9 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 const { setGlobalOptions } = require("firebase-functions");
 const { onRequest } = require("firebase-functions/v2/https");
 const functions = require("firebase-functions");
@@ -754,6 +757,76 @@ exports.students = onRequest(
 // Email notification when a new user registers
 const nodemailer = require('nodemailer');
 
+// Test endpoint to manually send a test email
+exports.testEmail = onRequest(
+  { memory: "256MB", timeoutSeconds: 60 },
+  async (req, res) => {
+    try {
+      logger.info('=== Test email endpoint called ===');
+
+      const gmailEmail = process.env.GMAIL_EMAIL;
+      const gmailPassword = process.env.GMAIL_PASSWORD;
+      const adminEmail = process.env.ADMIN_EMAIL;
+
+      if (!gmailEmail || !gmailPassword || !adminEmail) {
+        res.status(500).json({
+          error: 'Email configuration missing',
+          config: {
+            hasEmail: !!gmailEmail,
+            hasPassword: !!gmailPassword,
+            hasAdminEmail: !!adminEmail
+          }
+        });
+        return;
+      }
+
+      logger.info(`Attempting to send test email from ${gmailEmail} to ${adminEmail}`);
+
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: gmailEmail,
+          pass: gmailPassword
+        }
+      });
+
+      const mailOptions = {
+        from: gmailEmail,
+        to: adminEmail,
+        subject: '✅ Test Email - Email System Working',
+        html: `
+          <h2>Email System Test Successful!</h2>
+          <p>This is a test email from your Level Up App Cloud Function.</p>
+          <p><strong>From:</strong> ${gmailEmail}</p>
+          <p><strong>To:</strong> ${adminEmail}</p>
+          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+          <p>If you received this, your email notification system is configured correctly!</p>
+        `
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      logger.info(`Test email sent successfully: ${info.messageId}`);
+
+      res.status(200).json({
+        success: true,
+        messageId: info.messageId,
+        from: gmailEmail,
+        to: adminEmail
+      });
+
+    } catch (error) {
+      logger.error('Error sending test email:', error);
+      res.status(500).json({
+        error: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+    }
+  }
+);
+
 exports.sendNewUserNotification = onDocumentCreated('users/{userId}', async (event) => {
   logger.info('=== sendNewUserNotification triggered ===');
 
@@ -771,16 +844,14 @@ exports.sendNewUserNotification = onDocumentCreated('users/{userId}', async (eve
 
     logger.info(`Processing new user registration: ${userData.email || userId}`);
 
-    // Configure your email settings using Firebase environment config
-    // To set these, run: firebase functions:config:set gmail.email="your-email@gmail.com" gmail.password="your-app-password"
-    const gmailEmail = functions.config().gmail?.email;
-    const gmailPassword = functions.config().gmail?.password;
-    const adminEmail = functions.config().admin?.email;
+    // Use environment variables (Firebase Functions v2 way)
+    const gmailEmail = process.env.GMAIL_EMAIL;
+    const gmailPassword = process.env.GMAIL_PASSWORD;
+    const adminEmail = process.env.ADMIN_EMAIL;
 
     if (!gmailEmail || !gmailPassword || !adminEmail) {
       logger.warn('Gmail credentials or admin email not configured. Skipping email notification.');
-      logger.info('To configure, run:');
-      logger.info('firebase functions:config:set gmail.email="your-email@gmail.com" gmail.password="your-app-password" admin.email="admin@example.com"');
+      logger.info('Set environment variables: GMAIL_EMAIL, GMAIL_PASSWORD, ADMIN_EMAIL');
       return;
     }
 
