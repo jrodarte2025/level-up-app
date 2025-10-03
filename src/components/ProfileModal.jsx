@@ -293,7 +293,7 @@ export default function ProfileModal({
               </label>
             </div>
           )}
-          {isAdmin === true && (
+          {isAdmin === true && !isSelf && (
             <div style={{
               padding: "0.75rem",
               backgroundColor: theme.palette.mode === 'dark' ? "rgba(99, 102, 241, 0.1)" : "#f0f0f0",
