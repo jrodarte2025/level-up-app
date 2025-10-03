@@ -1343,10 +1343,18 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 <button
                   onClick={async () => {
                     if (window.confirm("Delete this user? This cannot be undone.")) {
-                      await deleteDoc(doc(db, "users", selectedUser.id));
-                      setUsers(users.filter(u => u.id !== selectedUser.id));
-                      setSelectedUser(null);
-                      setIsEditing(false);
+                      try {
+                        console.log('Deleting user:', selectedUser.id);
+                        await deleteDoc(doc(db, "users", selectedUser.id));
+                        console.log('User deleted successfully');
+                        setUsers(users.filter(u => u.id !== selectedUser.id));
+                        setSelectedUser(null);
+                        setIsEditing(false);
+                        alert('User deleted successfully');
+                      } catch (error) {
+                        console.error('Error deleting user:', error);
+                        alert(`Error deleting user: ${error.message}`);
+                      }
                     }
                   }}
                   style={{ backgroundColor: "#ef4444", color: "#fff", padding: "0.5rem 1rem", border: "none", borderRadius: "6px", cursor: "pointer" }}
