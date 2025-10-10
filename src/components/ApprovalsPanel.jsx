@@ -45,7 +45,7 @@ const ApprovalsPanel = () => {
             <div>
               <strong>{code.code}</strong>{" "}
               <span style={{ color: "var(--brand-medium-gray)" }}>
-                – {code.role === "student" ? "Standard User" : (code.role === "admin" || code.isAdmin === true) ? "Admin" : code.role}
+                – {(code.code === "!levelup!" || code.id === "!levelup!" || code.role === "student") ? "Standard User" : (code.role === "admin" || code.isAdmin === true) ? "Admin" : code.role}
               </span>
               {/* label intentionally not shown */}
             </div>
