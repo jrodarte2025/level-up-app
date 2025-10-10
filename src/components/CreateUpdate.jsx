@@ -264,7 +264,7 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
             <Checkbox
               checked={forStudents}
               onChange={() => setForStudents(!forStudents)}
-              sx={{ color: "#1e2a78", "&.Mui-checked": { color: "#1e2a78" } }}
+              sx={{ color: "#18264E", "&.Mui-checked": { color: "#18264E" } }}
             />
           }
           label="Students"
@@ -274,7 +274,7 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
             <Checkbox
               checked={forCoaches}
               onChange={() => setForCoaches(!forCoaches)}
-              sx={{ color: "#1e2a78", "&.Mui-checked": { color: "#1e2a78" } }}
+              sx={{ color: "#18264E", "&.Mui-checked": { color: "#18264E" } }}
             />
           }
           label="Coaches"
@@ -290,9 +290,9 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
                 setForCoaches(checked);
               }}
               sx={{
-                color: "#1e2a78",
-                "&.Mui-checked": { color: "#1e2a78" },
-                "&.MuiCheckbox-indeterminate": { color: "#1e2a78" }
+                color: "#18264E",
+                "&.Mui-checked": { color: "#18264E" },
+                "&.MuiCheckbox-indeterminate": { color: "#18264E" }
               }}
             />
           }
@@ -303,7 +303,7 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
       <Button
         variant="contained"
         sx={{
-          backgroundColor: postToEdit ? "#92400e" : "#1e2a78",
+          backgroundColor: postToEdit ? "#92400e" : "#18264E",
           textTransform: "none",
           fontWeight: 500,
           fontSize: "1rem",

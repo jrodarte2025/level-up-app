@@ -185,7 +185,7 @@ export default function Signup({ onSignupComplete }) {
           <button
             onClick={() => { setForm(prev => ({ ...prev, role: "student" })); handleNext(); }}
             style={{
-              backgroundColor: "#F15F5E", // coral
+              backgroundColor: "var(--brand-primary-coral)", // coral
               color: "#fff",
               padding: "0.75rem",
               borderRadius: "6px",
@@ -200,7 +200,7 @@ export default function Signup({ onSignupComplete }) {
           <button
             onClick={() => { setForm(prev => ({ ...prev, role: "coach" })); handleNext(); }}
             style={{
-              backgroundColor: "#1e2d5f", // dark blue
+              backgroundColor: "var(--brand-primary-blue)", // dark blue
               color: "#fff",
               padding: "0.75rem",
               borderRadius: "6px",
@@ -356,7 +356,7 @@ export default function Signup({ onSignupComplete }) {
             <button
               type="submit"
               style={{
-                backgroundColor: "#1e2d5f",
+                backgroundColor: "var(--brand-primary-blue)",
                 color: "#fff",
                 padding: "0.75rem",
                 borderRadius: "6px",
@@ -539,7 +539,7 @@ export default function Signup({ onSignupComplete }) {
             <button
               type="submit"
               style={{
-                backgroundColor: "#1e2d5f",
+                backgroundColor: "var(--brand-primary-blue)",
                 color: "#fff",
                 padding: "0.75rem",
                 borderRadius: "6px",
@@ -629,7 +629,7 @@ export default function Signup({ onSignupComplete }) {
             <button
               onClick={handleNext}
               style={{
-                backgroundColor: "#1e2d5f",
+                backgroundColor: "var(--brand-primary-blue)",
                 color: "#fff",
                 padding: "0.75rem",
                 borderRadius: "6px",
@@ -697,7 +697,7 @@ export default function Signup({ onSignupComplete }) {
             <button
               onClick={handleSubmit}
               style={{
-                backgroundColor: "#F15F5E",
+                backgroundColor: "var(--brand-primary-coral)",
                 color: "#fff",
                 padding: "0.75rem",
                 borderRadius: "6px",

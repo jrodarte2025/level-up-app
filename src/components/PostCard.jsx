@@ -382,7 +382,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                       width: 20,
                       height: 20,
                       borderRadius: '50%',
-                      backgroundColor: '#1e2a78',
+                      backgroundColor: '#18264E',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

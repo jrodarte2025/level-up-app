@@ -169,7 +169,7 @@ export default function Login({ onLogin = () => {} }) {
         <Link to="/signup" style={{ width: "100%", display: "inline-block", textAlign: "center" }}>
           <button
             className="button-primary"
-            style={{ width: "100%", backgroundColor: "#F15F5E", color: "#fff" }}
+            style={{ width: "100%", backgroundColor: "var(--brand-primary-coral)", color: "#fff" }}
           >
             New User? Sign Up
           </button>

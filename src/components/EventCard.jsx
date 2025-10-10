@@ -106,7 +106,7 @@ export default function EventCard({
             position: "absolute",
             top: "0.75rem",
             right: "0.75rem",
-            backgroundColor: "#F15F5E",
+            backgroundColor: "var(--brand-primary-coral)",
             color: "#fff",
             padding: "0.25rem 0.5rem",
             borderRadius: "4px",
@@ -137,7 +137,7 @@ export default function EventCard({
             onRSVP?.(id);
           }}
           style={{
-            backgroundColor: "#F15F5E",
+            backgroundColor: "var(--brand-primary-coral)",
             color: "#fff",
             padding: "0.5rem 1rem",
             fontSize: "0.95rem",
@@ -149,7 +149,7 @@ export default function EventCard({
             margin: "0.75rem"
           }}
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#d14b4a"}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#F15F5E"}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--brand-primary-coral)"}
         >
           RSVP
         </button>

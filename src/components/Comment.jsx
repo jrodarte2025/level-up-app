@@ -165,7 +165,7 @@ const Comment = ({
               width: depth > 0 ? 28 : 32,
               height: depth > 0 ? 28 : 32,
               borderRadius: "50%",
-              backgroundColor: theme.palette.primary.main || "#1e2a78",
+              backgroundColor: theme.palette.primary.main || "#18264E",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -260,7 +260,7 @@ const Comment = ({
               type="submit"
               style={{
                 padding: "0.5rem 1rem",
-                backgroundColor: "#1e2d5f",
+                backgroundColor: "var(--brand-primary-blue)",
                 color: "#fff",
                 border: "none",
                 borderRadius: "6px",

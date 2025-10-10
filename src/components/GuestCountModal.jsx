@@ -189,7 +189,7 @@ export default function GuestCountModal({
             style={{
               padding: "0.75rem 1.5rem",
               border: "none",
-              backgroundColor: "#F15F5E",
+              backgroundColor: "var(--brand-primary-coral)",
               color: "#fff",
               borderRadius: "8px",
               fontSize: "0.9rem",

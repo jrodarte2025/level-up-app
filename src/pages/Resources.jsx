@@ -145,8 +145,8 @@ export default function Resources() {
               }}
               style={{
                 backgroundColor: theme.palette.background.paper,
-                color: "#1E2D5F",
-                border: "1px solid #1E2D5F",
+                color: "var(--brand-primary-blue)",
+                border: "1px solid var(--brand-primary-blue)",
                 padding: "0.5rem 1rem",
                 borderRadius: "6px",
                 fontWeight: 600,

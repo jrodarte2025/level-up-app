@@ -1603,7 +1603,7 @@ export default function AdminPanel({ tab }) {
                           rel="noopener noreferrer"
                           style={{
                             backgroundColor: "#f3f4f6",
-                            color: "#1e2d5f",
+                            color: "#18264E",
                             padding: "0.5rem 1rem",
                             borderRadius: "6px",
                             fontSize: "0.875rem",
@@ -1739,7 +1739,7 @@ export default function AdminPanel({ tab }) {
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
-                            color: "#1e40af",
+                            color: "#F15F5E",
                             fontSize: "0.9rem",
                             display: "inline-block",
                             wordWrap: "break-word"

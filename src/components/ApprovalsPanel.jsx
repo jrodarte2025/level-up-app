@@ -72,8 +72,8 @@ const ApprovalsPanel = () => {
                 style={{
                   padding: "0.3rem 0.75rem",
                   fontSize: "0.85rem",
-                  backgroundColor: "#e0e7ff",
-                  color: "#1e3a8a",
+                  backgroundColor: "#6B7BA8",
+                  color: "#fff",
                   border: "none",
                   borderRadius: "6px",
                   cursor: "pointer"

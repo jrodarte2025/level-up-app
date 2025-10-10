@@ -28,7 +28,7 @@ export default function AvatarList({ users }) {
               border: user.isMatch
                 ? (theme.palette.mode === 'dark'
                     ? '2px solid #ffffff'
-                    : `2px solid ${['coach', 'coach-board'].includes(user.role) ? '#1e2d5f' : '#F15F5E'}`)
+                    : `2px solid ${['coach', 'coach-board'].includes(user.role) ? '#18264E' : '#F15F5E'}`)
                 : 'none'
             }}
           />
@@ -38,7 +38,7 @@ export default function AvatarList({ users }) {
               color: user.isMatch
                 ? (theme.palette.mode === 'dark'
                     ? '#ffffff'
-                    : ['coach', 'coach-board'].includes(user.role) ? '#1e2d5f' : '#F15F5E')
+                    : ['coach', 'coach-board'].includes(user.role) ? '#18264E' : '#F15F5E')
                 : undefined,
               marginTop: "0.25rem",
               fontWeight: 600

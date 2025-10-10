@@ -329,8 +329,8 @@ export default function PasswordResetPanel() {
               padding: "1rem",
               borderRadius: "6px",
               marginBottom: "1rem",
-              backgroundColor: "#e0f2fe",
-              border: "1px solid #0284c7"
+              backgroundColor: "#e3f2fd",
+              border: "1px solid #6B7BA8"
             }}>
               <strong>Reset Link Generated:</strong>
               <div style={{
@@ -352,7 +352,7 @@ export default function PasswordResetPanel() {
                   }}
                   style={{
                     padding: "0.5rem 1rem",
-                    backgroundColor: "#0284c7",
+                    backgroundColor: "#6B7BA8",
                     color: "white",
                     border: "none",
                     borderRadius: "6px",

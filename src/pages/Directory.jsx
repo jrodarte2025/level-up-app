@@ -183,14 +183,14 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
     { key: "future-coach", label: "Future Coaches" },
   ];
 
-  // Role badge background colors
+  // Role badge background colors - Level Up Cincinnati Brand Palette
   const roleColors = {
-    coach: "#1e2d5f",
-    student: "#F15F5E",
-    board: "#2D7D7D",
-    "coach-board": "#7c3aed",
-    "future-coach": "#34D399",
-    admin: "#6B7280"
+    coach: "#18264E",          // Primary Blue - leadership/authority
+    student: "#F15F5E",        // Primary Coral - energy/learning
+    board: "#4CAFB6",          // Accent Teal - governance
+    "coach-board": "#4CAFB6",  // Accent Teal - hybrid role (rare, can share)
+    "future-coach": "#6B7BA8", // Soft Blue - aspiring coach
+    admin: "#18264E"           // Primary Blue - leadership (Level Up Team)
   };
 
   return (
@@ -409,7 +409,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                         fontWeight: 500,
                         padding: "0.2rem 0.5rem",
                         borderRadius: "4px",
-                        backgroundColor: "#3b82f6",
+                        backgroundColor: "#4CAFB6",
                         color: "#fff"
                       }}
                     >
@@ -818,7 +818,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                     setIsEditing(false);
                   }}
                   style={{
-                    backgroundColor: "#1e2d5f",
+                    backgroundColor: "var(--brand-primary-blue)",
                     color: "#fff",
                     padding: "0.75rem 1rem",
                     border: "none",
@@ -1210,7 +1210,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                         style={{
                           padding: "0.75rem 1.25rem",
                           fontSize: "0.9rem",
-                          backgroundColor: "#1e2d5f",
+                          backgroundColor: "var(--brand-primary-blue)",
                           color: "#fff",
                           border: "none",
                           borderRadius: "6px",
@@ -1336,7 +1336,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                     setSelectedUser(null);
                     setIsEditing(false);
                   }}
-                  style={{ backgroundColor: "#1e2d5f", color: "#fff", padding: "0.5rem 1rem", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                  style={{ backgroundColor: "var(--brand-primary-blue)", color: "#fff", padding: "0.5rem 1rem", border: "none", borderRadius: "6px", cursor: "pointer" }}
                 >
                   Save
                 </button>
