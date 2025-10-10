@@ -12,9 +12,13 @@ const ApprovalsPanel = () => {
       const snapshot = await getDocs(collection(db, "registrationCodes"));
       const codes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       // Only show !levelup! (standard user) and admin codes
-      const filteredCodes = codes.filter(code =>
-        code.code === "!levelup!" || code.role === "admin" || code.isAdmin === true
-      );
+      const filteredCodes = codes.filter(code => {
+        // Show if it's the !levelup! code (by code field or document ID)
+        const isLevelUpCode = code.code === "!levelup!" || code.id === "!levelup!";
+        // Show if it's an admin code
+        const isAdminCode = code.role === "admin" || code.isAdmin === true;
+        return isLevelUpCode || isAdminCode;
+      });
       setRegistrationCodes(filteredCodes);
     };
     fetchCodes();
