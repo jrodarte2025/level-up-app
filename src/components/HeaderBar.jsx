@@ -6,29 +6,38 @@ export default function HeaderBar({ title, profileImage, onProfileClick, onLogoC
   const theme = useTheme();
   return (
     <AppBar position="static" elevation={0} color="default" sx={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
-        <Box onClick={onLogoClick} sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-          <Box component="img" src="/logo.png" alt="Level Up Cincinnati" sx={{ height: 32, objectFit: "contain" }} />
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 64 }}>
+        <Box onClick={onLogoClick} sx={{ display: "flex", alignItems: "center", cursor: "pointer", flex: 1, justifyContent: "flex-start" }}>
+          <Box component="img" src="/logo.png" alt="Level Up Cincinnati" sx={{ height: 32, objectFit: "contain", maxWidth: 120 }} />
         </Box>
         <Typography
           variant="h6"
           noWrap
-          sx={{ flex: 1, textAlign: "center", fontWeight: 600, color: theme.palette.text.primary }}
+          sx={{
+            flex: 1,
+            textAlign: "center",
+            fontWeight: 600,
+            color: theme.palette.text.primary,
+            overflow: "hidden",
+            textOverflow: "ellipsis"
+          }}
         >
           {title}
         </Typography>
-        <IconButton onClick={onProfileClick} title="View Profile">
-          <Avatar
-            src={profileImage}
-            alt="User"
-            sx={{
-              width: 32,
-              height: 32,
-              transition: "opacity 0.2s",
-              "&:hover": { opacity: 0.85 }
-            }}
-          />
-        </IconButton>
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+          <IconButton onClick={onProfileClick} title="View Profile">
+            <Avatar
+              src={profileImage}
+              alt="User"
+              sx={{
+                width: 32,
+                height: 32,
+                transition: "opacity 0.2s",
+                "&:hover": { opacity: 0.85 }
+              }}
+            />
+          </IconButton>
+        </Box>
       </Toolbar>
     </AppBar>
   );
