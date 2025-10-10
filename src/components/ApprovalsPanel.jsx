@@ -11,7 +11,11 @@ const ApprovalsPanel = () => {
     const fetchCodes = async () => {
       const snapshot = await getDocs(collection(db, "registrationCodes"));
       const codes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRegistrationCodes(codes);
+      // Only show !levelup! (standard user) and admin codes
+      const filteredCodes = codes.filter(code =>
+        code.code === "!levelup!" || code.role === "admin" || code.isAdmin === true
+      );
+      setRegistrationCodes(filteredCodes);
     };
     fetchCodes();
   }, []);
