@@ -136,15 +136,15 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                   marginBottom: '0.25em',
                 },
                 '& blockquote': {
-                  borderLeft: '3px solid #e5e7eb',
+                  borderLeft: '3px solid var(--brand-muted-gray)',
                   marginLeft: 0,
                   marginRight: 0,
                   paddingLeft: '1rem',
-                  color: '#6b7280',
+                  color: 'var(--brand-medium-gray)',
                   fontStyle: 'italic',
                 },
                 '& pre': {
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: 'var(--brand-off-white)',
                   borderRadius: '0.375rem',
                   color: '#111827',
                   fontFamily: 'monospace',
@@ -153,7 +153,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
                   overflowX: 'auto',
                 },
                 '& code': {
-                  backgroundColor: '#f3f4f6',
+                  backgroundColor: 'var(--brand-off-white)',
                   borderRadius: '0.25rem',
                   color: '#111827',
                   fontFamily: 'monospace',
@@ -278,7 +278,7 @@ const PostCard = ({ post, onCommentClick, onLikeClick, onEmojiReaction, onEditCl
               justifyContent: "center",
               fontSize: "0.75rem",
               fontWeight: 600,
-              color: "#374151"
+              color: "var(--brand-deep-gray)"
             }}
           >
             {post.displayName?.charAt(0) || "?"}

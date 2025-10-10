@@ -43,7 +43,7 @@ const MenuBar = ({ editor }) => {
         p: 1,
         borderBottom: '1px solid',
         borderColor: 'divider',
-        backgroundColor: '#f9fafb',
+        backgroundColor: 'var(--brand-off-white)',
         borderRadius: '8px 8px 0 0',
       }}
     >
@@ -205,7 +205,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your update he
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          style: 'color: #F15F5E; text-decoration: underline;',
+          style: 'color: var(--brand-primary-coral); text-decoration: underline;',
         },
       }),
       Placeholder.configure({
@@ -285,15 +285,15 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your update he
               marginBottom: '0.25em',
             },
             '& blockquote': {
-              borderLeft: '3px solid #e5e7eb',
+              borderLeft: '3px solid var(--brand-muted-gray)',
               marginLeft: 0,
               marginRight: 0,
               paddingLeft: '1rem',
-              color: '#6b7280',
+              color: 'var(--brand-medium-gray)',
               fontStyle: 'italic',
             },
             '& pre': {
-              backgroundColor: '#f3f4f6',
+              backgroundColor: 'var(--brand-off-white)',
               borderRadius: '0.375rem',
               color: '#111827',
               fontFamily: 'monospace',
@@ -302,7 +302,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your update he
               overflowX: 'auto',
             },
             '& code': {
-              backgroundColor: '#f3f4f6',
+              backgroundColor: 'var(--brand-off-white)',
               borderRadius: '0.25rem',
               color: '#111827',
               fontFamily: 'monospace',
@@ -310,15 +310,15 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your update he
               padding: '0.125rem 0.25rem',
             },
             '& a': {
-              color: '#F15F5E',
+              color: 'var(--brand-primary-coral)',
               textDecoration: 'underline',
               cursor: 'pointer',
               '&:hover': {
-                color: '#FFA69E',
+                color: 'var(--brand-light-coral)',
               },
             },
             '& .is-editor-empty:first-child::before': {
-              color: '#9ca3af',
+              color: 'var(--brand-light-gray)',
               content: 'attr(data-placeholder)',
               float: 'left',
               height: 0,

@@ -339,7 +339,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
     <div style={{ padding: "1rem", maxWidth: "1100px", margin: "0 auto" }}>
       {/* Event Filters Subtitle and Controls */}
       <div style={{ maxWidth: "600px", margin: "0 auto 1.5rem", padding: "0 1rem", textAlign: "center" }}>
-        <p style={{ margin: 0, marginBottom: "0.5rem", fontSize: "0.875rem", color: "#6b7280", fontWeight: 500 }}>
+        <p style={{ margin: 0, marginBottom: "0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)", fontWeight: 500 }}>
           Event Filters
         </p>
         <div style={{
@@ -396,7 +396,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
           })}
         </div>
       ) : (
-        <p style={{ color: "#6b7280", fontSize: "0.95rem" }}>No events match your filters.</p>
+        <p style={{ color: "var(--brand-medium-gray)", fontSize: "0.95rem" }}>No events match your filters.</p>
       )}
       {/* Slide-up Profile Modal */}
       {showProfile && (
@@ -443,7 +443,7 @@ export default function UserDashboard({ setShowAdminPanel }) {
                 background: "transparent",
                 border: "none",
                 fontSize: "1.25rem",
-                color: "#6b7280",
+                color: "var(--brand-medium-gray)",
                 cursor: "pointer"
               }}
               aria-label="Close"

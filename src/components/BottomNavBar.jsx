@@ -58,11 +58,11 @@ export default function BottomNavBar({ tabs, selectedTab, onTabChange }) {
             sx={{
               padding: "0.5rem 0.25rem",
               minWidth: 0,
-              color: selectedTab === tab.key ? "#F15F5E" : theme.palette.text.secondary,
+              color: selectedTab === tab.key ? "var(--brand-primary-coral)" : theme.palette.text.secondary,
               "&.Mui-selected, &.Mui-focusVisible": {
                 outline: "none",
                 boxShadow: "none",
-                color: "#F15F5E"
+                color: "var(--brand-primary-coral)"
               },
               "& .MuiBottomNavigationAction-label": {
                 fontSize: "0.75rem",

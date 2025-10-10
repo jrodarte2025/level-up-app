@@ -162,7 +162,7 @@ const MatchMakingPanel = () => {
       </Typography>
       <Typography
         variant="body2"
-        sx={{ color: "#6b7280", mb: 2 }}
+        sx={{ color: "var(--brand-medium-gray)", mb: 2 }}
       >
         Pair students with their coaches below.
       </Typography>
@@ -202,8 +202,8 @@ const MatchMakingPanel = () => {
                     mb: 2,
                     borderRadius: 2,
                     boxShadow: 1,
-                    border: selectedStudent?.id === student.id ? "2px solid #1976d2" : "1px solid #ccc",
-                    backgroundColor: selectedStudent?.id === student.id ? "#f0f6ff" : "background.paper",
+                    border: selectedStudent?.id === student.id ? "2px solid var(--brand-primary-blue)" : "1px solid var(--brand-muted-gray)",
+                    backgroundColor: selectedStudent?.id === student.id ? "var(--brand-off-white)" : "background.paper",
                     cursor: "pointer",
                     transition: "0.2s",
                   }}
@@ -214,13 +214,13 @@ const MatchMakingPanel = () => {
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      backgroundColor: "#e5e7eb",
+                      backgroundColor: "var(--brand-muted-gray)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontWeight: 600,
                       fontSize: "0.85rem",
-                      color: "#374151",
+                      color: "var(--brand-deep-gray)",
                     }}
                   >
                     {student.firstName?.charAt(0)}
@@ -263,8 +263,8 @@ const MatchMakingPanel = () => {
                     mb: 2,
                     borderRadius: 2,
                     boxShadow: 1,
-                    border: selectedCoach?.id === coach.id ? "2px solid #1976d2" : "1px solid #ccc",
-                    backgroundColor: selectedCoach?.id === coach.id ? "#f0f6ff" : "background.paper",
+                    border: selectedCoach?.id === coach.id ? "2px solid var(--brand-primary-blue)" : "1px solid var(--brand-muted-gray)",
+                    backgroundColor: selectedCoach?.id === coach.id ? "var(--brand-off-white)" : "background.paper",
                     cursor: "pointer",
                     transition: "0.2s",
                   }}
@@ -275,13 +275,13 @@ const MatchMakingPanel = () => {
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      backgroundColor: "#e5e7eb",
+                      backgroundColor: "var(--brand-muted-gray)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontWeight: 600,
                       fontSize: "0.85rem",
-                      color: "#374151",
+                      color: "var(--brand-deep-gray)",
                     }}
                   >
                     {coach.firstName?.charAt(0)}

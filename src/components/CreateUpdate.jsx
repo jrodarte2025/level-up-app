@@ -109,7 +109,7 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
     <Box
       id="update-form"
       sx={{
-        backgroundColor: { xs: "transparent", sm: "#fff" },
+        backgroundColor: { xs: "transparent", sm: "var(--brand-white)" },
         borderRadius: { xs: 0, sm: "12px" },
         padding: { xs: "1rem", sm: "1.5rem" },
         boxShadow: { xs: "none", sm: postToEdit ? "0 0 12px rgba(251,191,36,0.3)" : "0 4px 8px rgba(0,0,0,0.05)" },
@@ -158,7 +158,7 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
       </Typography>
       <Typography
         variant="body2"
-        sx={{ color: "#6b7280", fontSize: "0.875rem", mb: 1 }}
+        sx={{ color: "var(--brand-medium-gray)", fontSize: "0.875rem", mb: 1 }}
       >
         {postToEdit 
           ? "Modify your update below. Changes will be saved immediately."
@@ -245,7 +245,7 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
 
       <Typography
         variant="body1"
-        sx={{ mt: 3, mb: 0.5, fontWeight: 600, fontSize: "1rem", color: "#374151" }}
+        sx={{ mt: 3, mb: 0.5, fontWeight: 600, fontSize: "1rem", color: "var(--brand-deep-gray)" }}
       >
         Select Audience
       </Typography>
@@ -254,7 +254,7 @@ export default function CreateUpdate({ postToEdit = null, onFinish = () => {} })
           display: "flex",
           gap: 2,
           flexWrap: "wrap",
-          backgroundColor: "#f9fafb",
+          backgroundColor: "var(--brand-off-white)",
           padding: "0.75rem",
           borderRadius: "6px"
         }}

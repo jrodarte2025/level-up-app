@@ -418,11 +418,11 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                   )}
                 </div>
               </div>
-              <div style={{ fontSize: "1.25rem", color: "#6b7280" }}>›</div>
+              <div style={{ fontSize: "1.25rem", color: "var(--brand-medium-gray)" }}>›</div>
             </div>
           ))
         ) : (
-          <p style={{ textAlign: "center", color: "#6b7280", fontSize: "0.95rem" }}>
+          <p style={{ textAlign: "center", color: "var(--brand-medium-gray)", fontSize: "0.95rem" }}>
             No users found. Try adjusting your search or filter.
           </p>
         )}
@@ -488,7 +488,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 background: "transparent",
                 border: "none",
                 fontSize: "1.25rem",
-                color: "#6b7280",
+                color: "var(--brand-medium-gray)",
                 cursor: "pointer"
               }}
               aria-label="Close"
@@ -525,7 +525,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                     <>
                       {/* Name Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Name</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Name</h4>
                         <input
                           type="text"
                           value={editForm.firstName}
@@ -544,7 +544,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* Work Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Work</h4>
                         {["coach", "board", "coach-board", "future-coach", "admin"].includes(editForm.role) ? (
                           <>
                             {["board", "coach-board"].includes(editForm.role) && (
@@ -593,7 +593,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* Contact Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Contact Info</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Contact Info</h4>
                         <input
                           type="email"
                           value={editForm.email}
@@ -618,7 +618,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* LinkedIn Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>LinkedIn</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>LinkedIn</h4>
                         <input
                           type="text"
                           value={editForm.linkedinUrl}
@@ -630,7 +630,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* Role and Alumni (Admin Only) */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Admin Controls</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Admin Controls</h4>
                         <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>User Role</label>
                         <select
                           value={editForm.role}
@@ -671,7 +671,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                 {/* Work Section */}
                 <div style={{ marginBottom: "1.25rem" }}>
-                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
+                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
                     {(["coach", "board", "coach-board", "future-coach", "admin"].includes(selectedUser.role))
                       ? (selectedUser.title && selectedUser.company
@@ -685,7 +685,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                 {/* Contact Section */}
                 <div style={{ marginBottom: "1.25rem" }}>
-                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Contact Info</h4>
+                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Contact Info</h4>
                   <p style={{ margin: 0 }}>
                     <a
                       href={`mailto:${selectedUser.email}`}
@@ -706,7 +706,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 {/* LinkedIn Section */}
                 {selectedUser.linkedinUrl && (
                   <div style={{ marginBottom: "1rem" }}>
-                    <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>LinkedIn</h4>
+                    <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>LinkedIn</h4>
                     <a
                       href={selectedUser.linkedinUrl}
                       target="_blank"
@@ -778,7 +778,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                         }}
                       />
                       <div style={{ textAlign: "left" }}>
-                        <div style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>Matched With</div>
+                        <div style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>Matched With</div>
                         <div style={{ fontWeight: 500, fontSize: "0.9rem", color: theme.palette.text.primary }}>
                           {match.firstName} {match.lastName}
                         </div>
@@ -971,7 +971,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 background: "transparent",
                 border: "none",
                 fontSize: "1.25rem",
-                color: "#6b7280",
+                color: "var(--brand-medium-gray)",
                 cursor: "pointer"
               }}
               aria-label="Close"
@@ -1008,7 +1008,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                     <>
                       {/* Name Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Name</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Name</h4>
                         <input
                           type="text"
                           value={editForm.firstName}
@@ -1027,7 +1027,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* Work Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Work</h4>
                         {["coach", "board", "coach-board", "future-coach", "admin"].includes(editForm.role) ? (
                           <>
                             {["board", "coach-board"].includes(selectedUser.role) && (
@@ -1076,7 +1076,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* Contact Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Contact Info</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Contact Info</h4>
                         <input
                           type="email"
                           value={editForm.email}
@@ -1101,7 +1101,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* LinkedIn Section */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>LinkedIn</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>LinkedIn</h4>
                         <input
                           type="text"
                           value={editForm.linkedinUrl}
@@ -1113,7 +1113,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                       {/* Role and Alumni (Admin Only) */}
                       <div style={{ marginBottom: "1.25rem", textAlign: "left" }}>
-                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "#6b7280" }}>Admin Controls</h4>
+                        <h4 style={{ margin: "0 0 0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Admin Controls</h4>
                         <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>User Role</label>
                         <select
                           value={editForm.role}
@@ -1154,7 +1154,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                 {/* Work Section */}
                 <div style={{ marginBottom: "1.25rem" }}>
-                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Work</h4>
+                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Work</h4>
                   <p style={{ margin: 0, fontSize: "1rem", fontWeight: 500 }}>
                     {(["coach", "board", "coach-board", "future-coach", "admin"].includes(selectedUser.role))
                       ? (selectedUser.title && selectedUser.company
@@ -1168,7 +1168,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
 
                 {/* Contact Section */}
                 <div style={{ marginBottom: "1.25rem" }}>
-                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>Contact Info</h4>
+                  <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>Contact Info</h4>
                   <p style={{ margin: 0 }}>
                     <a
                       href={`mailto:${selectedUser.email}`}
@@ -1189,7 +1189,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                 {/* LinkedIn Section */}
                 {selectedUser.linkedinUrl && (
                   <div style={{ marginBottom: "1rem" }}>
-                    <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "#6b7280" }}>LinkedIn</h4>
+                    <h4 style={{ margin: "0 0 0.25rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)" }}>LinkedIn</h4>
                     <a
                       href={selectedUser.linkedinUrl}
                       target="_blank"
@@ -1297,7 +1297,7 @@ export default function Directory({ roleFilter = "all", showAdminPanel = false }
                         }}
                       />
                       <div style={{ textAlign: "left" }}>
-                        <div style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>Matched With</div>
+                        <div style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>Matched With</div>
                         <div style={{ fontWeight: 500, fontSize: "0.9rem", color: theme.palette.text.primary }}>
                           {match.firstName} {match.lastName}
                         </div>

@@ -416,7 +416,7 @@ const PostPage = () => {
         style={{
           background: "none",
           border: "none",
-          color: "#F15F5E",
+          color: "var(--brand-primary-coral)",
           fontWeight: 500,
           fontSize: "0.875rem",
           textDecoration: "underline",
@@ -462,7 +462,7 @@ const PostPage = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    color: "#F15F5E",
+                    color: "var(--brand-primary-coral)",
                     textDecoration: "underline"
                   }}
                 />
@@ -477,7 +477,7 @@ const PostPage = () => {
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color: "#F15F5E",
+                color: "var(--brand-primary-coral)",
                 textDecoration: "underline",
                 fontSize: "0.875rem"
               }}

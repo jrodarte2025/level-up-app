@@ -159,7 +159,7 @@ export default function ProfileModal({
             border: "none",
             fontSize: "1.25rem",
             lineHeight: "1",
-            color: "#6b7280",
+            color: "var(--brand-medium-gray)",
             cursor: "pointer"
           }}
         >

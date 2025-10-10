@@ -312,7 +312,7 @@ export default function EventCard({
                 }}
                 style={{
                   margin: 0,
-                  color: "#F15F5E",
+                  color: "var(--brand-primary-coral)",
                   fontSize: "0.85rem",
                   fontWeight: 600,
                   cursor: "pointer",

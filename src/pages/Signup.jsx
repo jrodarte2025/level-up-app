@@ -347,7 +347,7 @@ export default function Signup({ onSignupComplete }) {
             Don’t have a code?{" "}
             <a
               href={`mailto:hello@levelupcincinnati.org?subject=Registration Code Request from ${form.email}&body=You have a new registration code request from ${form.firstName} ${form.lastName} at ${form.email}.%0D%0AIf this is an approved user, please send them a registration code as soon as possible.`}
-              style={{ color: "#F15F5E", textDecoration: "underline" }}
+              style={{ color: "var(--brand-primary-coral)", textDecoration: "underline" }}
             >
               Request one now
             </a>
@@ -570,7 +570,7 @@ export default function Signup({ onSignupComplete }) {
 
       {step === 4 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", alignItems: "center" }}>
-          <p style={{ fontSize: "0.9rem", color: "#374151", textAlign: "center" }}>
+          <p style={{ fontSize: "0.9rem", color: "var(--brand-deep-gray)", textAlign: "center" }}>
             Upload your headshot (square image preferred)
           </p>
           {previewUrl && (
@@ -721,7 +721,7 @@ export default function Signup({ onSignupComplete }) {
           className="button-link"
           onClick={() => navigate("/login")}
           style={{
-            color: "#F15F5E",
+            color: "var(--brand-primary-coral)",
             background: "none",
             border: "none",
             textDecoration: "underline",

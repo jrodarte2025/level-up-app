@@ -560,13 +560,13 @@ export default function AdminPanel({ tab }) {
           <p style={{
             fontSize: "0.75rem",
             fontWeight: 500,
-            color: "#6b7280",
+            color: "var(--brand-medium-gray)",
             textTransform: "uppercase",
             marginBottom: "1.5rem",
             letterSpacing: "0.04em"
           }}>
           </p>
-          <hr style={{ border: "none", borderTop: "1px solid #e5e7eb", marginBottom: "1.5rem" }} />
+          <hr style={{ border: "none", borderTop: "1px solid var(--brand-muted-gray)", marginBottom: "1.5rem" }} />
           {success && (
             <div style={{ 
               position: "fixed", 
@@ -707,7 +707,7 @@ export default function AdminPanel({ tab }) {
                   <label style={{
                     fontSize: "0.75rem",
                     fontWeight: 600,
-                    color: "#6b7280",
+                    color: "var(--brand-medium-gray)",
                     marginBottom: "0.25rem",
                     textTransform: "uppercase",
                     letterSpacing: "0.04em"
@@ -738,7 +738,7 @@ export default function AdminPanel({ tab }) {
                 <label style={{
                   fontSize: "0.75rem",
                   fontWeight: 600,
-                  color: "#6b7280",
+                  color: "var(--brand-medium-gray)",
                   marginBottom: "0.25rem",
                   textTransform: "uppercase",
                   letterSpacing: "0.04em"
@@ -776,7 +776,7 @@ export default function AdminPanel({ tab }) {
                 <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 500 }}>
                   <input type="checkbox" name="allowGuests" checked={form.allowGuests} onChange={handleChange} />
                   Allow Guests
-                  <span style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "0.5rem" }}>
+                  <span style={{ fontSize: "0.8rem", color: "var(--brand-medium-gray)", marginLeft: "0.5rem" }}>
                     (People can bring additional guests when RSVPing)
                   </span>
                 </label>
@@ -784,7 +784,7 @@ export default function AdminPanel({ tab }) {
                   <label style={{
                     fontSize: "0.75rem",
                     fontWeight: 600,
-                    color: "#6b7280",
+                    color: "var(--brand-medium-gray)",
                     marginBottom: "0.25rem",
                     textTransform: "uppercase",
                     letterSpacing: "0.04em"
@@ -849,14 +849,14 @@ export default function AdminPanel({ tab }) {
                 </button>
             </form>
           </div>
-          <hr style={{ margin: "2rem 0", border: "none", borderTop: "1px solid #e5e7eb" }} />
+          <hr style={{ margin: "2rem 0", border: "none", borderTop: "1px solid var(--brand-muted-gray)" }} />
           <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "1rem" }}>📅 Upcoming Events</h3>
           <ul style={{ listStyle: "none", padding: 0 }}>
             {sortEventsByDateTime(filterUpcomingEvents(events))
               .map((event) => (
-                <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+                <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid var(--brand-muted-gray)", borderRadius: "8px" }}>
                   <strong>{event.name}</strong>
-                  <p style={{ margin: "0.25rem 0", color: "#6b7280" }}>
+                  <p style={{ margin: "0.25rem 0", color: "var(--brand-medium-gray)" }}>
                     {event.date?.seconds
                       ? new Date(event.date.seconds * 1000).toLocaleDateString("en-US", {
                           weekday: "short",
@@ -910,9 +910,9 @@ export default function AdminPanel({ tab }) {
               })
               .sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0))
               .map((event) => (
-                <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#f9fafb" }}>
+                <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid var(--brand-muted-gray)", borderRadius: "8px", backgroundColor: "var(--brand-off-white)" }}>
                   <strong>{event.name}</strong>
-                  <p style={{ margin: "0.25rem 0", color: "#6b7280" }}>
+                  <p style={{ margin: "0.25rem 0", color: "var(--brand-medium-gray)" }}>
                     {event.date?.seconds
                       ? new Date(event.date.seconds * 1000).toLocaleDateString("en-US", {
                           weekday: "short",
@@ -986,7 +986,7 @@ export default function AdminPanel({ tab }) {
               style={{
                 position: "absolute", top: "0.5rem", right: "0.5rem",
                 background: "transparent", border: "none", fontSize: "1.25rem",
-                color: "#6b7280", cursor: "pointer"
+                color: "var(--brand-medium-gray)", cursor: "pointer"
               }}
               aria-label="Close"
             >×</button>
@@ -1039,7 +1039,7 @@ export default function AdminPanel({ tab }) {
                             justifyContent: "space-between",
                             alignItems: "center",
                             padding: "0.5rem 0",
-                            borderBottom: "1px solid #e5e7eb"
+                            borderBottom: "1px solid var(--brand-muted-gray)"
                           }}
                         >
                           <div style={{ display: "flex", flexDirection: "column" }}>
@@ -1047,7 +1047,7 @@ export default function AdminPanel({ tab }) {
                             {u.guestCount > 0 && (
                               <span style={{
                                 fontSize: "0.75rem",
-                                color: "#6b7280",
+                                color: "var(--brand-medium-gray)",
                                 fontStyle: "italic"
                               }}>
                                 + {u.guestCount} guest{u.guestCount !== 1 ? 's' : ''}
@@ -1056,7 +1056,7 @@ export default function AdminPanel({ tab }) {
                             {u.rsvpTimestamp && (
                               <span style={{
                                 fontSize: "0.7rem",
-                                color: "#9ca3af",
+                                color: "var(--brand-light-gray)",
                                 marginTop: "0.25rem"
                               }}>
                                 RSVP'd {new Date(u.rsvpTimestamp.seconds * 1000).toLocaleDateString("en-US", {
@@ -1126,7 +1126,7 @@ export default function AdminPanel({ tab }) {
                     <strong>Guests</strong>
                     <p style={{ 
                       fontSize: "0.9rem", 
-                      color: "#6b7280", 
+                      color: "var(--brand-medium-gray)", 
                       margin: "0.25rem 0",
                       fontStyle: "italic"
                     }}>
@@ -1156,7 +1156,7 @@ export default function AdminPanel({ tab }) {
                     return totalPeople + totalGuests;
                   })()}
                 </strong>
-                <span style={{ fontSize: "0.8rem", color: "#6b7280", marginLeft: "0.5rem" }}>
+                <span style={{ fontSize: "0.8rem", color: "var(--brand-medium-gray)", marginLeft: "0.5rem" }}>
                   ({rsvpAttendees.filter(u => rsvpRoleFilter === "all" || u.role === rsvpRoleFilter).length} RSVPs 
                   {(() => {
                     const totalGuests = rsvpAttendees
@@ -1193,7 +1193,7 @@ export default function AdminPanel({ tab }) {
                 padding: "0.5rem",
                 fontSize: "0.9rem",
                 marginBottom: "0.5rem",
-                border: `1px solid ${rsvpSelectedUser ? "#10b981" : "#d1d5db"}`,
+                border: `1px solid ${rsvpSelectedUser ? "var(--brand-success)" : "var(--brand-muted-gray)"}`,
                 borderRadius: "4px"
               }}
               list="rsvp-user-options"
@@ -1424,7 +1424,7 @@ export default function AdminPanel({ tab }) {
               <label style={{
                 fontSize: "0.75rem",
                 fontWeight: 600,
-                color: "#6b7280",
+                color: "var(--brand-medium-gray)",
                 marginBottom: "0.25rem",
                 textTransform: "uppercase",
                 letterSpacing: "0.04em"
@@ -1514,7 +1514,7 @@ export default function AdminPanel({ tab }) {
             </button>
           </form>
           {/* Existing Resources section */}
-          <hr style={{ margin: "2rem 0", border: "none", borderTop: "1px solid #e5e7eb" }} />
+          <hr style={{ margin: "2rem 0", border: "none", borderTop: "1px solid var(--brand-muted-gray)" }} />
           <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "1rem" }}>Existing Resources</h3>
           <input
             type="text"
@@ -1567,7 +1567,7 @@ export default function AdminPanel({ tab }) {
                       }}
                     >
                       <strong>{r.title}</strong>
-                      <p style={{ margin: "0.25rem 0", color: "#6b7280" }}>
+                      <p style={{ margin: "0.25rem 0", color: "var(--brand-medium-gray)" }}>
                         {r.type} — {r.section}
                       </p>
                       <div
@@ -1640,14 +1640,14 @@ export default function AdminPanel({ tab }) {
           postToEdit={posts.find(p => p.id === editingPostId) || null}
           onFinish={() => setEditingPostId(null)}
         />
-        <hr style={{ margin: "2rem 0", borderTop: "1px solid #e5e7eb" }} />
+        <hr style={{ margin: "2rem 0", borderTop: "1px solid var(--brand-muted-gray)" }} />
         <h4 style={{ fontWeight: 600, marginBottom: "1rem" }}>Existing Posts</h4>
         {/* Filter controls for posts */}
         <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e5e7eb", fontSize: "0.9rem" }}
+            style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--brand-muted-gray)", fontSize: "0.9rem" }}
           >
             <option value="">All Types</option>
             <option value="announcement">Announcement</option>
@@ -1659,7 +1659,7 @@ export default function AdminPanel({ tab }) {
           <select
             value={filterAudience}
             onChange={(e) => setFilterAudience(e.target.value)}
-            style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e5e7eb", fontSize: "0.9rem" }}
+            style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--brand-muted-gray)", fontSize: "0.9rem" }}
           >
             <option value="">All Audiences</option>
             <option value="student">Students</option>
@@ -1673,7 +1673,7 @@ export default function AdminPanel({ tab }) {
             (!filterAudience || p.roles?.includes(filterAudience))
           );
           return filteredPosts.length === 0 ? (
-            <p style={{ fontSize: "0.9rem", color: "#6b7280", fontStyle: "italic", marginTop: "1rem" }}>
+            <p style={{ fontSize: "0.9rem", color: "var(--brand-medium-gray)", fontStyle: "italic", marginTop: "1rem" }}>
               No posts found for the selected filters.
             </p>
           ) : (
@@ -1682,7 +1682,7 @@ export default function AdminPanel({ tab }) {
                 key={p.id}
                 onClick={() => setExpandedPostId(prev => prev === p.id ? null : p.id)}
                 style={{
-                  border: "1px solid #e5e7eb",
+                  border: "1px solid var(--brand-muted-gray)",
                   padding: "1rem 1.25rem",
                   borderRadius: "10px",
                   marginBottom: "1.25rem",
@@ -1739,7 +1739,7 @@ export default function AdminPanel({ tab }) {
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
-                            color: "#F15F5E",
+                            color: "var(--brand-primary-coral)",
                             fontSize: "0.9rem",
                             display: "inline-block",
                             wordWrap: "break-word"
