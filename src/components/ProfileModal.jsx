@@ -338,7 +338,7 @@ export default function ProfileModal({
                   Copy ID
                 </button>
                 {copiedUid && (
-                  <span style={{ color: "#16a34a", fontSize: "0.75rem", fontWeight: 500 }}>
+                  <span style={{ color: "#10b981", fontSize: "0.75rem", fontWeight: 500 }}>
                     Copied!
                   </span>
                 )}

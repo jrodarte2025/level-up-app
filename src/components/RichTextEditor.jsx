@@ -205,7 +205,7 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your update he
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          style: 'color: #1e40af; text-decoration: underline;',
+          style: 'color: #F15F5E; text-decoration: underline;',
         },
       }),
       Placeholder.configure({
@@ -310,11 +310,11 @@ const RichTextEditor = ({ content, onChange, placeholder = "Write your update he
               padding: '0.125rem 0.25rem',
             },
             '& a': {
-              color: '#1e40af',
+              color: '#F15F5E',
               textDecoration: 'underline',
               cursor: 'pointer',
               '&:hover': {
-                color: '#1e3a8a',
+                color: '#FFA69E',
               },
             },
             '& .is-editor-empty:first-child::before': {

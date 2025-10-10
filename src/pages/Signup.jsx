@@ -185,7 +185,7 @@ export default function Signup({ onSignupComplete }) {
           <button
             onClick={() => { setForm(prev => ({ ...prev, role: "student" })); handleNext(); }}
             style={{
-              backgroundColor: "#F66E5B", // coral
+              backgroundColor: "#F15F5E", // coral
               color: "#fff",
               padding: "0.75rem",
               borderRadius: "6px",
@@ -347,7 +347,7 @@ export default function Signup({ onSignupComplete }) {
             Don’t have a code?{" "}
             <a
               href={`mailto:hello@levelupcincinnati.org?subject=Registration Code Request from ${form.email}&body=You have a new registration code request from ${form.firstName} ${form.lastName} at ${form.email}.%0D%0AIf this is an approved user, please send them a registration code as soon as possible.`}
-              style={{ color: "#F66E5B", textDecoration: "underline" }}
+              style={{ color: "#F15F5E", textDecoration: "underline" }}
             >
               Request one now
             </a>
@@ -697,7 +697,7 @@ export default function Signup({ onSignupComplete }) {
             <button
               onClick={handleSubmit}
               style={{
-                backgroundColor: "#F66E5B",
+                backgroundColor: "#F15F5E",
                 color: "#fff",
                 padding: "0.75rem",
                 borderRadius: "6px",
@@ -721,7 +721,7 @@ export default function Signup({ onSignupComplete }) {
           className="button-link"
           onClick={() => navigate("/login")}
           style={{
-            color: "#F66E5B",
+            color: "#F15F5E",
             background: "none",
             border: "none",
             textDecoration: "underline",

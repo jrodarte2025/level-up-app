@@ -47,12 +47,12 @@
 }
 
 .post-content-html a {
-  color: #1e40af;
+  color: var(--brand-primary-coral);
   text-decoration: underline;
 }
 
 .post-content-html a:hover {
-  color: #1e3a8a;
+  color: var(--brand-light-coral);
 }
 
 .post-content-html blockquote {

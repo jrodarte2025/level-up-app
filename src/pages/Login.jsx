@@ -169,7 +169,7 @@ export default function Login({ onLogin = () => {} }) {
         <Link to="/signup" style={{ width: "100%", display: "inline-block", textAlign: "center" }}>
           <button
             className="button-primary"
-            style={{ width: "100%", backgroundColor: "#F66E5B", color: "#fff" }}
+            style={{ width: "100%", backgroundColor: "#F15F5E", color: "#fff" }}
           >
             New User? Sign Up
           </button>
@@ -199,10 +199,10 @@ export default function Login({ onLogin = () => {} }) {
             width: "90%",
             textAlign: "center"
           }}>
-            <div style={{ 
-              fontSize: "2rem", 
+            <div style={{
+              fontSize: "2rem",
               marginBottom: "1rem",
-              color: resetMessage.includes("sent") ? "#4caf50" : "#ff9800"
+              color: resetMessage.includes("sent") ? "#10b981" : "#ff9800"
             }}>
               {resetMessage.includes("sent") ? "✓" : "ℹ"}
             </div>
@@ -210,11 +210,11 @@ export default function Login({ onLogin = () => {} }) {
               {resetMessage.includes("sent") ? "Email Sent!" : "Action Required"}
             </h3>
             <p style={{ fontSize: "1rem", marginBottom: "1.5rem", lineHeight: "1.5" }}>{resetMessage}</p>
-            <button 
-              className="button-primary" 
+            <button
+              className="button-primary"
               onClick={() => setResetMessage("")}
               style={{
-                backgroundColor: resetMessage.includes("sent") ? "#4caf50" : theme.palette.primary.main,
+                backgroundColor: resetMessage.includes("sent") ? "#10b981" : theme.palette.primary.main,
                 minWidth: "100px"
               }}
             >

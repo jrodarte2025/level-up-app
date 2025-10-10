@@ -79,7 +79,7 @@ export default function EventCard({
             position: "absolute",
             top: "0.75rem",
             left: "0.75rem",
-            backgroundColor: "#1e2d5f",
+            backgroundColor: "#18264E",
             color: "#fff",
             padding: "0.25rem 0.5rem",
             borderRadius: "4px",

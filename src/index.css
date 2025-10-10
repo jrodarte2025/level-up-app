@@ -1,8 +1,33 @@
 :root {
-  --color-text: #213547;
+  /* Legacy variables - to be deprecated */
+  --color-text: var(--brand-deep-gray);
   --color-bg: #ffffff;
   --color-card-bg: #ffffff;
   --color-border: #e5e7eb;
+
+  /* === Level Up Cincinnati Brand Colors === */
+
+  /* Primary Colors (60% of design) */
+  --brand-primary-blue: #18264E;
+  --brand-primary-coral: #F15F5E;
+
+  /* Secondary Colors (30% of design) */
+  --brand-soft-blue: #6B7BA8;
+  --brand-light-coral: #FFA69E;
+
+  /* Accent Colors (10% of design) */
+  --brand-muted-gray: #d8d9df;
+  --brand-accent-teal: #4CAFB6;
+
+  /* Functional Colors */
+  --brand-success: #10b981;
+
+  /* Neutral Colors */
+  --brand-deep-gray: #111827;
+  --brand-medium-gray: #4b5563;
+  --brand-light-gray: #9ca3af;
+  --brand-off-white: #f3f4f6;
+  --brand-white: #ffffff;
 
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -54,7 +79,7 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--brand-light-coral);
 }
 button:focus,
 button:focus-visible {
@@ -63,7 +88,7 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: var(--brand-deep-gray);
     background-color: #ffffff;
   }
   a:hover {
@@ -76,11 +101,11 @@ button:focus-visible {
 
 /* === Button Variants === */
 .button-primary {
-  background-color: #1e2d5f;
+  background-color: var(--brand-primary-blue);
   color: white;
 }
 .button-primary:hover {
-  background-color: #16234a;
+  background-color: #0f1a3a;
 }
 
 .button-danger {
@@ -107,14 +132,14 @@ button:focus-visible {
   border-radius: 9999px;
   border: 1px solid #ccc;
   background-color: #fff;
-  color: #1e2d5f;
+  color: var(--brand-primary-blue);
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .button-toggle.active {
-  background-color: #1e2d5f;
+  background-color: var(--brand-primary-blue);
   color: #fff;
-  border-color: #1e2d5f;
+  border-color: var(--brand-primary-blue);
 }
