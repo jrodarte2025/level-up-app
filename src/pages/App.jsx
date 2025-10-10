@@ -521,12 +521,12 @@ export default function App() {
             <AppShell
               title={
                 !showAdminPanel
-                  ? (selectedTab === "events" ? "Upcoming Events"
+                  ? (selectedTab === "events" ? "Events"
                     : selectedTab === "directory" ? "Directory"
                     : selectedTab === "resources" ? "Resources"
                     : selectedTab === "updates" ? "Updates"
                     : "")
-                  : (selectedTab === "events" ? "Upcoming Events"
+                  : (selectedTab === "events" ? "Events"
                     : selectedTab === "directory" ? "Directory"
                     : selectedTab === "adminMatches" ? (pendingApprovalCount > 0 ? `Admin (${pendingApprovalCount})` : "Admin")
                     : selectedTab === "resources" ? "Resources"
