@@ -103,21 +103,67 @@ exports.sendTestPush = onRequest(
 
 
 exports.sendUpdateNotification = onDocumentCreated('posts/{postId}', async (event) => {
+  const post = event.data?.data();
+  const visibleTo = post?.visibleTo || [];
+
+  logger.info(`New post created: ${post?.title}`);
+  logger.info(`Target audience (visibleTo): ${JSON.stringify(visibleTo)}`);
+
+  // If no audience specified, don't send notifications
+  if (visibleTo.length === 0) {
+    logger.warn("Post has no target audience (visibleTo is empty). Skipping notifications.");
+    return;
+  }
+
+  // Helper function to check if a user's role matches the visibleTo array
+  const roleMatches = (userRole, visibleTo) => {
+    if (!userRole) return false;
+
+    // Direct match
+    if (visibleTo.includes(userRole)) return true;
+
+    // Handle composite roles
+    if (userRole === "coach-board") {
+      return visibleTo.includes("coach") || visibleTo.includes("board");
+    }
+    if (userRole === "future-coach") {
+      return visibleTo.includes("coach");
+    }
+
+    return false;
+  };
+
+  // Get all users and filter by role
+  const usersSnapshot = await admin.firestore().collection("users").get();
+  const targetUserIds = usersSnapshot.docs
+    .filter(doc => roleMatches(doc.data()?.role, visibleTo))
+    .map(doc => doc.id);
+
+  logger.info(`Found ${targetUserIds.length} users with matching roles out of ${usersSnapshot.size} total users`);
+
+  if (targetUserIds.length === 0) {
+    logger.info(`No users found matching roles: ${visibleTo.join(', ')}`);
+    return;
+  }
+
+  // Get notification tokens only for target users
   const tokensSnapshot = await admin.firestore().collection("notification_tokens").get();
   const tokenDocs = tokensSnapshot.docs.filter(doc => {
     const token = doc.data()?.token;
-    return typeof token === 'string' && token.length > 0;
+    const userId = doc.id;
+    const isTargetUser = targetUserIds.includes(userId);
+    const hasValidToken = typeof token === 'string' && token.length > 0;
+    return isTargetUser && hasValidToken;
   });
 
   if (tokenDocs.length === 0) {
-    logger.info("No tokens available for update notification");
+    logger.info("No notification tokens available for target users");
     return;
   }
 
   const tokens = tokenDocs.map(doc => doc.data().token);
-  logger.info(`Collected ${tokens.length} tokens for update push`);
+  logger.info(`Sending notifications to ${tokens.length} devices (filtered by role)`);
 
-  const post = event.data?.data();
   const message = {
     notification: {
       title: `📢 New Update: ${post.title}`,
@@ -126,7 +172,7 @@ exports.sendUpdateNotification = onDocumentCreated('posts/{postId}', async (even
     tokens
   };
 
-  logger.info("Sending update notification:", message);
+  logger.info("Sending update notification to filtered audience");
 
   try {
     const messaging = admin.messaging();
@@ -135,23 +181,23 @@ exports.sendUpdateNotification = onDocumentCreated('posts/{postId}', async (even
       successCount: response.successCount,
       failureCount: response.failureCount
     });
-    
+
     // Handle failed tokens
     if (response.failureCount > 0) {
       const tokensToDelete = [];
       const batch = admin.firestore().batch();
-      
+
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
           const errorCode = resp.error?.code;
           const token = tokens[idx];
           const tokenDocId = tokenDocs[idx].id;
-          
+
           logger.warn(`Failed to send to token ${token.substring(0, 10)}...`, {
             errorCode,
             errorMessage: resp.error?.message
           });
-          
+
           // Remove invalid/unregistered tokens
           if (errorCode === 'messaging/registration-token-not-registered' ||
               errorCode === 'messaging/invalid-registration-token' ||
@@ -162,14 +208,14 @@ exports.sendUpdateNotification = onDocumentCreated('posts/{postId}', async (even
           }
         }
       });
-      
+
       // Execute batch deletion if there are tokens to delete
       if (tokensToDelete.length > 0) {
         await batch.commit();
         logger.info(`Cleaned up ${tokensToDelete.length} invalid FCM tokens from Firestore`);
       }
     }
-    
+
     return response;
   } catch (error) {
     logger.error("Error sending update notification:", error);
@@ -178,21 +224,74 @@ exports.sendUpdateNotification = onDocumentCreated('posts/{postId}', async (even
 });
 
 exports.sendEventNotification = onDocumentCreated('events/{eventId}', async (event) => {
+  const eventData = event.data?.data();
+  const eventGroups = eventData?.groups || [];
+
+  logger.info(`New event created: ${eventData?.name}`);
+  logger.info(`Target groups: ${JSON.stringify(eventGroups)}`);
+
+  // If no groups specified, don't send notifications
+  if (eventGroups.length === 0) {
+    logger.warn("Event has no target groups. Skipping notifications.");
+    return;
+  }
+
+  // Convert event groups ("coaches", "students") to user roles ("coach", "student")
+  // and handle composite roles
+  const roleMatches = (userRole, eventGroups) => {
+    if (!userRole) return false;
+
+    // Map event groups to roles
+    const hasCoaches = eventGroups.includes("coaches");
+    const hasStudents = eventGroups.includes("students");
+
+    // Direct role matches
+    if (userRole === "coach" && hasCoaches) return true;
+    if (userRole === "student" && hasStudents) return true;
+    if (userRole === "board" && hasCoaches) return true; // Boards typically attend coach events
+
+    // Composite roles
+    if (userRole === "coach-board") {
+      return hasCoaches; // Coach-board users get coach events
+    }
+    if (userRole === "future-coach") {
+      return hasCoaches; // Future coaches get coach events
+    }
+
+    return false;
+  };
+
+  // Get all users and filter by role
+  const usersSnapshot = await admin.firestore().collection("users").get();
+  const targetUserIds = usersSnapshot.docs
+    .filter(doc => roleMatches(doc.data()?.role, eventGroups))
+    .map(doc => doc.id);
+
+  logger.info(`Found ${targetUserIds.length} users with matching roles out of ${usersSnapshot.size} total users`);
+
+  if (targetUserIds.length === 0) {
+    logger.info(`No users found matching groups: ${eventGroups.join(', ')}`);
+    return;
+  }
+
+  // Get notification tokens only for target users
   const tokensSnapshot = await admin.firestore().collection("notification_tokens").get();
   const tokenDocs = tokensSnapshot.docs.filter(doc => {
     const token = doc.data()?.token;
-    return typeof token === 'string' && token.length > 0;
+    const userId = doc.id;
+    const isTargetUser = targetUserIds.includes(userId);
+    const hasValidToken = typeof token === 'string' && token.length > 0;
+    return isTargetUser && hasValidToken;
   });
 
   if (tokenDocs.length === 0) {
-    logger.info("No tokens available for event notification");
+    logger.info("No notification tokens available for target users");
     return;
   }
 
   const tokens = tokenDocs.map(doc => doc.data().token);
-  logger.info(`Collected ${tokens.length} tokens for event push`);
+  logger.info(`Sending notifications to ${tokens.length} devices (filtered by group)`);
 
-  const eventData = event.data?.data();
   const message = {
     notification: {
       title: `📅 Event Added: ${eventData.name}`,
@@ -201,7 +300,7 @@ exports.sendEventNotification = onDocumentCreated('events/{eventId}', async (eve
     tokens
   };
 
-  logger.info("Sending event notification:", message);
+  logger.info("Sending event notification to filtered audience");
 
   try {
     const messaging = admin.messaging();
@@ -210,23 +309,23 @@ exports.sendEventNotification = onDocumentCreated('events/{eventId}', async (eve
       successCount: response.successCount,
       failureCount: response.failureCount
     });
-    
+
     // Handle failed tokens
     if (response.failureCount > 0) {
       const tokensToDelete = [];
       const batch = admin.firestore().batch();
-      
+
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
           const errorCode = resp.error?.code;
           const token = tokens[idx];
           const tokenDocId = tokenDocs[idx].id;
-          
+
           logger.warn(`Failed to send to token ${token.substring(0, 10)}...`, {
             errorCode,
             errorMessage: resp.error?.message
           });
-          
+
           // Remove invalid/unregistered tokens
           if (errorCode === 'messaging/registration-token-not-registered' ||
               errorCode === 'messaging/invalid-registration-token' ||
@@ -237,14 +336,14 @@ exports.sendEventNotification = onDocumentCreated('events/{eventId}', async (eve
           }
         }
       });
-      
+
       // Execute batch deletion if there are tokens to delete
       if (tokensToDelete.length > 0) {
         await batch.commit();
         logger.info(`Cleaned up ${tokensToDelete.length} invalid FCM tokens from Firestore`);
       }
     }
-    
+
     return response;
   } catch (error) {
     logger.error("Error sending event notification:", error);
