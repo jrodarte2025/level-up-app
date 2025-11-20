@@ -56,14 +56,26 @@ export default function EventCard({
     return { google, ics, outlook: ics };
   };
 
+  // Determine audience color for border accent
+  const audienceColor = event.groups?.includes("coaches") && event.groups?.includes("students")
+    ? "#4CAFB6"  // Both: Accent Teal (brand)
+    : event.groups?.includes("coaches")
+    ? "#18264E"  // Coaches: Primary Blue (brand)
+    : "#6B7BA8"; // Students: Soft Blue (brand)
+
   return (
     <div
       key={id}
       style={{
         borderRadius: "12px",
         overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-        backgroundColor: theme.palette.background.paper,
+        boxShadow: required
+          ? "0 2px 12px rgba(241, 95, 94, 0.2), 0 0 0 2px rgba(241, 95, 94, 0.15)"
+          : "0 2px 8px rgba(0,0,0,0.08)",
+        backgroundColor: required
+          ? "rgba(241, 95, 94, 0.02)"
+          : theme.palette.background.paper,
+        borderLeft: `4px solid ${audienceColor}`,
         display: "flex",
         flexDirection: "column",
         cursor: "pointer",
@@ -74,16 +86,44 @@ export default function EventCard({
     >
       {/* Header image */}
       <div style={{ position: "relative", width: "100%", height: "200px" }}>
+        {/* Target Audience Badge - ALWAYS SHOWN */}
+        <span style={{
+          position: "absolute",
+          top: "0.75rem",
+          left: "0.75rem",
+          backgroundColor:
+            event.groups?.includes("coaches") && event.groups?.includes("students")
+              ? "#4CAFB6"  // Both: Accent Teal (brand)
+              : event.groups?.includes("coaches")
+              ? "#18264E"  // Coaches: Primary Blue (brand)
+              : "#6B7BA8", // Students: Soft Blue (brand)
+          color: "#fff",
+          padding: "0.45rem 0.85rem",
+          borderRadius: "6px",
+          fontSize: "0.8rem",
+          fontWeight: 700,
+          zIndex: 1,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px"
+        }}>
+          {event.groups?.includes("coaches") && event.groups?.includes("students")
+            ? "All Attendees"
+            : event.groups?.includes("coaches")
+            ? "For Coaches"
+            : "For Students"}
+        </span>
+
+        {/* Match Going Badge - Stacked below audience badge */}
         {isMatchGoing && (
           <span style={{
             position: "absolute",
-            top: "0.75rem",
+            top: "2.75rem",  // Stacked below audience badge
             left: "0.75rem",
             backgroundColor: "#18264E",
             color: "#fff",
             padding: "0.25rem 0.5rem",
             borderRadius: "4px",
-            fontSize: "0.75rem",
+            fontSize: "0.7rem",
             fontWeight: 600,
             zIndex: 1
           }}>
@@ -101,6 +141,7 @@ export default function EventCard({
           background: "linear-gradient(to top, rgba(0,0,0,0.7) 40%, transparent)",
           pointerEvents: "none"
         }} />
+        {/* Required badge - stays top-right */}
         {required && (
           <span style={{
             position: "absolute",
@@ -108,11 +149,13 @@ export default function EventCard({
             right: "0.75rem",
             backgroundColor: "var(--brand-primary-coral)",
             color: "#fff",
-            padding: "0.25rem 0.5rem",
-            borderRadius: "4px",
+            padding: "0.4rem 0.75rem",
+            borderRadius: "6px",
             fontSize: "0.75rem",
             fontWeight: 600,
-            zIndex: 1
+            zIndex: 1,
+            textTransform: "uppercase",
+            letterSpacing: "0.5px"
           }}>
             Required
           </span>

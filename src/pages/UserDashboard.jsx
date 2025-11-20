@@ -307,6 +307,17 @@ export default function UserDashboard({ setShowAdminPanel }) {
     const isRequired = event.required;
     const isRSVPed = rsvps[event.id];
 
+    // AUTOMATIC ROLE-BASED FILTERING
+    // If no manual filters are active, auto-filter by user role
+    const hasActiveFilters = filters.coach || filters.student || filters.required || filters.notRsvpd;
+
+    if (!hasActiveFilters && userRole) {
+      // Default: Only show events relevant to user's role
+      if (userRole === "coach" && !isCoach) return false;
+      if (userRole === "student" && !isStudent) return false;
+    }
+
+    // Manual filter overrides
     if (filters.coach && !isCoach) return false;
     if (filters.student && !isStudent) return false;
     if (filters.required && !isRequired) return false;
@@ -338,10 +349,60 @@ export default function UserDashboard({ setShowAdminPanel }) {
   return (
     <div style={{ padding: "1rem", maxWidth: "1100px", margin: "0 auto" }}>
       {/* Event Filters Subtitle and Controls */}
-      <div style={{ maxWidth: "600px", margin: "0 auto 1.5rem", padding: "0 1rem", textAlign: "center" }}>
-        <p style={{ margin: 0, marginBottom: "0.5rem", fontSize: "0.875rem", color: "var(--brand-medium-gray)", fontWeight: 500 }}>
-          Event Filters
-        </p>
+      <div style={{ maxWidth: "600px", margin: "0 auto 1.5rem", padding: "0 1rem" }}>
+        {/* Smart filter header with user context */}
+        <div style={{
+          marginBottom: "1rem",
+          textAlign: "center",
+          fontSize: "0.9rem",
+          color: "var(--brand-medium-gray)"
+        }}>
+          {!filters.coach && !filters.student && !filters.required && !filters.notRsvpd ? (
+            <p style={{ margin: 0 }}>
+              Showing <strong>{userRole === "coach" ? "Coach" : userRole === "student" ? "Student" : "All"} Events</strong>
+              {userRole && (
+                <>
+                  {" · "}
+                  <button
+                    onClick={() => toggleFilter(userRole === "coach" ? "student" : userRole === "student" ? "coach" : null)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#4A90E2",
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      fontWeight: 500
+                    }}
+                  >
+                    Show all events
+                  </button>
+                </>
+              )}
+            </p>
+          ) : (
+            <p style={{ margin: 0 }}>
+              Filtered view ·
+              <button
+                onClick={() => setFilters({ coach: false, student: false, required: false, notRsvpd: false })}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#4A90E2",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                  marginLeft: "0.25rem"
+                }}
+              >
+                Clear filters
+              </button>
+            </p>
+          )}
+        </div>
+
+        {/* Filter buttons */}
         <div style={{
           display: "flex",
           flexWrap: "wrap",
@@ -349,15 +410,21 @@ export default function UserDashboard({ setShowAdminPanel }) {
           gap: "0.5rem"
         }}>
           {[
-            { label: "Coach Event", key: "coach" },
-            { label: "Student Event", key: "student" },
-            { label: "Required", key: "required" },
-            { label: "Not RSVP’d", key: "notRsvpd" }
-          ].map(({ label, key }) => (
+            { label: "Coach Events", key: "coach", color: "#18264E" },
+            { label: "Student Events", key: "student", color: "#6B7BA8" },
+            { label: "Required Only", key: "required", color: "#F15F5E" },
+            { label: "Not Yet RSVP'd", key: "notRsvpd", color: "#d8d9df" }
+          ].map(({ label, key, color }) => (
             <button
               key={key}
               onClick={() => toggleFilter(key)}
               className={`button-toggle ${filters[key] ? "active" : ""}`}
+              style={filters[key] ? {
+                backgroundColor: color,
+                color: key === "notRsvpd" ? "#18264E" : "#fff",
+                borderColor: color,
+                fontWeight: 600
+              } : {}}
             >
               {label}
             </button>
@@ -368,35 +435,144 @@ export default function UserDashboard({ setShowAdminPanel }) {
         <div style={{
           display: "flex",
           flexDirection: "column",
-          gap: "1.5rem",
           maxWidth: "600px",
           margin: "0 auto"
         }}>
-          {filteredEvents.map((event) => {
-            const isExpanded = selectedEvent && selectedEvent.id === event.id;
-            const attendingUsers = isExpanded ? rsvpUsers : [];
+          {(() => {
+            // Group events by required status
+            const requiredEvents = filteredEvents.filter(e => e.required);
+            const optionalEvents = filteredEvents.filter(e => !e.required);
 
             return (
-              <EventCard
-                key={event.id}
-                event={event}
-                isRSVPed={!!rsvps[event.id]?.attending}
-                isMatchGoing={!!matchRsvps[event.id]}
-                onRSVP={handleRSVP}
-                onClick={() => {
-                  setSelectedEvent(isExpanded ? null : event);
-                  setShowRsvpList(false);
-                }}
-                expanded={isExpanded}
-                showDetails={isExpanded}
-                attendingUsers={attendingUsers}
-                toggleDetails={() => setShowRsvpList(!showRsvpList)}
-              />
+              <>
+                {/* Required Events Section */}
+                {requiredEvents.length > 0 && (
+                  <>
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      marginBottom: "1rem",
+                      padding: "0 0.5rem"
+                    }}>
+                      <span style={{
+                        backgroundColor: "#F15F5E",
+                        color: "#fff",
+                        padding: "0.35rem 0.75rem",
+                        borderRadius: "6px",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px"
+                      }}>
+                        Required
+                      </span>
+                      <h3 style={{
+                        margin: 0,
+                        fontSize: "0.95rem",
+                        color: theme.palette.text.secondary
+                      }}>
+                        Don't Miss These
+                      </h3>
+                    </div>
+                    {requiredEvents.map((event) => {
+                      const isExpanded = selectedEvent && selectedEvent.id === event.id;
+                      const attendingUsers = isExpanded ? rsvpUsers : [];
+
+                      return (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          isRSVPed={!!rsvps[event.id]?.attending}
+                          isMatchGoing={!!matchRsvps[event.id]}
+                          onRSVP={handleRSVP}
+                          onClick={() => {
+                            setSelectedEvent(isExpanded ? null : event);
+                            setShowRsvpList(false);
+                          }}
+                          expanded={isExpanded}
+                          showDetails={isExpanded}
+                          attendingUsers={attendingUsers}
+                          toggleDetails={() => setShowRsvpList(!showRsvpList)}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Optional Events Section */}
+                {optionalEvents.length > 0 && (
+                  <>
+                    {requiredEvents.length > 0 && (
+                      <div style={{
+                        borderTop: `1px solid ${theme.palette.divider}`,
+                        margin: "2rem 0 1.5rem",
+                        paddingTop: "1.5rem"
+                      }}>
+                        <h3 style={{
+                          textAlign: "center",
+                          fontSize: "0.9rem",
+                          color: theme.palette.text.secondary,
+                          marginBottom: "1rem"
+                        }}>
+                          Optional Events
+                        </h3>
+                      </div>
+                    )}
+                    {optionalEvents.map((event) => {
+                      const isExpanded = selectedEvent && selectedEvent.id === event.id;
+                      const attendingUsers = isExpanded ? rsvpUsers : [];
+
+                      return (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          isRSVPed={!!rsvps[event.id]?.attending}
+                          isMatchGoing={!!matchRsvps[event.id]}
+                          onRSVP={handleRSVP}
+                          onClick={() => {
+                            setSelectedEvent(isExpanded ? null : event);
+                            setShowRsvpList(false);
+                          }}
+                          expanded={isExpanded}
+                          showDetails={isExpanded}
+                          attendingUsers={attendingUsers}
+                          toggleDetails={() => setShowRsvpList(!showRsvpList)}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+              </>
             );
-          })}
+          })()}
         </div>
       ) : (
-        <p style={{ color: "var(--brand-medium-gray)", fontSize: "0.95rem" }}>No events match your filters.</p>
+        <div style={{
+          textAlign: "center",
+          padding: "2rem",
+          color: "var(--brand-medium-gray)"
+        }}>
+          <p style={{ fontSize: "1.1rem", marginBottom: "0.5rem", margin: 0 }}>
+            {filters.coach || filters.student || filters.required || filters.notRsvpd
+              ? "No events match your filters"
+              : `No ${userRole === "coach" ? "coach" : userRole === "student" ? "student" : ""} events found`}
+          </p>
+          <p style={{ fontSize: "0.9rem", margin: "0.5rem 0 0 0" }}>
+            {filters.required || filters.notRsvpd || filters.coach || filters.student
+              ? "Try adjusting your filters to see more events."
+              : "Check back later for upcoming events!"}
+          </p>
+          {(filters.required || filters.notRsvpd || filters.coach || filters.student) && (
+            <button
+              className="button-primary"
+              onClick={() => setFilters({ coach: false, student: false, required: false, notRsvpd: false })}
+              style={{ marginTop: "1rem" }}
+            >
+              Clear All Filters
+            </button>
+          )}
+        </div>
       )}
       {/* Slide-up Profile Modal */}
       {showProfile && (
