@@ -6,9 +6,8 @@ import {
 import { db, auth } from "../firebase";
 import PostCard from "../components/PostCard";
 import CardWrapper from "../components/CardWrapper";
-import UpdateRequestModal from "../components/UpdateRequestModal";
-import { Container, Typography, Box, Button, Fab } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Container, Typography, Box, Button, Card, CardContent } from "@mui/material";
+import { ChatBubbleOutline as ChatIcon, ArrowForward as ArrowIcon } from "@mui/icons-material";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function Updates() {
@@ -19,7 +18,6 @@ export default function Updates() {
   const [reactionsByPost, setReactionsByPost] = useState({});
   const user = auth.currentUser;
   const [userRole, setUserRole] = useState(null);
-  const [showUpdateRequestModal, setShowUpdateRequestModal] = useState(false);
 
   // Load user role (optimized)
   useEffect(() => {
@@ -159,30 +157,71 @@ export default function Updates() {
         minHeight: '100vh',
       }}
     >
-      <Box sx={{ textAlign: "center", mb: 2, px: 2 }}>
+      <Box sx={{ mb: 3, px: 2 }}>
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ mt: 0.5, fontSize: "0.9rem", mb: 2 }}
+          sx={{ textAlign: "center", mt: 0.5, fontSize: "0.9rem", mb: 2 }}
         >
-          Stay connected with updates, wins, and announcements.
+          Official updates, wins, and announcements from the Level Up team.
         </Typography>
-        
-        {/* Request Update Button */}
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setShowUpdateRequestModal(true)}
+
+        {/* GroupMe Community Card */}
+        <Card
           sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            fontWeight: 600,
-            px: 3,
-            py: 1
+            background: 'linear-gradient(135deg, #4CAFB6 0%, #18264E 100%)',
+            borderRadius: 3,
+            boxShadow: '0 4px 12px rgba(76, 175, 182, 0.3)',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 16px rgba(76, 175, 182, 0.4)'
+            }
           }}
+          onClick={() => window.open('https://groupme.com/join_group/111057832/9TtW2MIp', '_blank')}
         >
-          Share Update
-        </Button>
+          <CardContent sx={{ py: 2.5, px: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '50%',
+                  p: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <ChatIcon sx={{ fontSize: 32, color: '#fff' }} />
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    mb: 0.5
+                  }}
+                >
+                  Join Our Community Chat
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '0.875rem',
+                    lineHeight: 1.4
+                  }}
+                >
+                  Connect with scholars and coaches in our GroupMe! Share ideas, ask questions, and stay engaged.
+                </Typography>
+              </Box>
+              <ArrowIcon sx={{ color: '#fff', fontSize: 28 }} />
+            </Box>
+          </CardContent>
+        </Card>
       </Box> 
       {posts.map((post) => (
         <PostCard
@@ -201,12 +240,6 @@ export default function Updates() {
           onEmojiReaction={handlePostEmojiReaction}
         />
       ))}
-      
-      {/* Update Request Modal */}
-      <UpdateRequestModal
-        open={showUpdateRequestModal}
-        onClose={() => setShowUpdateRequestModal(false)}
-      />
     </Container>
   );
 }
