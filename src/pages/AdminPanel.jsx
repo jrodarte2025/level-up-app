@@ -54,6 +54,7 @@ const roleOptions = [
 
 import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
+import DOMPurify from "dompurify";
 import { useTheme } from "@mui/material/styles";
 import { resizeImage } from "../utils/resizeImage";
 import CropModal from "../components/CropModal";
@@ -2330,11 +2331,11 @@ export default function AdminPanel({ tab }) {
                   <>
                     {/* Check if content is HTML (new posts) or Markdown (legacy posts) */}
                     {p.body && p.body.includes('<') && p.body.includes('>') ? (
-                      <div 
-                        dangerouslySetInnerHTML={{ __html: p.body }}
-                        style={{ 
-                          marginTop: "0.75em", 
-                          marginBottom: "0.5em", 
+                      <div
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p.body, { ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3'], ALLOWED_ATTR: ['href', 'target', 'rel'] }) }}
+                        style={{
+                          marginTop: "0.75em",
+                          marginBottom: "0.5em",
                           color: "#1e293b",
                           lineHeight: 1.6
                         }}
