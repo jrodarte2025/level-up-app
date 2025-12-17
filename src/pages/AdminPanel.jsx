@@ -203,6 +203,7 @@ export default function AdminPanel({ tab }) {
     slug: "",
     additionalRegistrationUrl: "",
     additionalRegistrationText: "",
+    status: "draft",
   });
   const [headerImageFile, setHeaderImageFile] = useState(null);
   const [existingHeaderImage, setExistingHeaderImage] = useState(null);
@@ -392,6 +393,7 @@ export default function AdminPanel({ tab }) {
       slug: event.slug || "",
       additionalRegistrationUrl: event.additionalRegistrationUrl || "",
       additionalRegistrationText: event.additionalRegistrationText || "",
+      status: event.status || "published", // Default to published for backwards compatibility
     });
     setEditingId(event.id);
     setExistingHeaderImage(event.headerImage || null);
@@ -475,6 +477,7 @@ export default function AdminPanel({ tab }) {
           slug: form.slug || "",
           additionalRegistrationUrl: form.additionalRegistrationUrl || "",
           additionalRegistrationText: form.additionalRegistrationText || "",
+          status: form.status || "draft",
         });
       } else {
         // Add new event, update local events list, show success message
@@ -492,10 +495,11 @@ export default function AdminPanel({ tab }) {
           slug: form.slug || "",
           additionalRegistrationUrl: form.additionalRegistrationUrl || "",
           additionalRegistrationText: form.additionalRegistrationText || "",
+          status: form.status || "draft",
         });
         setEvents(prev => [
           ...prev,
-          { id: newEventRef.id, ...form, timeRange: `${startTimeString} – ${endTimeString}`, date: Timestamp.fromDate(eventDateObj), headerImage: headerImageUrl, slug: form.slug }
+          { id: newEventRef.id, ...form, timeRange: `${startTimeString} – ${endTimeString}`, date: Timestamp.fromDate(eventDateObj), headerImage: headerImageUrl, slug: form.slug, status: form.status }
         ]);
         setSuccess("Event created!");
         setTimeout(() => setSuccess(""), 3000);
@@ -519,6 +523,7 @@ export default function AdminPanel({ tab }) {
       slug: "",
       additionalRegistrationUrl: "",
       additionalRegistrationText: "",
+      status: "draft",
     });
     setHeaderImageFile(null);
     setExistingHeaderImage(null);
@@ -643,7 +648,8 @@ export default function AdminPanel({ tab }) {
                       allowGuests: false,
                       slug: "",
                       additionalRegistrationUrl: "",
-                      additionalRegistrationText: ""
+                      additionalRegistrationText: "",
+                      status: "draft"
                     });
                   }}
                 >
@@ -798,6 +804,54 @@ export default function AdminPanel({ tab }) {
                     (People can bring additional guests when RSVPing)
                   </span>
                 </label>
+
+                {/* Event Status */}
+                <div style={{
+                  backgroundColor: form.status === "draft" ? "#fef3c7" : "#dcfce7",
+                  border: `1px solid ${form.status === "draft" ? "#fde68a" : "#bbf7d0"}`,
+                  borderRadius: "8px",
+                  padding: "1rem",
+                  marginTop: "0.5rem"
+                }}>
+                  <label style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: form.status === "draft" ? "#92400e" : "#166534",
+                    marginBottom: "0.5rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    display: "block"
+                  }}>
+                    Event Status
+                  </label>
+                  <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name="status"
+                        value="draft"
+                        checked={form.status === "draft"}
+                        onChange={handleChange}
+                      />
+                      <span style={{ fontWeight: form.status === "draft" ? 600 : 400 }}>Draft</span>
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name="status"
+                        value="published"
+                        checked={form.status === "published"}
+                        onChange={handleChange}
+                      />
+                      <span style={{ fontWeight: form.status === "published" ? 600 : 400 }}>Published</span>
+                    </label>
+                  </div>
+                  <p style={{ fontSize: "0.8rem", color: form.status === "draft" ? "#92400e" : "#166534", marginTop: "0.5rem", marginBottom: 0 }}>
+                    {form.status === "draft"
+                      ? "Draft events are only visible to admins. Publish when ready to notify users."
+                      : "Published events are visible to all users and notifications will be sent."}
+                  </p>
+                </div>
 
                 {/* Landing Page Settings */}
                 <div style={{
@@ -1026,8 +1080,29 @@ export default function AdminPanel({ tab }) {
           <ul style={{ listStyle: "none", padding: 0 }}>
             {sortEventsByDateTime(filterUpcomingEvents(events))
               .map((event) => (
-                <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid var(--brand-muted-gray)", borderRadius: "8px" }}>
-                  <strong>{event.name}</strong>
+                <li key={event.id} style={{
+                  marginBottom: "1rem",
+                  padding: "1rem",
+                  border: `1px solid ${event.status === "draft" ? "#fde68a" : "var(--brand-muted-gray)"}`,
+                  borderRadius: "8px",
+                  backgroundColor: event.status === "draft" ? "#fffbeb" : "transparent"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <strong>{event.name}</strong>
+                    {event.status === "draft" && (
+                      <span style={{
+                        backgroundColor: "#fef3c7",
+                        color: "#92400e",
+                        padding: "0.125rem 0.5rem",
+                        borderRadius: "4px",
+                        fontSize: "0.7rem",
+                        fontWeight: 600,
+                        textTransform: "uppercase"
+                      }}>
+                        Draft
+                      </span>
+                    )}
+                  </div>
                   <p style={{ margin: "0.25rem 0", color: "var(--brand-medium-gray)" }}>
                     {event.date?.seconds
                       ? new Date(event.date.seconds * 1000).toLocaleDateString("en-US", {
@@ -1150,8 +1225,29 @@ export default function AdminPanel({ tab }) {
               })
               .sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0))
               .map((event) => (
-                <li key={event.id} style={{ marginBottom: "1rem", padding: "1rem", border: "1px solid var(--brand-muted-gray)", borderRadius: "8px", backgroundColor: "var(--brand-off-white)" }}>
-                  <strong>{event.name}</strong>
+                <li key={event.id} style={{
+                  marginBottom: "1rem",
+                  padding: "1rem",
+                  border: `1px solid ${event.status === "draft" ? "#fde68a" : "var(--brand-muted-gray)"}`,
+                  borderRadius: "8px",
+                  backgroundColor: event.status === "draft" ? "#fffbeb" : "var(--brand-off-white)"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <strong>{event.name}</strong>
+                    {event.status === "draft" && (
+                      <span style={{
+                        backgroundColor: "#fef3c7",
+                        color: "#92400e",
+                        padding: "0.125rem 0.5rem",
+                        borderRadius: "4px",
+                        fontSize: "0.7rem",
+                        fontWeight: 600,
+                        textTransform: "uppercase"
+                      }}>
+                        Draft
+                      </span>
+                    )}
+                  </div>
                   <p style={{ margin: "0.25rem 0", color: "var(--brand-medium-gray)" }}>
                     {event.date?.seconds
                       ? new Date(event.date.seconds * 1000).toLocaleDateString("en-US", {

@@ -22,29 +22,29 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
-  try {
-    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
-    const { title, body } = payload.notification || {
-      title: "Unknown Title",
-      body: "No body content provided"
-    };
+  // IMPORTANT: Do NOT manually show notification here when payload contains
+  // a 'notification' field. Firebase automatically displays notifications
+  // for messages with the 'notification' payload. Calling showNotification()
+  // here would cause DUPLICATE notifications.
+  //
+  // Only show manually if using data-only messages (no notification field):
+  if (!payload.notification && payload.data) {
+    // Data-only message - manually show notification
+    const title = payload.data.title || "Level Up";
+    const body = payload.data.body || "You have a new notification";
 
     self.registration.showNotification(title, {
       body,
       icon: '/icons/icon-192.png',
       data: {
-        url: 'https://app.levelupcincinnati.org'
+        url: payload.data.url || 'https://app.levelupcincinnati.org'
       }
     });
-
-    console.log('[firebase-messaging-sw.js] showNotification triggered.');
-  } catch (error) {
-    console.error('[firebase-messaging-sw.js] Error handling background message:', error);
-    self.registration.showNotification("Push Failed", {
-      body: "Error occurred in background message handler.",
-      icon: '/icons/icon-192.png',
-    });
+    console.log('[firebase-messaging-sw.js] Manual notification shown for data-only message.');
+  } else {
+    console.log('[firebase-messaging-sw.js] Notification payload present - Firebase will auto-display.');
   }
 });
 

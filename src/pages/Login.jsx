@@ -19,7 +19,15 @@ export default function Login({ onLogin = () => {} }) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       await registerForNotifications();
-      onLogin();
+
+      // Check for redirect path (from event landing page)
+      const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        sessionStorage.removeItem("redirectAfterLogin");
+        navigate(redirectPath, { replace: true });
+      } else {
+        onLogin();
+      }
     } catch (error) {
       console.error("Login failed:", error);
       // Provide user-friendly error messages

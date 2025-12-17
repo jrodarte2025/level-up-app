@@ -301,7 +301,10 @@ export default function UserDashboard({ setShowAdminPanel }) {
 
   const sortedEvents = processUpcomingEvents([...events]);
 
-  const filteredEvents = sortedEvents.filter((event) => {
+  // Filter out draft events - only show published events (or events without status for backwards compatibility)
+  const publishedEvents = sortedEvents.filter((event) => event.status !== "draft");
+
+  const filteredEvents = publishedEvents.filter((event) => {
     const isCoach = event.groups?.includes("coaches");
     const isStudent = event.groups?.includes("students");
     const isRequired = event.required;
