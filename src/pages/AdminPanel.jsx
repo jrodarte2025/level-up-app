@@ -658,308 +658,559 @@ export default function AdminPanel({ tab }) {
               </div>
             )}
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Event Name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                style={{
-                  padding: "0.65rem",
-                  fontSize: "1rem",
-                  borderRadius: "6px",
-                  border: `1px solid ${theme.palette.divider}`,
-                  color: theme.palette.text.primary,
-                  backgroundColor: theme.palette.background.default,
-                  fontWeight: 400,
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-                }}
-              />
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                required
-                style={{
-                  padding: "0.65rem",
-                  fontSize: "1rem",
-                  borderRadius: "6px",
-                  border: `1px solid ${theme.palette.divider}`,
-                  color: theme.palette.text.primary,
-                  backgroundColor: theme.palette.background.default,
-                  fontWeight: 400,
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-                }}
-              />
-              <input
-                type="time"
-                name="startTime"
-                value={form.startTime}
-                onChange={handleChange}
-                required
-                style={{
-                  padding: "0.65rem",
-                  fontSize: "1rem",
-                  borderRadius: "6px",
-                  border: `1px solid ${theme.palette.divider}`,
-                  color: theme.palette.text.primary,
-                  backgroundColor: theme.palette.background.default,
-                  fontWeight: 400,
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-                }}
-              />
-              <input
-                type="time"
-                name="endTime"
-                value={form.endTime}
-                onChange={handleChange}
-                required
-                style={{
-                  padding: "0.65rem",
-                  fontSize: "1rem",
-                  borderRadius: "6px",
-                  border: `1px solid ${theme.palette.divider}`,
-                  color: theme.palette.text.primary,
-                  backgroundColor: theme.palette.background.default,
-                  fontWeight: 400,
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-                }}
-              />
+
+              {/* ============ SECTION: EVENT DETAILS ============ */}
+              <div style={{
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "12px",
+                padding: "1.25rem",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "1rem",
+                  paddingBottom: "0.75rem",
+                  borderBottom: `1px solid ${theme.palette.divider}`
+                }}>
+                  <span style={{ fontSize: "1.1rem" }}>📋</span>
+                  <h4 style={{ margin: 0, fontSize: "0.9rem", fontWeight: 600, color: theme.palette.text.primary }}>
+                    Event Details
+                  </h4>
+                </div>
+
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <label style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    color: "var(--brand-medium-gray)",
-                    marginBottom: "0.25rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em"
-                  }}>
-                    Location:
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    placeholder="Location"
-                    ref={locationInputRef}
-                    value={form.location}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      padding: "0.65rem",
-                      fontSize: "1rem",
-                      borderRadius: "6px",
-                      border: `1px solid ${theme.palette.divider}`,
-                      color: theme.palette.text.primary,
-                      backgroundColor: theme.palette.background.default,
-                      fontWeight: 400,
-                      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-                      width: "100%"
-                    }}
-                  />
-                </div>
-                <label style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "var(--brand-medium-gray)",
-                  marginBottom: "0.25rem",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em"
-                }}>
-                  Description
-                </label>
-                <RichTextEditor
-                  content={form.description}
-                  onChange={(value) => setForm(prev => ({ ...prev, description: value }))}
-                  placeholder="Enter details about the event. You can format text with bold, italic, lists, and more..."
-                />
-                <select
-                  name="groups"
-                  value={form.groups}
-                  onChange={handleChange}
-                  style={{
-                    padding: "0.65rem",
-                    fontSize: "1rem",
-                    borderRadius: "6px",
-                    border: `1px solid ${theme.palette.divider}`,
-                    color: theme.palette.text.primary,
-                    backgroundColor: theme.palette.background.default,
-                    fontWeight: 400,
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-                  }}
-                >
-                  <option value="both">Both Students & Coaches</option>
-                  <option value="students">Students Only</option>
-                  <option value="coaches">Coaches Only</option>
-                </select>
-                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 500 }}>
-                  <input type="checkbox" name="required" checked={form.required} onChange={handleChange} />
-                  Required Event
-                </label>
-                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 500 }}>
-                  <input type="checkbox" name="allowGuests" checked={form.allowGuests} onChange={handleChange} />
-                  Allow Guests
-                  <span style={{ fontSize: "0.8rem", color: "var(--brand-medium-gray)", marginLeft: "0.5rem" }}>
-                    (People can bring additional guests when RSVPing)
-                  </span>
-                </label>
-
-                {/* Event Status */}
-                <div style={{
-                  backgroundColor: form.status === "draft" ? "#fef3c7" : "#dcfce7",
-                  border: `1px solid ${form.status === "draft" ? "#fde68a" : "#bbf7d0"}`,
-                  borderRadius: "8px",
-                  padding: "1rem",
-                  marginTop: "0.5rem"
-                }}>
-                  <label style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    color: form.status === "draft" ? "#92400e" : "#166534",
-                    marginBottom: "0.5rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    display: "block"
-                  }}>
-                    Event Status
-                  </label>
-                  <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-                      <input
-                        type="radio"
-                        name="status"
-                        value="draft"
-                        checked={form.status === "draft"}
-                        onChange={handleChange}
-                      />
-                      <span style={{ fontWeight: form.status === "draft" ? 600 : 400 }}>Draft</span>
-                    </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-                      <input
-                        type="radio"
-                        name="status"
-                        value="published"
-                        checked={form.status === "published"}
-                        onChange={handleChange}
-                      />
-                      <span style={{ fontWeight: form.status === "published" ? 600 : 400 }}>Published</span>
-                    </label>
-                  </div>
-                  <p style={{ fontSize: "0.8rem", color: form.status === "draft" ? "#92400e" : "#166534", marginTop: "0.5rem", marginBottom: 0 }}>
-                    {form.status === "draft"
-                      ? "Draft events are only visible to admins. Publish when ready to notify users."
-                      : "Published events are visible to all users and notifications will be sent."}
-                  </p>
-                </div>
-
-                {/* Landing Page Settings */}
-                <div style={{
-                  backgroundColor: theme.palette.background.default,
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: "8px",
-                  padding: "1rem",
-                  marginTop: "0.5rem"
-                }}>
-                  <label style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    color: "var(--brand-medium-gray)",
-                    marginBottom: "0.5rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    display: "block"
-                  }}>
-                    Landing Page Settings (Optional)
-                  </label>
-                  <p style={{ fontSize: "0.8rem", color: "var(--brand-medium-gray)", marginBottom: "1rem" }}>
-                    Create a shareable event page for external registration.
-                  </p>
-
-                  <div style={{ marginBottom: "1rem" }}>
-                    <label style={{
-                      fontSize: "0.75rem",
-                      fontWeight: 600,
-                      color: "var(--brand-medium-gray)",
-                      marginBottom: "0.25rem",
-                      display: "block"
-                    }}>
-                      URL Slug
-                    </label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <span style={{ fontSize: "0.85rem", color: "var(--brand-medium-gray)" }}>
-                        app.levelupcincinnati.org/event/
-                      </span>
-                      <input
-                        type="text"
-                        name="slug"
-                        placeholder="coach-happy-hour"
-                        value={form.slug}
-                        onChange={handleChange}
-                        style={{
-                          padding: "0.5rem",
-                          fontSize: "0.9rem",
-                          borderRadius: "6px",
-                          border: `1px solid ${theme.palette.divider}`,
-                          color: theme.palette.text.primary,
-                          backgroundColor: theme.palette.background.paper,
-                          flex: 1,
-                          maxWidth: "200px"
-                        }}
-                      />
-                    </div>
-                    <p style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>
-                      Use lowercase letters, numbers, and hyphens only
-                    </p>
-                  </div>
-
+                  {/* Event Name */}
                   <div>
                     <label style={{
                       fontSize: "0.75rem",
                       fontWeight: 600,
                       color: "var(--brand-medium-gray)",
-                      marginBottom: "0.25rem",
-                      display: "block"
+                      marginBottom: "0.375rem",
+                      display: "block",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em"
                     }}>
-                      Additional Registration URL
+                      Event Name <span style={{ color: "#dc2626" }}>*</span>
                     </label>
                     <input
-                      type="url"
-                      name="additionalRegistrationUrl"
-                      placeholder="https://forms.google.com/..."
-                      value={form.additionalRegistrationUrl}
+                      type="text"
+                      name="name"
+                      placeholder="e.g., Coach Happy Hour, Student Workshop"
+                      value={form.name}
                       onChange={handleChange}
+                      required
                       style={{
-                        padding: "0.5rem",
-                        fontSize: "0.9rem",
+                        padding: "0.65rem",
+                        fontSize: "1rem",
                         borderRadius: "6px",
                         border: `1px solid ${theme.palette.divider}`,
                         color: theme.palette.text.primary,
-                        backgroundColor: theme.palette.background.paper,
+                        backgroundColor: theme.palette.background.default,
                         width: "100%"
                       }}
                     />
-                    <p style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>
-                      Optional: Link to Google Form or other registration (shown after RSVP)
+                  </div>
+
+                  {/* Header Image */}
+                  <div>
+                    <label style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: "var(--brand-medium-gray)",
+                      marginBottom: "0.375rem",
+                      display: "block",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em"
+                    }}>
+                      Header Image
+                      <span style={{ fontWeight: 400, textTransform: "none", marginLeft: "0.5rem", fontSize: "0.7rem" }}>
+                        (1200×675px recommended)
+                      </span>
+                    </label>
+                    {(existingHeaderImage || headerImageFile) ? (
+                      <div style={{
+                        position: "relative",
+                        display: "inline-block"
+                      }}>
+                        <img
+                          src={headerImageFile ? URL.createObjectURL(headerImageFile) : existingHeaderImage}
+                          alt="Header preview"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "150px",
+                            borderRadius: "6px",
+                            border: `1px solid ${theme.palette.divider}`
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setHeaderImageFile(null);
+                            setExistingHeaderImage(null);
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: "0.5rem",
+                            right: "0.5rem",
+                            backgroundColor: "rgba(0,0,0,0.7)",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            padding: "0.25rem 0.5rem",
+                            cursor: "pointer",
+                            fontSize: "0.75rem"
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => setCropImageSrc(reader.result);
+                          reader.readAsDataURL(file);
+                        }}
+                        style={{
+                          padding: "0.5rem",
+                          fontSize: "0.9rem",
+                          border: `1px dashed ${theme.palette.divider}`,
+                          borderRadius: "6px",
+                          width: "100%",
+                          cursor: "pointer"
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: "var(--brand-medium-gray)",
+                      marginBottom: "0.375rem",
+                      display: "block",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em"
+                    }}>
+                      Description
+                    </label>
+                    <RichTextEditor
+                      content={form.description}
+                      onChange={(value) => setForm(prev => ({ ...prev, description: value }))}
+                      placeholder="Enter details about the event..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ============ SECTION: WHEN & WHERE ============ */}
+              <div style={{
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "12px",
+                padding: "1.25rem",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "1rem",
+                  paddingBottom: "0.75rem",
+                  borderBottom: `1px solid ${theme.palette.divider}`
+                }}>
+                  <span style={{ fontSize: "1.1rem" }}>📅</span>
+                  <h4 style={{ margin: 0, fontSize: "0.9rem", fontWeight: 600, color: theme.palette.text.primary }}>
+                    When & Where
+                  </h4>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {/* Date */}
+                  <div>
+                    <label style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: "var(--brand-medium-gray)",
+                      marginBottom: "0.375rem",
+                      display: "block",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em"
+                    }}>
+                      Date <span style={{ color: "#dc2626" }}>*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={form.date}
+                      onChange={handleChange}
+                      required
+                      style={{
+                        padding: "0.65rem",
+                        fontSize: "1rem",
+                        borderRadius: "6px",
+                        border: `1px solid ${theme.palette.divider}`,
+                        color: theme.palette.text.primary,
+                        backgroundColor: theme.palette.background.default,
+                        width: "100%"
+                      }}
+                    />
+                  </div>
+
+                  {/* Time - Side by Side */}
+                  <div style={{ display: "flex", gap: "1rem" }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--brand-medium-gray)",
+                        marginBottom: "0.375rem",
+                        display: "block",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em"
+                      }}>
+                        Start Time <span style={{ color: "#dc2626" }}>*</span>
+                      </label>
+                      <input
+                        type="time"
+                        name="startTime"
+                        value={form.startTime}
+                        onChange={handleChange}
+                        required
+                        style={{
+                          padding: "0.65rem",
+                          fontSize: "1rem",
+                          borderRadius: "6px",
+                          border: `1px solid ${theme.palette.divider}`,
+                          color: theme.palette.text.primary,
+                          backgroundColor: theme.palette.background.default,
+                          width: "100%"
+                        }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--brand-medium-gray)",
+                        marginBottom: "0.375rem",
+                        display: "block",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em"
+                      }}>
+                        End Time <span style={{ color: "#dc2626" }}>*</span>
+                      </label>
+                      <input
+                        type="time"
+                        name="endTime"
+                        value={form.endTime}
+                        onChange={handleChange}
+                        required
+                        style={{
+                          padding: "0.65rem",
+                          fontSize: "1rem",
+                          borderRadius: "6px",
+                          border: `1px solid ${theme.palette.divider}`,
+                          color: theme.palette.text.primary,
+                          backgroundColor: theme.palette.background.default,
+                          width: "100%"
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: "var(--brand-medium-gray)",
+                      marginBottom: "0.375rem",
+                      display: "block",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em"
+                    }}>
+                      Location <span style={{ color: "#dc2626" }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="location"
+                      placeholder="Enter address or venue name"
+                      ref={locationInputRef}
+                      value={form.location}
+                      onChange={handleChange}
+                      required
+                      style={{
+                        padding: "0.65rem",
+                        fontSize: "1rem",
+                        borderRadius: "6px",
+                        border: `1px solid ${theme.palette.divider}`,
+                        color: theme.palette.text.primary,
+                        backgroundColor: theme.palette.background.default,
+                        width: "100%"
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ============ SECTION: AUDIENCE & SETTINGS ============ */}
+              <div style={{
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "12px",
+                padding: "1.25rem",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "1rem",
+                  paddingBottom: "0.75rem",
+                  borderBottom: `1px solid ${theme.palette.divider}`
+                }}>
+                  <span style={{ fontSize: "1.1rem" }}>👥</span>
+                  <h4 style={{ margin: 0, fontSize: "0.9rem", fontWeight: 600, color: theme.palette.text.primary }}>
+                    Audience & Settings
+                  </h4>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {/* Groups */}
+                  <div>
+                    <label style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: "var(--brand-medium-gray)",
+                      marginBottom: "0.375rem",
+                      display: "block",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.04em"
+                    }}>
+                      Who can see this event?
+                    </label>
+                    <select
+                      name="groups"
+                      value={form.groups}
+                      onChange={handleChange}
+                      style={{
+                        padding: "0.65rem",
+                        fontSize: "1rem",
+                        borderRadius: "6px",
+                        border: `1px solid ${theme.palette.divider}`,
+                        color: theme.palette.text.primary,
+                        backgroundColor: theme.palette.background.default,
+                        width: "100%"
+                      }}
+                    >
+                      <option value="both">Both Students & Coaches</option>
+                      <option value="students">Students Only</option>
+                      <option value="coaches">Coaches Only</option>
+                    </select>
+                    <p style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem", marginBottom: 0 }}>
+                      Controls who receives notifications and can view the event
                     </p>
                   </div>
 
-                  {form.additionalRegistrationUrl && (
+                  {/* Checkboxes Row */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 500, cursor: "pointer" }}>
+                      <input type="checkbox" name="required" checked={form.required} onChange={handleChange} />
+                      Required Event
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 500, cursor: "pointer" }}>
+                      <input type="checkbox" name="allowGuests" checked={form.allowGuests} onChange={handleChange} />
+                      Allow Guests
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* ============ SECTION: PUBLISH STATUS ============ */}
+              <div style={{
+                backgroundColor: form.status === "draft" ? "#fef3c7" : "#dcfce7",
+                border: `2px solid ${form.status === "draft" ? "#fcd34d" : "#86efac"}`,
+                borderRadius: "12px",
+                padding: "1.25rem",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "1rem"
+                }}>
+                  <span style={{ fontSize: "1.1rem" }}>{form.status === "draft" ? "📝" : "🚀"}</span>
+                  <h4 style={{ margin: 0, fontSize: "0.9rem", fontWeight: 600, color: form.status === "draft" ? "#92400e" : "#166534" }}>
+                    Publish Status
+                  </h4>
+                </div>
+
+                <div style={{ display: "flex", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, status: "draft" }))}
+                    style={{
+                      flex: 1,
+                      padding: "0.75rem",
+                      borderRadius: "8px",
+                      border: form.status === "draft" ? "2px solid #d97706" : `1px solid ${theme.palette.divider}`,
+                      backgroundColor: form.status === "draft" ? "#fef3c7" : theme.palette.background.paper,
+                      color: form.status === "draft" ? "#92400e" : theme.palette.text.secondary,
+                      fontWeight: form.status === "draft" ? 600 : 400,
+                      cursor: "pointer",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    📝 Draft
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, status: "published" }))}
+                    style={{
+                      flex: 1,
+                      padding: "0.75rem",
+                      borderRadius: "8px",
+                      border: form.status === "published" ? "2px solid #16a34a" : `1px solid ${theme.palette.divider}`,
+                      backgroundColor: form.status === "published" ? "#dcfce7" : theme.palette.background.paper,
+                      color: form.status === "published" ? "#166534" : theme.palette.text.secondary,
+                      fontWeight: form.status === "published" ? 600 : 400,
+                      cursor: "pointer",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    🚀 Published
+                  </button>
+                </div>
+                <p style={{ fontSize: "0.8rem", color: form.status === "draft" ? "#92400e" : "#166534", margin: 0 }}>
+                  {form.status === "draft"
+                    ? "Only admins can see this event. Publish when ready to notify users."
+                    : "This event is live. Users will be notified when saved."}
+                </p>
+              </div>
+
+              {/* ============ SECTION: ADVANCED SETTINGS (Collapsible) ============ */}
+              <details style={{
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: "12px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
+              }}>
+                <summary style={{
+                  padding: "1rem 1.25rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  listStyle: "none"
+                }}>
+                  <span style={{ fontSize: "1.1rem" }}>⚙️</span>
+                  Advanced Settings
+                  <span style={{ marginLeft: "auto", fontSize: "0.75rem", color: "var(--brand-medium-gray)", fontWeight: 400 }}>
+                    (Landing page, external registration)
+                  </span>
+                </summary>
+                <div style={{ padding: "0 1.25rem 1.25rem" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    {/* URL Slug */}
                     <div>
                       <label style={{
                         fontSize: "0.75rem",
                         fontWeight: 600,
                         color: "var(--brand-medium-gray)",
-                        marginBottom: "0.25rem",
-                        display: "block"
+                        marginBottom: "0.375rem",
+                        display: "block",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em"
                       }}>
-                        Button Text & Description
+                        URL Slug
+                      </label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--brand-medium-gray)" }}>
+                          app.levelupcincinnati.org/event/
+                        </span>
+                        <input
+                          type="text"
+                          name="slug"
+                          placeholder="coach-happy-hour"
+                          value={form.slug}
+                          onChange={handleChange}
+                          style={{
+                            padding: "0.5rem",
+                            fontSize: "0.9rem",
+                            borderRadius: "6px",
+                            border: `1px solid ${theme.palette.divider}`,
+                            color: theme.palette.text.primary,
+                            backgroundColor: theme.palette.background.default,
+                            flex: 1,
+                            minWidth: "150px"
+                          }}
+                        />
+                      </div>
+                      <p style={{ fontSize: "0.7rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem", marginBottom: 0 }}>
+                        Creates a shareable landing page for this event
+                      </p>
+                    </div>
+
+                    {/* Shareable Link Preview */}
+                    {form.slug && (
+                      <div style={{
+                        padding: "0.75rem",
+                        backgroundColor: "#dcfce7",
+                        borderRadius: "6px",
+                        border: "1px solid #bbf7d0"
+                      }}>
+                        <span style={{ fontSize: "0.75rem", color: "#166534", fontWeight: 500 }}>
+                          Shareable Link:
+                        </span>
+                        <a
+                          href={`/event/${form.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: "block",
+                            fontSize: "0.85rem",
+                            color: "#15803d",
+                            marginTop: "0.25rem",
+                            wordBreak: "break-all"
+                          }}
+                        >
+                          https://app.levelupcincinnati.org/event/{form.slug}
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Additional Registration URL */}
+                    <div>
+                      <label style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--brand-medium-gray)",
+                        marginBottom: "0.375rem",
+                        display: "block",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em"
+                      }}>
+                        Additional Registration URL
                       </label>
                       <input
-                        type="text"
-                        name="additionalRegistrationText"
-                        placeholder="Reserve your bourbon tour time slot"
-                        value={form.additionalRegistrationText}
+                        type="url"
+                        name="additionalRegistrationUrl"
+                        placeholder="https://forms.google.com/..."
+                        value={form.additionalRegistrationUrl}
                         onChange={handleChange}
                         style={{
                           padding: "0.5rem",
@@ -967,112 +1218,70 @@ export default function AdminPanel({ tab }) {
                           borderRadius: "6px",
                           border: `1px solid ${theme.palette.divider}`,
                           color: theme.palette.text.primary,
-                          backgroundColor: theme.palette.background.paper,
+                          backgroundColor: theme.palette.background.default,
                           width: "100%"
                         }}
                       />
-                      <p style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>
-                        Custom text shown above the additional registration button
+                      <p style={{ fontSize: "0.7rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem", marginBottom: 0 }}>
+                        Link to Google Form or other registration (shown after RSVP)
                       </p>
                     </div>
-                  )}
 
-                  {form.slug && (
-                    <div style={{
-                      marginTop: "1rem",
-                      padding: "0.75rem",
-                      backgroundColor: "#dcfce7",
-                      borderRadius: "6px",
-                      border: "1px solid #bbf7d0"
-                    }}>
-                      <span style={{ fontSize: "0.8rem", color: "#166534", fontWeight: 500 }}>
-                        Shareable Link:
-                      </span>
-                      <a
-                        href={`/event/${form.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
+                    {/* Additional Registration Text */}
+                    {form.additionalRegistrationUrl && (
+                      <div>
+                        <label style={{
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          color: "var(--brand-medium-gray)",
+                          marginBottom: "0.375rem",
                           display: "block",
-                          fontSize: "0.85rem",
-                          color: "#15803d",
-                          marginTop: "0.25rem",
-                          wordBreak: "break-all"
-                        }}
-                      >
-                        https://app.levelupcincinnati.org/event/{form.slug}
-                      </a>
-                    </div>
-                  )}
+                          textTransform: "uppercase",
+                          letterSpacing: "0.04em"
+                        }}>
+                          Registration Button Text
+                        </label>
+                        <input
+                          type="text"
+                          name="additionalRegistrationText"
+                          placeholder="Reserve your bourbon tour time slot"
+                          value={form.additionalRegistrationText}
+                          onChange={handleChange}
+                          style={{
+                            padding: "0.5rem",
+                            fontSize: "0.9rem",
+                            borderRadius: "6px",
+                            border: `1px solid ${theme.palette.divider}`,
+                            color: theme.palette.text.primary,
+                            backgroundColor: theme.palette.background.default,
+                            width: "100%"
+                          }}
+                        />
+                        <p style={{ fontSize: "0.7rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem", marginBottom: 0 }}>
+                          Custom text shown above the registration button
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </details>
 
-                <div>
-                  <label style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    color: "var(--brand-medium-gray)",
-                    marginBottom: "0.25rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em"
-                  }}>
-                    Header Image (1200 × 675px recommended)
-                  </label>
-                  {(existingHeaderImage || headerImageFile) && (
-                    <div style={{
-                      marginTop: "0.5rem",
-                      marginBottom: "0.5rem",
-                      position: "relative",
-                      display: "inline-block"
-                    }}>
-                      <img
-                        src={headerImageFile ? URL.createObjectURL(headerImageFile) : existingHeaderImage}
-                        alt="Header preview"
-                        style={{
-                          maxWidth: "300px",
-                          maxHeight: "169px",
-                          borderRadius: "6px",
-                          border: `1px solid ${theme.palette.divider}`
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setHeaderImageFile(null);
-                          setExistingHeaderImage(null);
-                        }}
-                        style={{
-                          position: "absolute",
-                          top: "0.5rem",
-                          right: "0.5rem",
-                          backgroundColor: "rgba(0,0,0,0.7)",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          padding: "0.25rem 0.5rem",
-                          cursor: "pointer",
-                          fontSize: "0.75rem"
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => setCropImageSrc(reader.result);
-                      reader.readAsDataURL(file);
-                    }}
-                    style={{ marginTop: "0.5rem", display: "block" }}
-                  />
-                </div>
-                <button type="submit" className="button-primary">
-                  {editingId ? "Save Changes" : "Create Event"}
-                </button>
+              {/* ============ SUBMIT BUTTON ============ */}
+              <button
+                type="submit"
+                className="button-primary"
+                style={{
+                  padding: "1rem",
+                  fontSize: "1rem",
+                  fontWeight: 600
+                }}
+              >
+                {editingId
+                  ? "Save Changes"
+                  : form.status === "published"
+                    ? "Create & Publish Event"
+                    : "Save as Draft"}
+              </button>
             </form>
           </div>
           <hr style={{ margin: "2rem 0", border: "none", borderTop: "1px solid var(--brand-muted-gray)" }} />
