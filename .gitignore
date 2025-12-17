@@ -24,6 +24,10 @@ dist-ssr
 *.sw?
 .env
 
+# Test/debug scripts (may contain config)
+test-*.js
+*-checker.js
+
 # Firebase
 .firebase/
 firebase-debug.log
