@@ -200,6 +200,9 @@ export default function AdminPanel({ tab }) {
     groups: "both",
     required: true,
     allowGuests: false,
+    slug: "",
+    additionalRegistrationUrl: "",
+    additionalRegistrationText: "",
   });
   const [headerImageFile, setHeaderImageFile] = useState(null);
   const [existingHeaderImage, setExistingHeaderImage] = useState(null);
@@ -386,6 +389,9 @@ export default function AdminPanel({ tab }) {
         : event.groups[0],
       required: event.required,
       allowGuests: event.allowGuests || false,
+      slug: event.slug || "",
+      additionalRegistrationUrl: event.additionalRegistrationUrl || "",
+      additionalRegistrationText: event.additionalRegistrationText || "",
     });
     setEditingId(event.id);
     setExistingHeaderImage(event.headerImage || null);
@@ -466,6 +472,9 @@ export default function AdminPanel({ tab }) {
           required: form.required,
           allowGuests: form.allowGuests,
           headerImage: headerImageUrl || existingHeaderImage || "",
+          slug: form.slug || "",
+          additionalRegistrationUrl: form.additionalRegistrationUrl || "",
+          additionalRegistrationText: form.additionalRegistrationText || "",
         });
       } else {
         // Add new event, update local events list, show success message
@@ -480,10 +489,13 @@ export default function AdminPanel({ tab }) {
           allowGuests: form.allowGuests,
           createdBy: auth.currentUser?.email || "unknown",
           headerImage: headerImageUrl,
+          slug: form.slug || "",
+          additionalRegistrationUrl: form.additionalRegistrationUrl || "",
+          additionalRegistrationText: form.additionalRegistrationText || "",
         });
         setEvents(prev => [
           ...prev,
-          { id: newEventRef.id, ...form, timeRange: `${startTimeString} – ${endTimeString}`, date: Timestamp.fromDate(eventDateObj), headerImage: headerImageUrl }
+          { id: newEventRef.id, ...form, timeRange: `${startTimeString} – ${endTimeString}`, date: Timestamp.fromDate(eventDateObj), headerImage: headerImageUrl, slug: form.slug }
         ]);
         setSuccess("Event created!");
         setTimeout(() => setSuccess(""), 3000);
@@ -504,6 +516,9 @@ export default function AdminPanel({ tab }) {
       groups: "both",
       required: true,
       allowGuests: false,
+      slug: "",
+      additionalRegistrationUrl: "",
+      additionalRegistrationText: "",
     });
     setHeaderImageFile(null);
     setExistingHeaderImage(null);
@@ -625,7 +640,10 @@ export default function AdminPanel({ tab }) {
                       description: "",
                       groups: "both",
                       required: true,
-                      allowGuests: false
+                      allowGuests: false,
+                      slug: "",
+                      additionalRegistrationUrl: "",
+                      additionalRegistrationText: ""
                     });
                   }}
                 >
@@ -780,6 +798,160 @@ export default function AdminPanel({ tab }) {
                     (People can bring additional guests when RSVPing)
                   </span>
                 </label>
+
+                {/* Landing Page Settings */}
+                <div style={{
+                  backgroundColor: theme.palette.background.default,
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRadius: "8px",
+                  padding: "1rem",
+                  marginTop: "0.5rem"
+                }}>
+                  <label style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: "var(--brand-medium-gray)",
+                    marginBottom: "0.5rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    display: "block"
+                  }}>
+                    Landing Page Settings (Optional)
+                  </label>
+                  <p style={{ fontSize: "0.8rem", color: "var(--brand-medium-gray)", marginBottom: "1rem" }}>
+                    Create a shareable event page for external registration.
+                  </p>
+
+                  <div style={{ marginBottom: "1rem" }}>
+                    <label style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: "var(--brand-medium-gray)",
+                      marginBottom: "0.25rem",
+                      display: "block"
+                    }}>
+                      URL Slug
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span style={{ fontSize: "0.85rem", color: "var(--brand-medium-gray)" }}>
+                        app.levelupcincinnati.org/event/
+                      </span>
+                      <input
+                        type="text"
+                        name="slug"
+                        placeholder="coach-happy-hour"
+                        value={form.slug}
+                        onChange={handleChange}
+                        style={{
+                          padding: "0.5rem",
+                          fontSize: "0.9rem",
+                          borderRadius: "6px",
+                          border: `1px solid ${theme.palette.divider}`,
+                          color: theme.palette.text.primary,
+                          backgroundColor: theme.palette.background.paper,
+                          flex: 1,
+                          maxWidth: "200px"
+                        }}
+                      />
+                    </div>
+                    <p style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>
+                      Use lowercase letters, numbers, and hyphens only
+                    </p>
+                  </div>
+
+                  <div>
+                    <label style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: "var(--brand-medium-gray)",
+                      marginBottom: "0.25rem",
+                      display: "block"
+                    }}>
+                      Additional Registration URL
+                    </label>
+                    <input
+                      type="url"
+                      name="additionalRegistrationUrl"
+                      placeholder="https://forms.google.com/..."
+                      value={form.additionalRegistrationUrl}
+                      onChange={handleChange}
+                      style={{
+                        padding: "0.5rem",
+                        fontSize: "0.9rem",
+                        borderRadius: "6px",
+                        border: `1px solid ${theme.palette.divider}`,
+                        color: theme.palette.text.primary,
+                        backgroundColor: theme.palette.background.paper,
+                        width: "100%"
+                      }}
+                    />
+                    <p style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>
+                      Optional: Link to Google Form or other registration (shown after RSVP)
+                    </p>
+                  </div>
+
+                  {form.additionalRegistrationUrl && (
+                    <div>
+                      <label style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: "var(--brand-medium-gray)",
+                        marginBottom: "0.25rem",
+                        display: "block"
+                      }}>
+                        Button Text & Description
+                      </label>
+                      <input
+                        type="text"
+                        name="additionalRegistrationText"
+                        placeholder="Reserve your bourbon tour time slot"
+                        value={form.additionalRegistrationText}
+                        onChange={handleChange}
+                        style={{
+                          padding: "0.5rem",
+                          fontSize: "0.9rem",
+                          borderRadius: "6px",
+                          border: `1px solid ${theme.palette.divider}`,
+                          color: theme.palette.text.primary,
+                          backgroundColor: theme.palette.background.paper,
+                          width: "100%"
+                        }}
+                      />
+                      <p style={{ fontSize: "0.75rem", color: "var(--brand-medium-gray)", marginTop: "0.25rem" }}>
+                        Custom text shown above the additional registration button
+                      </p>
+                    </div>
+                  )}
+
+                  {form.slug && (
+                    <div style={{
+                      marginTop: "1rem",
+                      padding: "0.75rem",
+                      backgroundColor: "#dcfce7",
+                      borderRadius: "6px",
+                      border: "1px solid #bbf7d0"
+                    }}>
+                      <span style={{ fontSize: "0.8rem", color: "#166534", fontWeight: 500 }}>
+                        Shareable Link:
+                      </span>
+                      <a
+                        href={`/event/${form.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: "block",
+                          fontSize: "0.85rem",
+                          color: "#15803d",
+                          marginTop: "0.25rem",
+                          wordBreak: "break-all"
+                        }}
+                      >
+                        https://app.levelupcincinnati.org/event/{form.slug}
+                      </a>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <label style={{
                     fontSize: "0.75rem",
@@ -865,7 +1037,7 @@ export default function AdminPanel({ tab }) {
                         })
                       : "Date Unknown"} · {event.timeRange} @ {event.location}
                   </p>
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
                     <button
                       type="button"
                       className="button-primary"
@@ -892,6 +1064,74 @@ export default function AdminPanel({ tab }) {
                       }}
                     >
                       View RSVPs
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const eventDate = event.date?.seconds
+                          ? new Date(event.date.seconds * 1000).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric"
+                            })
+                          : "Date TBD";
+
+                        // Strip HTML tags from description for plain text
+                        const plainDescription = event.description
+                          ? event.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+                          : "";
+
+                        // Truncate description to ~100 chars for texting
+                        const shortDescription = plainDescription.length > 100
+                          ? plainDescription.substring(0, 100).trim() + "..."
+                          : plainDescription;
+
+                        const shareText = `${event.name}\n\n${eventDate}\n${event.timeRange}\n${event.location}${shortDescription ? `\n\n${shortDescription}` : ""}`;
+
+                        // Try Web Share API first, fallback to clipboard
+                        if (navigator.share) {
+                          try {
+                            await navigator.share({ text: shareText });
+                          } catch (err) {
+                            if (err.name !== 'AbortError') {
+                              console.error('Share failed:', err);
+                            }
+                          }
+                        } else {
+                          try {
+                            await navigator.clipboard.writeText(shareText);
+                            setSuccess("Event details copied to clipboard!");
+                            setTimeout(() => setSuccess(""), 3000);
+                          } catch (err) {
+                            console.error('Copy failed:', err);
+                            setSuccess("Unable to copy. Please try again.");
+                            setTimeout(() => setSuccess(""), 3000);
+                          }
+                        }
+                      }}
+                      style={{
+                        padding: "0.5rem 0.75rem",
+                        fontSize: "0.95rem",
+                        backgroundColor: "#f3f4f6",
+                        color: "#18264E",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem"
+                      }}
+                      title="Share event via text"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="18" cy="5" r="3"/>
+                        <circle cx="6" cy="12" r="3"/>
+                        <circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                      </svg>
+                      Share
                     </button>
                   </div>
                 </li>
@@ -921,7 +1161,7 @@ export default function AdminPanel({ tab }) {
                         })
                       : "Date Unknown"} · {event.timeRange} @ {event.location}
                   </p>
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
                     <button
                       type="button"
                       className="button-primary"
@@ -948,6 +1188,74 @@ export default function AdminPanel({ tab }) {
                       }}
                     >
                       View RSVPs
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const eventDate = event.date?.seconds
+                          ? new Date(event.date.seconds * 1000).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric"
+                            })
+                          : "Date TBD";
+
+                        // Strip HTML tags from description for plain text
+                        const plainDescription = event.description
+                          ? event.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+                          : "";
+
+                        // Truncate description to ~100 chars for texting
+                        const shortDescription = plainDescription.length > 100
+                          ? plainDescription.substring(0, 100).trim() + "..."
+                          : plainDescription;
+
+                        const shareText = `${event.name}\n\n${eventDate}\n${event.timeRange}\n${event.location}${shortDescription ? `\n\n${shortDescription}` : ""}`;
+
+                        // Try Web Share API first, fallback to clipboard
+                        if (navigator.share) {
+                          try {
+                            await navigator.share({ text: shareText });
+                          } catch (err) {
+                            if (err.name !== 'AbortError') {
+                              console.error('Share failed:', err);
+                            }
+                          }
+                        } else {
+                          try {
+                            await navigator.clipboard.writeText(shareText);
+                            setSuccess("Event details copied to clipboard!");
+                            setTimeout(() => setSuccess(""), 3000);
+                          } catch (err) {
+                            console.error('Copy failed:', err);
+                            setSuccess("Unable to copy. Please try again.");
+                            setTimeout(() => setSuccess(""), 3000);
+                          }
+                        }
+                      }}
+                      style={{
+                        padding: "0.5rem 0.75rem",
+                        fontSize: "0.95rem",
+                        backgroundColor: "#f3f4f6",
+                        color: "#18264E",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem"
+                      }}
+                      title="Share event via text"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="18" cy="5" r="3"/>
+                        <circle cx="6" cy="12" r="3"/>
+                        <circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                      </svg>
+                      Share
                     </button>
                   </div>
                 </li>

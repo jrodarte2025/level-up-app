@@ -26,6 +26,7 @@ import UserDashboard from "./UserDashboard";
 import AdminPanel from "./AdminPanel";
 import Directory from "./Directory";
 import AdminMatches from "./AdminMatches";
+import EventLandingPage from "./EventLandingPage";
 import EventIcon       from '@mui/icons-material/Event';
 import PeopleIcon      from '@mui/icons-material/People';
 import LinkIcon        from '@mui/icons-material/Link';
@@ -380,6 +381,12 @@ export default function App() {
   }
 
   if (authLoaded && user && (location.pathname === "/login" || location.pathname === "/signup")) {
+    // Check for redirect path first
+    const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+    if (redirectPath) {
+      sessionStorage.removeItem("redirectAfterLogin");
+      return <Navigate to={redirectPath} replace />;
+    }
     return <Navigate to="/" replace />;
   }
 
@@ -388,6 +395,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/event/:eventId" element={<EventLandingPage />} />
         <Route path="/test-update" element={<CreateUpdate />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
@@ -614,6 +622,7 @@ export default function App() {
             </AppShell>
           }
         />
+        <Route path="/event/:eventId" element={<EventLandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/test-update" element={<CreateUpdate />} />
