@@ -314,6 +314,73 @@ export default function EventLandingPage() {
   }
 
   if (error) {
+    // If user is not logged in, show "Members Only" message instead of "Not Found"
+    // This handles the case where Firestore rules require authentication
+    if (!user) {
+      return (
+        <div style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.palette.background.default,
+          padding: "2rem",
+          textAlign: "center"
+        }}>
+          <img src="/logo.png" alt="Level Up Cincinnati" style={{ height: "64px", marginBottom: "1.5rem" }} />
+          <div style={{
+            fontSize: "3rem",
+            marginBottom: "1rem"
+          }}>
+            🔒
+          </div>
+          <h2 style={{ color: theme.palette.text.primary, marginBottom: "0.5rem" }}>
+            Members Only
+          </h2>
+          <p style={{
+            color: theme.palette.text.secondary,
+            marginBottom: "1.5rem",
+            maxWidth: "300px",
+            lineHeight: 1.5
+          }}>
+            This event is for Level Up members. Please log in to view the event details.
+          </p>
+          <button
+            className="button-primary"
+            onClick={redirectToLogin}
+            style={{ marginBottom: "1rem" }}
+          >
+            Log In to View Event
+          </button>
+          <p style={{
+            color: theme.palette.text.secondary,
+            fontSize: "0.85rem"
+          }}>
+            Not a member?{" "}
+            <button
+              onClick={() => {
+                sessionStorage.setItem("redirectAfterLogin", location.pathname);
+                navigate("/signup");
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                color: theme.palette.primary.main,
+                textDecoration: "underline",
+                cursor: "pointer",
+                padding: 0,
+                fontSize: "0.85rem"
+              }}
+            >
+              Sign up here
+            </button>
+          </p>
+        </div>
+      );
+    }
+
+    // User is logged in but event not found - show actual error
     return (
       <div style={{
         minHeight: "100vh",
@@ -331,9 +398,9 @@ export default function EventLandingPage() {
         </p>
         <button
           className="button-primary"
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/")}
         >
-          Go to App
+          Go to Dashboard
         </button>
       </div>
     );
