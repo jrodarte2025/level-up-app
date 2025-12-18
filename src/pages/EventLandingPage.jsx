@@ -607,38 +607,94 @@ export default function EventLandingPage() {
           </button>
         ) : (
           <div style={{
-            backgroundColor: theme.palette.mode === 'dark' ? '#064e3b' : '#dcfce7',
-            border: `1px solid ${theme.palette.mode === 'dark' ? '#065f46' : '#bbf7d0'}`,
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30, 45, 95, 0.3)' : '#f8f8f8',
+            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(107, 123, 168, 0.3)' : '#e5e7eb'}`,
             borderRadius: "12px",
-            padding: "1rem",
+            padding: "1.5rem",
             marginBottom: "1.5rem",
             textAlign: "center"
           }}>
-            <div style={{ fontSize: "1.5rem", marginBottom: "0.25rem" }}>✓</div>
+            {/* Success Icon - Navy circle with checkmark */}
+            <div style={{
+              width: "56px",
+              height: "56px",
+              background: "linear-gradient(135deg, #1e2d5f 0%, #18264e 100%)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1rem",
+              fontSize: "1.5rem",
+              color: "#c9a962"
+            }}>
+              ✓
+            </div>
             <div style={{
               fontWeight: 600,
-              color: theme.palette.mode === 'dark' ? '#34d399' : '#16a34a',
-              fontSize: "1.1rem"
+              color: theme.palette.mode === 'dark' ? '#e8e8e8' : '#18264e',
+              fontSize: "1.1rem",
+              marginBottom: "0.25rem"
             }}>
-              You're In!
+              You're Registered!
             </div>
             {currentGuestCount > 0 && (
               <div style={{
-                fontSize: "0.9rem",
-                color: theme.palette.mode === 'dark' ? '#6ee7b7' : '#166534',
-                marginTop: "0.25rem"
+                fontSize: "0.875rem",
+                color: theme.palette.mode === 'dark' ? '#9ca3af' : '#666',
+                marginBottom: "0.5rem"
               }}>
                 + {currentGuestCount} guest{currentGuestCount !== 1 ? "s" : ""}
               </div>
             )}
-            <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap" }}>
-              <a href={calendarLinks.google} target="_blank" rel="noreferrer" className="button-secondary" style={{ fontSize: "0.85rem", padding: "0.5rem 0.75rem" }}>
+
+            {/* Calendar Links */}
+            <div style={{
+              marginTop: "1.25rem",
+              paddingTop: "1.25rem",
+              borderTop: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(107, 123, 168, 0.2)' : '#e5e7eb'}`,
+              display: "flex",
+              gap: "0.75rem",
+              justifyContent: "center",
+              flexWrap: "wrap"
+            }}>
+              <a
+                href={calendarLinks.google}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: "0.875rem",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "6px",
+                  border: `2px solid ${theme.palette.mode === 'dark' ? '#6B7BA8' : '#18264e'}`,
+                  color: theme.palette.mode === 'dark' ? '#e8e8e8' : '#18264e',
+                  backgroundColor: "transparent",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                  transition: "all 0.2s"
+                }}
+              >
                 Add to Google
               </a>
-              <a href={calendarLinks.ics} download={`${event.name}.ics`} className="button-secondary" style={{ fontSize: "0.85rem", padding: "0.5rem 0.75rem" }}>
+              <a
+                href={calendarLinks.ics}
+                download={`${event.name}.ics`}
+                style={{
+                  fontSize: "0.875rem",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "6px",
+                  border: `2px solid ${theme.palette.mode === 'dark' ? '#6B7BA8' : '#18264e'}`,
+                  color: theme.palette.mode === 'dark' ? '#e8e8e8' : '#18264e',
+                  backgroundColor: "transparent",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                  transition: "all 0.2s"
+                }}
+              >
                 Add to Calendar
               </a>
             </div>
+
+            {/* Cancel RSVP - Muted, not alarming */}
             <button
               onClick={handleCancelRSVP}
               disabled={rsvpLoading}
@@ -647,10 +703,11 @@ export default function EventLandingPage() {
                 marginTop: "1rem",
                 background: "none",
                 border: "none",
-                color: theme.palette.error?.main || "#dc2626",
-                fontSize: "0.85rem",
+                color: theme.palette.mode === 'dark' ? '#9ca3af' : '#888',
+                fontSize: "0.8rem",
                 cursor: "pointer",
-                textDecoration: "underline"
+                padding: "0.5rem",
+                opacity: rsvpLoading ? 0.5 : 1
               }}
             >
               Cancel RSVP
@@ -661,26 +718,47 @@ export default function EventLandingPage() {
         {/* Additional Registration Link */}
         {event.additionalRegistrationUrl && isRSVPed && (
           <div style={{
-            backgroundColor: theme.palette.mode === 'dark' ? '#78350f' : '#fef3c7',
-            border: `1px solid ${theme.palette.mode === 'dark' ? '#92400e' : '#fde68a'}`,
-            borderRadius: "12px",
-            padding: "1rem",
-            marginBottom: "1.5rem",
-            textAlign: "center"
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(241, 95, 94, 0.1)' : 'rgba(241, 95, 94, 0.06)',
+            borderLeft: "4px solid #F15F5E",
+            borderRadius: "0 8px 8px 0",
+            padding: "1.25rem",
+            marginBottom: "1.5rem"
           }}>
             <div style={{
               fontWeight: 600,
-              color: theme.palette.mode === 'dark' ? '#fcd34d' : '#92400e',
-              marginBottom: "0.5rem"
+              color: "#F15F5E",
+              fontSize: "0.9rem",
+              marginBottom: "0.5rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem"
             }}>
-              {event.additionalRegistrationText || "Additional Registration"}
+              <span style={{ fontSize: "1rem" }}>⚡</span>
+              {event.additionalRegistrationText || "One More Step"}
             </div>
+            <p style={{
+              fontSize: "0.875rem",
+              color: theme.palette.mode === 'dark' ? '#d1d5db' : '#555',
+              margin: "0 0 1rem 0",
+              lineHeight: 1.5
+            }}>
+              Complete your registration to secure your spot.
+            </p>
             <a
               href={event.additionalRegistrationUrl}
               target="_blank"
               rel="noreferrer"
-              className="button-primary"
-              style={{ display: "inline-block", padding: "0.5rem 1rem" }}
+              style={{
+                display: "inline-block",
+                padding: "0.75rem 1.25rem",
+                backgroundColor: "#F15F5E",
+                color: "#ffffff",
+                borderRadius: "6px",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                textDecoration: "none",
+                transition: "background-color 0.2s"
+              }}
             >
               Complete Registration
             </a>
