@@ -9,7 +9,7 @@ const ApprovalsPanel = () => {
   const [sharedCode, setSharedCode] = useState(null);
 
   const handleShare = async (code) => {
-    const shareText = `Hey - here's a link to register for the Level Up App. When you sign up, please use registration code ${code.id}: https://app.levelupcincinnati.org`;
+    const shareText = `Hey - here's a link to register for the Level Up App. When you sign up, please use registration code ${code.id}\n\nhttps://app.levelupcincinnati.org`;
 
     if (navigator.share) {
       try {
