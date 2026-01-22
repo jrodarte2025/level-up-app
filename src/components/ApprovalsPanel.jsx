@@ -6,6 +6,33 @@ import { Typography } from "@mui/material";
 const ApprovalsPanel = () => {
   const [registrationCodes, setRegistrationCodes] = useState([]);
   const [copiedCode, setCopiedCode] = useState(null);
+  const [sharedCode, setSharedCode] = useState(null);
+
+  const handleShare = async (code) => {
+    const shareText = `Hey - here's a link to register for the Level Up App. When you sign up, please use registration code ${code.id}: https://app.levelupcincinnati.org`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: shareText });
+        setSharedCode(code.id);
+        setTimeout(() => setSharedCode(null), 1500);
+      } catch (err) {
+        // User cancelled or share failed - only log if not a cancel
+        if (err.name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      // Fallback to clipboard for browsers without Web Share API
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setSharedCode(code.id);
+        setTimeout(() => setSharedCode(null), 1500);
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchCodes = async () => {
@@ -49,7 +76,7 @@ const ApprovalsPanel = () => {
               </span>
               {/* label intentionally not shown */}
             </div>
-            <div style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <button
                 onClick={() => {
                   if (navigator.clipboard && window.isSecureContext) {
@@ -87,11 +114,40 @@ const ApprovalsPanel = () => {
                   cursor: "pointer"
                 }}
               >
-                Copy
+                Copy Code
+              </button>
+              <button
+                onClick={() => handleShare(code)}
+                style={{
+                  padding: "0.3rem 0.75rem",
+                  fontSize: "0.85rem",
+                  backgroundColor: "#18264E",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.35rem"
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"/>
+                  <circle cx="6" cy="12" r="3"/>
+                  <circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Share Invite
               </button>
               {copiedCode === code.id && (
-                <span style={{ marginLeft: "0.5rem", color: "#16a34a", fontSize: "0.8rem" }}>
+                <span style={{ color: "#16a34a", fontSize: "0.8rem" }}>
                   Copied!
+                </span>
+              )}
+              {sharedCode === code.id && (
+                <span style={{ color: "#16a34a", fontSize: "0.8rem" }}>
+                  Shared!
                 </span>
               )}
             </div>
