@@ -284,6 +284,50 @@ export default function EventLandingPage() {
     return { google, ics, outlook: ics };
   };
 
+  // Handle sharing event link
+  const handleShareEvent = async () => {
+    const eventUrl = `https://app.levelupcincinnati.org/event/${event.slug || event.id}`;
+
+    // Use Web Share API on mobile, clipboard on desktop
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: event.name,
+          text: `Check out this event: ${event.name}`,
+          url: eventUrl
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      // Desktop fallback - copy to clipboard
+      try {
+        await navigator.clipboard.writeText(eventUrl);
+        setSuccessMessage("Event link copied to clipboard!");
+        // Clear any existing timeout
+        if (successTimeoutRef.current) {
+          clearTimeout(successTimeoutRef.current);
+        }
+        successTimeoutRef.current = setTimeout(() => setSuccessMessage(""), 3000);
+      } catch (err) {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = eventUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setSuccessMessage("Event link copied to clipboard!");
+        if (successTimeoutRef.current) {
+          clearTimeout(successTimeoutRef.current);
+        }
+        successTimeoutRef.current = setTimeout(() => setSuccessMessage(""), 3000);
+      }
+    }
+  };
+
   // Format date
   const formatDate = (timestamp) => {
     if (!timestamp?.seconds) return "Date TBD";
@@ -692,6 +736,32 @@ export default function EventLandingPage() {
               >
                 Add to Calendar
               </a>
+              <button
+                onClick={handleShareEvent}
+                style={{
+                  fontSize: "0.875rem",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "6px",
+                  border: `2px solid ${theme.palette.mode === 'dark' ? '#6B7BA8' : '#18264e'}`,
+                  color: theme.palette.mode === 'dark' ? '#e8e8e8' : '#18264e',
+                  backgroundColor: "transparent",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  transition: "all 0.2s"
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"/>
+                  <circle cx="6" cy="12" r="3"/>
+                  <circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Share Event
+              </button>
             </div>
 
             {/* Cancel RSVP - Muted, not alarming */}

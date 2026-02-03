@@ -210,6 +210,9 @@ export default function AdminPanel({ tab }) {
   const [existingHeaderImage, setExistingHeaderImage] = useState(null);
   const [events, setEvents] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  // Copy link state for slug preview and event list
+  const [copiedSlug, setCopiedSlug] = useState(false);
+  const [copiedEventLink, setCopiedEventLink] = useState(null);
 
   const [cropImageSrc, setCropImageSrc] = useState(null);
   useEffect(() => {
@@ -1174,9 +1177,62 @@ export default function AdminPanel({ tab }) {
                         borderRadius: "6px",
                         border: "1px solid #bbf7d0"
                       }}>
-                        <span style={{ fontSize: "0.75rem", color: "#166534", fontWeight: 500 }}>
-                          Shareable Link:
-                        </span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                          <span style={{ fontSize: "0.75rem", color: "#166534", fontWeight: 500 }}>
+                            Shareable Link:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const url = `https://app.levelupcincinnati.org/event/${form.slug}`;
+                              try {
+                                await navigator.clipboard.writeText(url);
+                                setCopiedSlug(true);
+                                setTimeout(() => setCopiedSlug(false), 1500);
+                              } catch (err) {
+                                // Fallback for older browsers
+                                const textArea = document.createElement("textarea");
+                                textArea.value = url;
+                                document.body.appendChild(textArea);
+                                textArea.select();
+                                document.execCommand("copy");
+                                document.body.removeChild(textArea);
+                                setCopiedSlug(true);
+                                setTimeout(() => setCopiedSlug(false), 1500);
+                              }
+                            }}
+                            style={{
+                              padding: "0.25rem 0.5rem",
+                              fontSize: "0.7rem",
+                              backgroundColor: copiedSlug ? "#166534" : "#15803d",
+                              color: "#ffffff",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.25rem",
+                              transition: "background-color 0.2s"
+                            }}
+                          >
+                            {copiedSlug ? (
+                              <>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                                Copy Link
+                              </>
+                            )}
+                          </button>
+                        </div>
                         <a
                           href={`/event/${form.slug}`}
                           target="_blank"
@@ -1185,7 +1241,6 @@ export default function AdminPanel({ tab }) {
                             display: "block",
                             fontSize: "0.85rem",
                             color: "#15803d",
-                            marginTop: "0.25rem",
                             wordBreak: "break-all"
                           }}
                         >
@@ -1407,7 +1462,7 @@ export default function AdminPanel({ tab }) {
                         alignItems: "center",
                         gap: "0.35rem"
                       }}
-                      title="Share event via text"
+                      title="Share event details via text"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="18" cy="5" r="3"/>
@@ -1416,7 +1471,59 @@ export default function AdminPanel({ tab }) {
                         <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
                         <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
                       </svg>
-                      Share
+                      Share Details
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const eventUrl = `https://app.levelupcincinnati.org/event/${event.slug || event.id}`;
+                        try {
+                          await navigator.clipboard.writeText(eventUrl);
+                          setCopiedEventLink(event.id);
+                          setTimeout(() => setCopiedEventLink(null), 1500);
+                        } catch (err) {
+                          // Fallback for older browsers
+                          const textArea = document.createElement("textarea");
+                          textArea.value = eventUrl;
+                          document.body.appendChild(textArea);
+                          textArea.select();
+                          document.execCommand("copy");
+                          document.body.removeChild(textArea);
+                          setCopiedEventLink(event.id);
+                          setTimeout(() => setCopiedEventLink(null), 1500);
+                        }
+                      }}
+                      style={{
+                        padding: "0.5rem 0.75rem",
+                        fontSize: "0.95rem",
+                        backgroundColor: copiedEventLink === event.id ? "#166534" : "#f3f4f6",
+                        color: copiedEventLink === event.id ? "#ffffff" : "#18264E",
+                        border: copiedEventLink === event.id ? "1px solid #166534" : "1px solid #e5e7eb",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        transition: "all 0.2s"
+                      }}
+                      title="Copy event link to clipboard"
+                    >
+                      {copiedEventLink === event.id ? (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                          </svg>
+                          Copy Link
+                        </>
+                      )}
                     </button>
                   </div>
                 </li>
@@ -1552,7 +1659,7 @@ export default function AdminPanel({ tab }) {
                         alignItems: "center",
                         gap: "0.35rem"
                       }}
-                      title="Share event via text"
+                      title="Share event details via text"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="18" cy="5" r="3"/>
@@ -1561,7 +1668,59 @@ export default function AdminPanel({ tab }) {
                         <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
                         <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
                       </svg>
-                      Share
+                      Share Details
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const eventUrl = `https://app.levelupcincinnati.org/event/${event.slug || event.id}`;
+                        try {
+                          await navigator.clipboard.writeText(eventUrl);
+                          setCopiedEventLink(event.id);
+                          setTimeout(() => setCopiedEventLink(null), 1500);
+                        } catch (err) {
+                          // Fallback for older browsers
+                          const textArea = document.createElement("textarea");
+                          textArea.value = eventUrl;
+                          document.body.appendChild(textArea);
+                          textArea.select();
+                          document.execCommand("copy");
+                          document.body.removeChild(textArea);
+                          setCopiedEventLink(event.id);
+                          setTimeout(() => setCopiedEventLink(null), 1500);
+                        }
+                      }}
+                      style={{
+                        padding: "0.5rem 0.75rem",
+                        fontSize: "0.95rem",
+                        backgroundColor: copiedEventLink === event.id ? "#166534" : "#f3f4f6",
+                        color: copiedEventLink === event.id ? "#ffffff" : "#18264E",
+                        border: copiedEventLink === event.id ? "1px solid #166534" : "1px solid #e5e7eb",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        transition: "all 0.2s"
+                      }}
+                      title="Copy event link to clipboard"
+                    >
+                      {copiedEventLink === event.id ? (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                          </svg>
+                          Copy Link
+                        </>
+                      )}
                     </button>
                   </div>
                 </li>
