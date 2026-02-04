@@ -56,10 +56,20 @@ export default function EventCard({
     return { google, ics, outlook: ics };
   };
 
+  // Handle both array format ["students", "coaches"] and legacy string format "both"
+  const groups = event.groups;
+  const isForCoaches = Array.isArray(groups)
+    ? groups.includes("coaches")
+    : groups === "both" || groups === "coaches";
+  const isForStudents = Array.isArray(groups)
+    ? groups.includes("students")
+    : groups === "both" || groups === "students";
+  const isForBoth = isForCoaches && isForStudents;
+
   // Determine audience color for border accent
-  const audienceColor = event.groups?.includes("coaches") && event.groups?.includes("students")
+  const audienceColor = isForBoth
     ? "#4CAFB6"  // Both: Accent Teal (brand)
-    : event.groups?.includes("coaches")
+    : isForCoaches
     ? "#18264E"  // Coaches: Primary Blue (brand)
     : "#6B7BA8"; // Students: Soft Blue (brand)
 
@@ -91,12 +101,11 @@ export default function EventCard({
           position: "absolute",
           top: "0.75rem",
           left: "0.75rem",
-          backgroundColor:
-            event.groups?.includes("coaches") && event.groups?.includes("students")
-              ? "#4CAFB6"  // Both: Accent Teal (brand)
-              : event.groups?.includes("coaches")
-              ? "#18264E"  // Coaches: Primary Blue (brand)
-              : "#6B7BA8", // Students: Soft Blue (brand)
+          backgroundColor: isForBoth
+            ? "#4CAFB6"  // Both: Accent Teal (brand)
+            : isForCoaches
+            ? "#18264E"  // Coaches: Primary Blue (brand)
+            : "#6B7BA8", // Students: Soft Blue (brand)
           color: "#fff",
           padding: "0.45rem 0.85rem",
           borderRadius: "6px",
@@ -106,9 +115,9 @@ export default function EventCard({
           textTransform: "uppercase",
           letterSpacing: "0.5px"
         }}>
-          {event.groups?.includes("coaches") && event.groups?.includes("students")
+          {isForBoth
             ? "All Attendees"
-            : event.groups?.includes("coaches")
+            : isForCoaches
             ? "For Coaches"
             : "For Students"}
         </span>

@@ -305,8 +305,14 @@ export default function UserDashboard({ setShowAdminPanel }) {
   const publishedEvents = sortedEvents.filter((event) => event.status !== "draft");
 
   const filteredEvents = publishedEvents.filter((event) => {
-    const isCoach = event.groups?.includes("coaches");
-    const isStudent = event.groups?.includes("students");
+    // Handle both array format ["students", "coaches"] and legacy string format "both"
+    const groups = event.groups;
+    const isCoach = Array.isArray(groups)
+      ? groups.includes("coaches")
+      : groups === "both" || groups === "coaches";
+    const isStudent = Array.isArray(groups)
+      ? groups.includes("students")
+      : groups === "both" || groups === "students";
     const isRequired = event.required;
     const isRSVPed = rsvps[event.id];
 
