@@ -27,6 +27,7 @@ export default function EventLandingPage() {
   const [currentGuestCount, setCurrentGuestCount] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showAttendeesModal, setShowAttendeesModal] = useState(false);
 
   // Ref for timeout cleanup
   const successTimeoutRef = useRef(null);
@@ -140,9 +141,11 @@ export default function EventLandingPage() {
             // Fall back to fetching user doc for older RSVPs without denormalized data
             const userDoc = await getDoc(doc(db, "users", rsvpData.userId));
             if (userDoc.exists()) {
+              const userData = userDoc.data();
               return {
                 id: userDoc.id,
-                ...userDoc.data(),
+                ...userData,
+                profileImage: userData.profileImage || userData.headshotUrl,
                 guestCount: rsvpData.guestCount || 0
               };
             }
@@ -190,7 +193,7 @@ export default function EventLandingPage() {
         rsvpTimestamp: Timestamp.now(),
         // Denormalized user data
         userName: user.fullName || user.email,
-        userAvatar: user.profileImage || null
+        userAvatar: user.profileImage || user.headshotUrl || null
       });
 
       setIsRSVPed(true);
@@ -214,7 +217,7 @@ export default function EventLandingPage() {
         return [...prev, {
           id: user.uid,
           fullName: user.fullName,
-          profileImage: user.profileImage,
+          profileImage: user.profileImage || user.headshotUrl,
           guestCount
         }];
       });
@@ -506,74 +509,94 @@ export default function EventLandingPage() {
 
       {/* Hero Section */}
       <div style={{
-        position: "relative",
         width: "100%",
-        height: "300px",
-        overflow: "hidden"
+        padding: "0 1rem",
+        paddingTop: "1rem",
+        boxSizing: "border-box"
       }}>
-        <img
-          src={imageUrl}
-          alt={event.name}
-          style={{
+        <div style={{
+          position: "relative",
+          width: "100%",
+          maxWidth: "800px",
+          margin: "0 auto",
+          borderRadius: "16px",
+          overflow: "hidden",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
+        }}>
+          {/* Aspect ratio container - 16:9 */}
+          <div style={{
+            position: "relative",
             width: "100%",
-            height: "100%",
-            objectFit: "cover"
-          }}
-        />
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)"
-        }} />
-
-        {/* Logo */}
-        <div style={{
-          position: "absolute",
-          top: "1rem",
-          left: "1rem"
-        }}>
-          <img
-            src="/logo.png"
-            alt="Level Up"
-            style={{
-              height: "40px",
-              filter: "brightness(0) invert(1)",
-              opacity: 0.9
-            }}
-          />
-        </div>
-
-        {/* Event Title */}
-        <div style={{
-          position: "absolute",
-          bottom: "1.5rem",
-          left: "1rem",
-          right: "1rem",
-          color: "#fff"
-        }}>
-          {event.required && (
-            <span style={{
-              backgroundColor: "var(--brand-primary-coral)",
-              color: "#fff",
-              padding: "0.25rem 0.5rem",
-              borderRadius: "4px",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              marginBottom: "0.5rem",
-              display: "inline-block"
-            }}>
-              Required
-            </span>
-          )}
-          <h1 style={{
-            fontSize: "1.75rem",
-            fontWeight: 700,
-            margin: 0,
-            textShadow: "0 2px 4px rgba(0,0,0,0.3)"
+            paddingTop: "56.25%", /* 16:9 aspect ratio */
           }}>
-            {event.name}
-          </h1>
+            <img
+              src={imageUrl}
+              alt={event.name}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover"
+              }}
+            />
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.1) 70%, transparent 100%)"
+            }} />
+
+            {/* Logo */}
+            <div style={{
+              position: "absolute",
+              top: "1rem",
+              left: "1rem"
+            }}>
+              <img
+                src="/logo.png"
+                alt="Level Up"
+                style={{
+                  height: "36px",
+                  filter: "brightness(0) invert(1)",
+                  opacity: 0.9
+                }}
+              />
+            </div>
+
+            {/* Event Title */}
+            <div style={{
+              position: "absolute",
+              bottom: "1.25rem",
+              left: "1.25rem",
+              right: "1.25rem",
+              color: "#fff"
+            }}>
+              {event.required && (
+                <span style={{
+                  backgroundColor: "var(--brand-primary-coral)",
+                  color: "#fff",
+                  padding: "0.25rem 0.5rem",
+                  borderRadius: "4px",
+                  fontSize: "0.7rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  marginBottom: "0.5rem",
+                  display: "inline-block"
+                }}>
+                  Required
+                </span>
+              )}
+              <h1 style={{
+                fontSize: "clamp(1.25rem, 4vw, 1.75rem)",
+                fontWeight: 700,
+                margin: 0,
+                textShadow: "0 2px 4px rgba(0,0,0,0.3)"
+              }}>
+                {event.name}
+              </h1>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -897,21 +920,40 @@ export default function EventLandingPage() {
 
         {/* Who's Attending */}
         {attendingUsers.length > 0 && (
-          <div style={{
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: "12px",
-            padding: "1.25rem",
-            marginBottom: "1.5rem",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-            border: `1px solid ${theme.palette.divider}`
-          }}>
+          <div
+            onClick={() => setShowAttendeesModal(true)}
+            style={{
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: "12px",
+              padding: "1.25rem",
+              marginBottom: "1.5rem",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              border: `1px solid ${theme.palette.divider}`,
+              cursor: "pointer",
+              transition: "transform 0.2s, box-shadow 0.2s"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.01)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
+            }}
+          >
             <h3 style={{
               margin: "0 0 0.75rem 0",
               fontSize: "1rem",
               fontWeight: 600,
-              color: theme.palette.text.primary
+              color: theme.palette.text.primary,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
             }}>
-              Who's Attending ({attendingUsers.length})
+              <span>Who's Attending ({attendingUsers.length})</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: 400, color: theme.palette.text.secondary }}>
+                Tap to view all →
+              </span>
             </h3>
             <AvatarList users={attendingUsers} size={40} />
           </div>
@@ -952,6 +994,91 @@ export default function EventLandingPage() {
           onConfirm={(count) => handleRSVP(count)}
           initialCount={currentGuestCount}
         />
+      )}
+
+      {/* Attendees Modal */}
+      {showAttendeesModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10000
+          }}
+          onClick={() => setShowAttendeesModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: theme.palette.background.paper,
+              padding: "1.5rem",
+              borderRadius: "12px",
+              maxWidth: "400px",
+              width: "90%",
+              maxHeight: "70vh",
+              overflowY: "auto",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem"
+            }}>
+              <h3 style={{ margin: 0, color: theme.palette.text.primary, fontSize: "1.1rem", fontWeight: 600 }}>
+                Who's Attending ({attendingUsers.length})
+              </h3>
+              <button
+                onClick={() => setShowAttendeesModal(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontSize: "1.5rem",
+                  color: theme.palette.text.secondary,
+                  cursor: "pointer",
+                  padding: "0.25rem"
+                }}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {attendingUsers.map((attendee, i) => (
+                <li key={i} style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  marginBottom: "0.75rem",
+                  color: theme.palette.text.primary
+                }}>
+                  <img
+                    src={attendee.profileImage || attendee.headshotUrl || "https://via.placeholder.com/32"}
+                    alt={attendee.fullName || attendee.email}
+                    style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }}
+                  />
+                  <div>
+                    <div style={{ fontSize: "0.95rem", fontWeight: 500, color: theme.palette.text.primary }}>
+                      {attendee.fullName || attendee.displayName || attendee.email}
+                    </div>
+                    {attendee.guestCount > 0 && (
+                      <div style={{ fontSize: "0.8rem", color: theme.palette.text.secondary }}>
+                        +{attendee.guestCount} guest{attendee.guestCount > 1 ? 's' : ''}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       )}
     </div>
   );

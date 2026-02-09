@@ -17,7 +17,7 @@ export default function AvatarList({ users }) {
       {users.slice(0, 3).map((user, i) => (
         <div style={{ textAlign: "center" }} key={i} title={user.displayName}>
           <img
-            src={user.profileImage || "https://via.placeholder.com/32"}
+            src={user.profileImage || user.headshotUrl || "https://via.placeholder.com/32"}
             alt={user.email}
             title={user.email}
             style={{
