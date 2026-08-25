@@ -52,7 +52,13 @@ export default function UserDashboard({ setShowAdminPanel }) {
   useEffect(() => {
     if (!matchUserId) return;
     const unsub = onSnapshot(
-      query(collection(db, "rsvps"), where("userId", "==", matchUserId)),
+      // attending filter is required by firestore.rules: non-admins may
+      // only list another user's rsvps when attending == true
+      query(
+        collection(db, "rsvps"),
+        where("userId", "==", matchUserId),
+        where("attending", "==", true)
+      ),
       (snapshot) => {
         const data = {};
         snapshot.docs.forEach((d) => {
@@ -111,9 +117,15 @@ export default function UserDashboard({ setShowAdminPanel }) {
     if (!selectedEvent) return;
 
     const loadRsvpUsers = async () => {
-      // 1) fetch RSVPs for this event
+      // 1) fetch attending RSVPs for this event. The attending filter is
+      // required by firestore.rules for non-admin list queries (it also
+      // stops cancelled attending:false docs from inflating the list).
       const rsvpSnap = await getDocs(
-        query(collection(db, "rsvps"), where("eventId", "==", selectedEvent.id))
+        query(
+          collection(db, "rsvps"),
+          where("eventId", "==", selectedEvent.id),
+          where("attending", "==", true)
+        )
       );
       const rsvpData = rsvpSnap.docs.map(d => ({
         userId: d.data().userId,
@@ -236,19 +248,23 @@ export default function UserDashboard({ setShowAdminPanel }) {
   }, []);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "rsvps"), (snapshot) => {
-      const data = {};
-      snapshot.docs.forEach((doc) => {
-        const rsvp = doc.data();
-        if (rsvp.userId === user?.uid) {
+    if (!user?.uid) return;
+    // firestore.rules denies unfiltered non-admin rsvps listens; scope the
+    // listener to the signed-in user's own docs (all this effect ever used)
+    const unsub = onSnapshot(
+      query(collection(db, "rsvps"), where("userId", "==", user.uid)),
+      (snapshot) => {
+        const data = {};
+        snapshot.docs.forEach((doc) => {
+          const rsvp = doc.data();
           data[rsvp.eventId] = {
             attending: true,
             guestCount: rsvp.guestCount || 0
           };
-        }
-      });
-      setRsvps(data);
-    });
+        });
+        setRsvps(data);
+      }
+    );
 
     return () => unsub();
   }, [user]);
